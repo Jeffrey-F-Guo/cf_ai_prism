@@ -5,11 +5,9 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cf-ai-prism",
-	"main": "src/server.ts",
-	"compatibility_date": "2026-03-02",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"main": "src/server/index.ts",
+	"compatibility_date": "2026-03-17",
+	"compatibility_flags": ["nodejs_compat"],
 	"ai": {
 		"binding": "AI",
 		"remote": true
@@ -25,15 +23,15 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "ChatAgent",
-				"name": "ChatAgent"
+				"class_name": "ReviewOrchestrator",
+				"name": "ReviewOrchestrator"
 			}
 		]
 	},
 	"migrations": [
 		{
 			"new_sqlite_classes": [
-				"ChatAgent"
+				"ReviewOrchestrator"
 			],
 			"tag": "v1"
 		}
