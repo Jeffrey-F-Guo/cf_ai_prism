@@ -5,5 +5,8 @@ import { defineConfig } from "vite";
 import decorators from "./src/decorators";
 
 export default defineConfig({
-  plugins: [decorators(), react(), cloudflare(), tailwindcss()]
+  plugins: [decorators(), react(), cloudflare(), tailwindcss()],
+  build: {
+    outDir: "public"
+  }
 });
