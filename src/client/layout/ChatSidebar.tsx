@@ -1,8 +1,20 @@
 import type { UIMessage } from "ai";
-import type { PrismState } from "../hooks/usePrism";
 import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
 
-interface ChatSidebarProps extends PrismState {}
+interface ChatSidebarProps {
+  connected: boolean;
+  input: string;
+  setInput: (value: string) => void;
+  leftCollapsed: boolean;
+  setLeftCollapsed: (value: boolean) => void;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  messages: UIMessage[];
+  clearHistory: () => void;
+  stop: () => void;
+  isStreaming: boolean;
+  send: () => void;
+}
 
 export function ChatSidebar({
   connected,
