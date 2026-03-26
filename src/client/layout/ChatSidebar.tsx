@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 import type { PrismState } from "../hooks/usePrism";
+import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
 
 interface ChatSidebarProps extends PrismState {}
 
@@ -24,7 +25,7 @@ export function ChatSidebar({
         onClick={() => setLeftCollapsed(!leftCollapsed)}
         className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-6 h-12 bg-[#131313] border border-[#494847]/20 rounded-r-md flex items-center justify-center text-[#777575] hover:text-white hover:bg-[#201f1f] transition-colors"
       >
-        <span className="material-symbols-outlined text-sm">{leftCollapsed ? "chevron_right" : "chevron_left"}</span>
+        {leftCollapsed ? <ChevronRight /> : <ChevronLeft />}
       </button>
 
       {/* Header */}

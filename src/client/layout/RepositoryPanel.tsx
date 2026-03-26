@@ -1,5 +1,6 @@
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
+import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
 
 interface RepositoryPanelProps {
   rightCollapsed: boolean;
@@ -21,7 +22,7 @@ export function RepositoryPanel({
         onClick={() => setRightCollapsed(!rightCollapsed)}
         className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-6 h-12 bg-[#0e0e0e] border border-[#494847]/20 rounded-l-md flex items-center justify-center text-[#777575] hover:text-white hover:bg-[#201f1f] transition-colors"
       >
-        <span className="material-symbols-outlined text-sm">{rightCollapsed ? "chevron_left" : "chevron_right"}</span>
+        {rightCollapsed ? <ChevronLeft /> : <ChevronRight />}
       </button>
 
       {!rightCollapsed && (
