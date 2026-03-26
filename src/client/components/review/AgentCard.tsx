@@ -1,0 +1,128 @@
+export type AgentStatus = "analyzing" | "queued" | "completed";
+
+export interface AgentTask {
+  id: string;
+  text: string;
+  status: "active" | "pending" | "completed";
+}
+
+interface AgentCardProps {
+  icon: string;
+  iconColor: "error" | "primary" | "secondary";
+  title: string;
+  subtitle: string;
+  status: AgentStatus;
+  tasks: AgentTask[];
+}
+
+const iconColors = {
+  error: {
+    bg: "bg-[#a70138]/20",
+    text: "text-[#ff6e84]",
+  },
+  primary: {
+    bg: "bg-[#bd9dff]/20",
+    text: "text-[#bd9dff]",
+  },
+  secondary: {
+    bg: "bg-[#612b8f]/20",
+    text: "text-[#c38bf5]",
+  },
+};
+
+export function AgentCard({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  status,
+  tasks,
+}: AgentCardProps) {
+  const colors = iconColors[iconColor];
+
+  return (
+    <div
+      className={`bg-[#1a1919] p-5 rounded-xl border border-white/5 relative group overflow-hidden ${
+        status === "analyzing" ? "pulsing-border" : ""
+      }`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center`}>
+            <span
+              className={`material-symbols-outlined ${colors.text}`}
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              {icon}
+            </span>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider">{title}</h3>
+            <p className="text-[10px] text-[#adaaaa] font-mono">{subtitle}</p>
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div
+          className={`px-2 py-1 rounded flex items-center gap-1.5 ${
+            status === "queued"
+              ? "bg-[#262626]"
+              : "bg-[#bd9dff]/10"
+          }`}
+        >
+          {status === "analyzing" && (
+            <div className="w-1 h-1 rounded-full bg-[#bd9dff] animate-pulse" />
+          )}
+          <span
+            className={`text-[8px] font-bold tracking-widest ${
+              status === "queued"
+                ? "text-gray-500"
+                : "text-[#bd9dff]"
+            }`}
+          >
+            {status === "analyzing" && "ANALYZING"}
+            {status === "queued" && "QUEUED"}
+            {status === "completed" && "COMPLETED"}
+          </span>
+        </div>
+      </div>
+
+      {/* Tasks */}
+      <div className="space-y-2 font-mono text-[11px]">
+        {tasks.map((task, index) => (
+          <div
+            key={task.id}
+            className={`flex gap-2 ${
+              task.status === "completed"
+                ? "opacity-30"
+                : task.status === "pending"
+                ? "opacity-60"
+                : ""
+            }`}
+          >
+            <span className={`${colors.text} opacity-50`}>
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span
+              className={`${
+                task.status === "active" ? "text-white stream-text" : "text-[#adaaaa]"
+              }`}
+            >
+              {task.text}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Queued State */}
+      {status === "queued" && tasks.length > 0 && (
+        <div className="h-8 bg-[#0e0e0e]/50 rounded flex items-center justify-center mt-4">
+          <span className="text-[10px] font-mono text-gray-600 italic">
+            {tasks[0]?.text || "Waiting..."}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
