@@ -1,0 +1,135 @@
+export type FindingSeverity = "critical" | "warning" | "suggestion" | "success";
+
+export interface FindingCodeBlock {
+  type: "addition" | "deletion" | "unchanged";
+  code: string;
+}
+
+interface FindingCardProps {
+  severity: FindingSeverity;
+  title: string;
+  description: string;
+  fileLocation?: string;
+  codeDiff?: FindingCodeBlock[];
+  onExpand?: () => void;
+  onChat?: () => void;
+  onAutoFix?: () => void;
+}
+
+const severityConfig = {
+  critical: {
+    border: "border-[#ff6e84]",
+    bg: "hover:bg-[#1a1919]",
+    badgeBg: "bg-[#ff6e84]/10",
+    badgeText: "text-[#ff6e84]",
+    codeText: "text-[#d73357]",
+    icon: "unfold_more",
+    iconHover: "group-hover:text-[#ff6e84]",
+  },
+  warning: {
+    border: "border-[#ffb800]",
+    bg: "hover:bg-[#1a1919]",
+    badgeBg: "bg-[#ffb800]/10",
+    badgeText: "text-[#ffb800]",
+    codeText: "text-[#ffb800]",
+    icon: "chat_bubble_outline",
+    iconHover: "group-hover:text-[#ffb800]",
+  },
+  suggestion: {
+    border: "border-[#bd9dff]",
+    bg: "hover:bg-[#1a1919]",
+    badgeBg: "bg-[#bd9dff]/10",
+    badgeText: "text-[#bd9dff]",
+    codeText: "text-[#bd9dff]",
+    icon: "auto_fix",
+    iconHover: "group-hover:text-[#bd9dff]",
+  },
+  success: {
+    border: "border-[#ff97b2]",
+    bg: "hover:bg-[#1a1919]",
+    badgeBg: "bg-[#ff97b2]/10",
+    badgeText: "text-[#ff97b2]",
+    codeText: "text-[#ff97b2]",
+    icon: "check_circle",
+    iconHover: "",
+  },
+};
+
+const severityLabels = {
+  critical: "Critical",
+  warning: "Warning",
+  suggestion: "Suggestion",
+  success: "Success",
+};
+
+export function FindingCard({
+  severity,
+  title,
+  description,
+  fileLocation,
+  codeDiff,
+  onExpand,
+  onChat,
+  onAutoFix,
+}: FindingCardProps) {
+  const config = severityConfig[severity];
+
+  const handleIconClick = () => {
+    if (severity === "critical" && onExpand) onExpand();
+    else if (severity === "warning" && onChat) onChat();
+    else if (severity === "suggestion" && onAutoFix) onAutoFix();
+  };
+
+  return (
+    <div
+      className={`group bg-[#131313] border-l-4 ${config.border} ${config.bg} transition-all p-6 rounded relative overflow-hidden`}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          <span className={`px-2 py-0.5 rounded-sm ${config.badgeBg} ${config.badgeText} text-[10px] font-bold uppercase tracking-widest`}>
+            {severityLabels[severity]}
+          </span>
+          {fileLocation && (
+            <span className="font-mono text-xs text-[#adaaaa]">{fileLocation}</span>
+          )}
+        </div>
+        {severity !== "success" && (
+          <button
+            onClick={handleIconClick}
+            className={`text-[#adaaaa] ${config.iconHover} transition-colors cursor-pointer`}
+          >
+            <span className="material-symbols-outlined">{config.icon}</span>
+          </button>
+        )}
+        {severity === "success" && (
+          <span className="material-symbols-outlined text-[#ff97b2]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            check_circle
+          </span>
+        )}
+      </div>
+
+      {/* Title */}
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+
+      {/* Description */}
+      <p className="text-[#adaaaa] text-sm mb-4 leading-relaxed">{description}</p>
+
+      {/* Code Diff */}
+      {codeDiff && codeDiff.length > 0 && (
+        <div className="bg-[#0e0e0e] p-4 rounded border border-[#494847]/10">
+          {codeDiff.map((line, index) => (
+            <div key={index}>
+              <code className={`font-mono text-xs ${line.type === "deletion" ? config.codeText : line.type === "addition" ? "text-[#bd9dff]" : "text-[#777575]"}`}>
+                {line.type === "deletion" && "- "}
+                {line.type === "addition" && "+ "}
+                {line.code}
+              </code>
+              {index < codeDiff.length - 1 && <br />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
