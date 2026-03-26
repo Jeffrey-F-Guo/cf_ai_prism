@@ -3,9 +3,9 @@ import { useAgent } from "agents/react";
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import type { UIMessage } from "ai";
 import type { ReviewOrchestrator } from "../../server/agents/ReviewOrchestrator";
-import type { ReviewStage, FindingSeverity, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem } from "../../types/review";
+import type { ReviewStage, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem } from "../../types/review";
 
-export type { ReviewStage, FindingSeverity, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem } from "../../types/review";
+export type { ReviewStage, FindingSeverity, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem, AgentTask } from "../../types/review";
 
 // Mock Data
 const mockPRMetadata: PRMetadata = {
@@ -130,7 +130,6 @@ export interface PrismState {
   stage: ReviewStage;
   setStage: (stage: ReviewStage) => void;
   hasHistoryRecords: boolean;
-  setHasHistoryRecords: (value: boolean) => void;
   
   // Refs
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
@@ -156,8 +155,7 @@ export function usePrism(): PrismState {
   const [input, setInput] = useState("");
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
-  const [stage, setStage] = useState<ReviewStage>("completed");
-  const [hasHistoryRecords, setHasHistoryRecords] = useState(false);
+  const [stage, setStage] = useState<ReviewStage>("landing");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -231,8 +229,7 @@ export function usePrism(): PrismState {
     setRightCollapsed,
     stage,
     setStage,
-    hasHistoryRecords,
-    setHasHistoryRecords,
+    hasHistoryRecords: reviewHistory.length > 0,
     messagesEndRef,
     textareaRef,
     messages,
