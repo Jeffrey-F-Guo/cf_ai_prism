@@ -1,4 +1,5 @@
 import type { ReviewHistoryItem } from "../../hooks/usePrism";
+import { ChevronRight } from "../shared/Icons";
 
 interface ReviewHistoryProps {
   hasRecords: boolean;
@@ -54,7 +55,7 @@ export function ReviewHistory({ hasRecords, reviews }: ReviewHistoryProps) {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-gray-500 font-mono">{review.timeAgo}</span>
-            <span className="material-symbols-outlined text-xs text-gray-600">chevron_right</span>
+            <ChevronRight />
           </div>
         </div>
       ))}
