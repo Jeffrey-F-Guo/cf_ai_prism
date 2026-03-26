@@ -1,19 +1,11 @@
+import type { ReviewSummary } from "../../hooks/usePrism";
+
 interface SummaryCardProps {
-  score: number;
-  grade: string;
-  critical: number;
-  warnings: number;
-  suggestions: number;
+  summary: ReviewSummary;
 }
 
-export function SummaryCard({
-  score,
-  grade,
-  critical,
-  warnings,
-  suggestions,
-}: SummaryCardProps) {
-  const scorePercentage = (score / 100) * 352;
+export function SummaryCard({ summary }: SummaryCardProps) {
+  const scorePercentage = (summary.score / 100) * 352;
 
   return (
     <div className="bg-[#131313]/50 rounded-xl p-4 relative overflow-hidden">
@@ -36,21 +28,21 @@ export function SummaryCard({
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-black text-white tracking-tighter">{score}</span>
-            <span className="text-[9px] text-[#adaaaa] font-medium">{grade}</span>
+            <span className="text-4xl font-black text-white tracking-tighter">{summary.score}</span>
+            <span className="text-[9px] text-[#adaaaa] font-medium">{summary.grade}</span>
           </div>
         </div>
         <div className="flex gap-6 w-full justify-around">
           <div className="flex flex-col items-center">
-            <span className="text-[#ff6e84] font-bold text-lg">{critical}</span>
+            <span className="text-[#ff6e84] font-bold text-lg">{summary.critical}</span>
             <span className="text-[9px] uppercase text-[#adaaaa] font-bold">Critical</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-[#ffb800] font-bold text-lg">{warnings}</span>
+            <span className="text-[#ffb800] font-bold text-lg">{summary.warnings}</span>
             <span className="text-[9px] uppercase text-[#adaaaa] font-bold">Warnings</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-[#bd9dff] font-bold text-lg">{suggestions}</span>
+            <span className="text-[#bd9dff] font-bold text-lg">{summary.suggestions}</span>
             <span className="text-[9px] uppercase text-[#adaaaa] font-bold">Suggestions</span>
           </div>
         </div>

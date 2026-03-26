@@ -1,23 +1,11 @@
-export interface ReviewHistoryItem {
-  id: string;
-  prNumber: number;
-  prTitle: string;
-  score: number;
-  timeAgo: string;
-}
+import type { ReviewHistoryItem } from "../../hooks/usePrism";
 
 interface ReviewHistoryProps {
   hasRecords: boolean;
-  reviews?: ReviewHistoryItem[];
+  reviews: ReviewHistoryItem[];
 }
 
-const defaultReviews: ReviewHistoryItem[] = [
-  { id: "1", prNumber: 841, prTitle: "Redux Store Refactor", score: 98, timeAgo: "2 hours ago" },
-  { id: "2", prNumber: 840, prTitle: "Fix OAuth Leak", score: 42, timeAgo: "Yesterday" },
-  { id: "3", prNumber: 839, prTitle: "New Landing Grid", score: 86, timeAgo: "2 days ago" },
-];
-
-export function ReviewHistory({ hasRecords, reviews = defaultReviews }: ReviewHistoryProps) {
+export function ReviewHistory({ hasRecords, reviews }: ReviewHistoryProps) {
   if (!hasRecords) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">

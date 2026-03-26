@@ -1,3 +1,4 @@
+import type { ReviewStage, ReviewSummary, ReviewHistoryItem } from "../hooks/usePrism";
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
 import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
@@ -5,8 +6,10 @@ import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
 interface RepositoryPanelProps {
   rightCollapsed: boolean;
   setRightCollapsed: (value: boolean) => void;
-  stage: "landing" | "processing" | "completed";
+  stage: ReviewStage;
   hasHistoryRecords: boolean;
+  reviewSummary: ReviewSummary | null;
+  reviewHistory: ReviewHistoryItem[];
 }
 
 export function RepositoryPanel({
@@ -14,7 +17,11 @@ export function RepositoryPanel({
   setRightCollapsed,
   stage,
   hasHistoryRecords,
+  reviewSummary,
+  reviewHistory,
 }: RepositoryPanelProps) {
+  const agentCount = stage === "processing" ? "3" : "0";
+
   return (
     <section className={`${rightCollapsed ? "w-12 shrink-0" : "w-[25%] shrink-0"} bg-[#0e0e0e] flex flex-col h-full border-l border-[#494847]/10 transition-all duration-300 relative`}>
       {/* Right Collapse Button */}
@@ -53,25 +60,19 @@ export function RepositoryPanel({
                 </div>
                 <p className="text-sm font-medium text-[#bd9dff]">Review in progress</p>
                 <p className="text-[10px] text-[#adaaaa] mt-1">
-                  3 agents analyzing...
+                  {agentCount} agents analyzing...
                 </p>
               </div>
             )}
 
-            {stage === "completed" && (
-              <SummaryCard
-                score={99}
-                grade="B+ Stable"
-                critical={1}
-                warnings={4}
-                suggestions={12}
-              />
+            {stage === "completed" && reviewSummary && (
+              <SummaryCard summary={reviewSummary} />
             )}
           </div>
 
           {/* Bottom Half: Review History */}
           <div className="flex-1 overflow-hidden">
-            <ReviewHistory hasRecords={hasHistoryRecords} />
+            <ReviewHistory hasRecords={hasHistoryRecords} reviews={reviewHistory} />
           </div>
 
           {/* Footer */}

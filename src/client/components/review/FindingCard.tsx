@@ -1,20 +1,4 @@
-export type FindingSeverity = "critical" | "warning" | "suggestion" | "success";
-
-export interface FindingCodeBlock {
-  type: "addition" | "deletion" | "unchanged";
-  code: string;
-}
-
-interface FindingCardProps {
-  severity: FindingSeverity;
-  title: string;
-  description: string;
-  fileLocation?: string;
-  codeDiff?: FindingCodeBlock[];
-  onExpand?: () => void;
-  onChat?: () => void;
-  onAutoFix?: () => void;
-}
+import type { Finding, FindingSeverity } from "../../hooks/usePrism";
 
 const severityConfig = {
   critical: {
@@ -55,29 +39,20 @@ const severityConfig = {
   },
 };
 
-const severityLabels = {
+const severityLabels: Record<FindingSeverity, string> = {
   critical: "Critical",
   warning: "Warning",
   suggestion: "Suggestion",
   success: "Success",
 };
 
-export function FindingCard({
-  severity,
-  title,
-  description,
-  fileLocation,
-  codeDiff,
-  onExpand,
-  onChat,
-  onAutoFix,
-}: FindingCardProps) {
-  const config = severityConfig[severity];
+export function FindingCard({ finding, onExpand, onChat, onAutoFix }: { finding: Finding; onExpand?: () => void; onChat?: () => void; onAutoFix?: () => void }) {
+  const config = severityConfig[finding.severity];
 
   const handleIconClick = () => {
-    if (severity === "critical" && onExpand) onExpand();
-    else if (severity === "warning" && onChat) onChat();
-    else if (severity === "suggestion" && onAutoFix) onAutoFix();
+    if (finding.severity === "critical" && onExpand) onExpand();
+    else if (finding.severity === "warning" && onChat) onChat();
+    else if (finding.severity === "suggestion" && onAutoFix) onAutoFix();
   };
 
   return (
@@ -88,13 +63,13 @@ export function FindingCard({
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           <span className={`px-2 py-0.5 rounded-sm ${config.badgeBg} ${config.badgeText} text-[10px] font-bold uppercase tracking-widest`}>
-            {severityLabels[severity]}
+            {severityLabels[finding.severity]}
           </span>
-          {fileLocation && (
-            <span className="font-mono text-xs text-[#adaaaa]">{fileLocation}</span>
+          {finding.fileLocation && (
+            <span className="font-mono text-xs text-[#adaaaa]">{finding.fileLocation}</span>
           )}
         </div>
-        {severity !== "success" && (
+        {finding.severity !== "success" && (
           <button
             onClick={handleIconClick}
             className={`text-[#adaaaa] ${config.iconHover} transition-colors cursor-pointer`}
@@ -102,7 +77,7 @@ export function FindingCard({
             <span className="material-symbols-outlined">{config.icon}</span>
           </button>
         )}
-        {severity === "success" && (
+        {finding.severity === "success" && (
           <span className="material-symbols-outlined text-[#ff97b2]" style={{ fontVariationSettings: "'FILL' 1" }}>
             check_circle
           </span>
@@ -110,22 +85,22 @@ export function FindingCard({
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold mb-2">{finding.title}</h3>
 
       {/* Description */}
-      <p className="text-[#adaaaa] text-sm mb-4 leading-relaxed">{description}</p>
+      <p className="text-[#adaaaa] text-sm mb-4 leading-relaxed">{finding.description}</p>
 
       {/* Code Diff */}
-      {codeDiff && codeDiff.length > 0 && (
+      {finding.codeDiff && finding.codeDiff.length > 0 && (
         <div className="bg-[#0e0e0e] p-4 rounded border border-[#494847]/10">
-          {codeDiff.map((line, index) => (
+          {finding.codeDiff.map((line, index) => (
             <div key={index}>
               <code className={`font-mono text-xs ${line.type === "deletion" ? config.codeText : line.type === "addition" ? "text-[#bd9dff]" : "text-[#777575]"}`}>
                 {line.type === "deletion" && "- "}
                 {line.type === "addition" && "+ "}
                 {line.code}
               </code>
-              {index < codeDiff.length - 1 && <br />}
+              {finding.codeDiff && index < finding.codeDiff.length - 1 && <br />}
             </div>
           ))}
         </div>
