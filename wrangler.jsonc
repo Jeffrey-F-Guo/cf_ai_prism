@@ -24,14 +24,32 @@
         "name": "ReviewOrchestrator"
       },
       {
+        "class_name": "SecurityAgent",
+        "name": "SecurityAgent"
+      },
+      {
         "class_name": "LogicAgent",
         "name": "LogicAgent"
+      },
+      {
+        "class_name": "PerformanceAgent",
+        "name": "PerformanceAgent"
+      },
+      {
+        "class_name": "PatternAgent",
+        "name": "PatternAgent"
       }
     ]
   },
   "migrations": [
     {
-      "new_sqlite_classes": ["ReviewOrchestrator"],
+      "new_sqlite_classes": [
+        "ReviewOrchestrator",
+        "SecurityAgent",
+        "LogicAgent",
+        "PerformanceAgent",
+        "PatternAgent"
+      ],
       "tag": "v1"
     }
   ],
