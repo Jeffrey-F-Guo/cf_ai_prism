@@ -4,164 +4,138 @@ import {
   streamText,
   convertToModelMessages,
   pruneMessages,
-  tool,
-  stepCountIs
 } from "ai";
-import { z } from "zod";
+import { parsePRUrl, getPRAnalysisContext, type PRAnalysisContext } from "../tools/github";
 
 export class ReviewOrchestrator extends AIChatAgent<Env> {
   maxPersistedMessages = 100;
 
+  private extractText(): string {
+    const lastMessage = this.messages[this.messages.length - 1];
+    if (!lastMessage) return "";
+    return lastMessage.parts
+      .filter((p) => p.type === "text")
+      .map((p) => (p as { text?: string }).text ?? "")
+      .join("");
+  }
+
+  private extractURL(text: string): string | null {
+    const match = text.match(/https?:\/\/github\.com\/[^\s]+\/pull\/\d+/);
+    return match ? match[0] : null;
+  }
+
+  private async runReview(url: string): Promise<PRAnalysisContext | null> {
+    const parsed = parsePRUrl(url);
+    if (!parsed) {
+      return null;
+    }
+
+    const { owner, repo, prNumber } = parsed;
+
+    try {
+      return await getPRAnalysisContext(owner, repo, prNumber);
+    } catch (err) {
+      console.error(`Failed to fetch PR ${owner}/${repo}#${prNumber}:`, err);
+      return null;
+    }
+  }
+
   async onChatMessage(_onFinish: unknown, options?: OnChatMessageOptions) {
+    const TEST_MODE = false;
+    // testing without llm
+    if (TEST_MODE) {
+      const text = this.extractText();
+      const url = this.extractURL(text);
+
+      let response = "Hello! I'm Prism. Paste a GitHub PR URL to start a review.";
+
+      if (url) {
+        response = `Got URL: ${url}\n\nFetching PR data...`;
+        const context = await this.runReview(url);
+
+        if (context) {
+          response = `PR: ${context.prData.title}
+Repo: ${context.prData.owner}/${context.prData.repo}
+Files: ${context.files.length}`;
+        } else {
+          response = `Could not fetch PR from ${url}`;
+        }
+      }
+
+      return new Response(response, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
+
     const workersai = createWorkersAI({ binding: this.env.AI });
+    const text = this.extractText();
+    const url = this.extractURL(text);
+    
+    if (url) {
+      const context = await this.runReview(url);
+      const testResponse = await this.env.AI.run(
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  {
+    messages: [
+      {
+        role: "system",
+        content: `You are a code analysis tool. You must respond with ONLY a valid JSON array. No markdown, no explanation, no code fences. Just the raw JSON array.`
+      },
+      {
+        role: "user",
+        content: `Analyze this code change and return findings as a JSON array with this exact shape:
+[{"severity":"critical"|"warning"|"suggestion","title":"string","description":"string","file":"string","line":number,"suggestion":"string"}]
+
+Code diff:
+\`\`\`
+- const token = Math.random().toString(36)
++ const token = crypto.randomUUID()
+\`\`\`
+
+Return ONLY the JSON array.`
+      }
+    ]
+  }
+);
+console.log("RAW LLAMA OUTPUT:", JSON.stringify(testResponse));
+      if (!context) {
+        const result = streamText({
+          model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+          system: `You are Prism. Tell the user there was an error fetching the PR.`,
+          messages: [{ role: "user", content: `Failed to fetch PR from ${url}` }],
+          abortSignal: options?.abortSignal
+        });
+        return result.toUIMessageStreamResponse();
+      }
+
+      const summary = `PR: ${context.prData.title}
+Repo: ${context.prData.owner}/${context.prData.repo}
+Files changed: ${context.files.length}
+Additions: +${context.files.reduce((sum, f) => sum + f.additions, 0)}
+Deletions: -${context.files.reduce((sum, f) => sum + f.deletions, 0)}
+      
+Files:
+${context.files.map(f => `• ${f.filename} (${f.status})`).join("\n")}`;
+
+      const result = streamText({
+        model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+        system: `You are Prism. Display the PR summary clearly formatted.`,
+        messages: [{ role: "user", content: summary }],
+        abortSignal: options?.abortSignal
+      });
+      return result.toUIMessageStreamResponse();
+    }
 
     const result = streamText({
-      model: workersai("@cf/moonshotai/kimi-k2.5"),
+      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
       system: `You are Prism, an AI-powered code review system. 
-When a user provides a GitHub PR URL, call the reviewPR tool immediately.
-Present the findings clearly, grouped by severity.
-Be concise and actionable in your responses.`,
+Ask the user for a GitHub PR URL to start a review.`,
       messages: pruneMessages({
         messages: await convertToModelMessages(this.messages),
         toolCalls: "before-last-2-messages"
       }),
-      tools: {
-        reviewPR: tool({
-          description:
-            "Analyze a GitHub pull request and return findings from all specialist agents",
-          inputSchema: z.object({
-            url: z.string().describe("The GitHub PR URL to review")
-          }),
-          execute: async ({ url }) => {
-            // Mock response — real agent logic goes here in Day 2
-            return {
-              pr: {
-                url,
-                title: "feat: implement distributed caching",
-                filesChanged: 8,
-                additions: 142,
-                deletions: 23
-              },
-              agents: {
-                security: {
-                  status: "complete",
-                  findings: [
-                    {
-                      severity: "critical",
-                      title: "Hardcoded API Key",
-                      description:
-                        "A plaintext API key was found in config/cache.ts. This will be exposed in version control.",
-                      file: "config/cache.ts",
-                      line: 14,
-                      suggestion:
-                        "Move to environment variable: process.env.CACHE_API_KEY"
-                    },
-                    {
-                      severity: "warning",
-                      title: "Missing Input Sanitization",
-                      description:
-                        "Cache keys built from user input without sanitization could allow cache poisoning.",
-                      file: "src/cache/keyBuilder.ts",
-                      line: 31,
-                      suggestion:
-                        "Sanitize input before building cache keys using a whitelist approach"
-                    }
-                  ]
-                },
-                logic: {
-                  status: "complete",
-                  findings: [
-                    {
-                      severity: "warning",
-                      title: "Race Condition on Cache Miss",
-                      description:
-                        "Multiple concurrent requests on cache miss will all hit the origin simultaneously — classic thundering herd.",
-                      file: "src/cache/manager.ts",
-                      line: 67,
-                      suggestion:
-                        "Implement a lock or promise coalescing pattern to deduplicate concurrent fetches"
-                    },
-                    {
-                      severity: "suggestion",
-                      title: "Unhandled Promise Rejection",
-                      description:
-                        "refreshCache() is called without await or catch in the request handler.",
-                      file: "src/handlers/request.ts",
-                      line: 89,
-                      suggestion: "Add try/catch or .catch() handler"
-                    }
-                  ]
-                },
-                performance: {
-                  status: "complete",
-                  findings: [
-                    {
-                      severity: "warning",
-                      title: "O(n²) Key Lookup",
-                      description:
-                        "Cache invalidation iterates all keys for each invalidation request. Will degrade significantly at scale.",
-                      file: "src/cache/invalidation.ts",
-                      line: 44,
-                      suggestion:
-                        "Use a Map or index structure for O(1) key lookups"
-                    },
-                    {
-                      severity: "suggestion",
-                      title: "Redundant Serialization",
-                      description:
-                        "JSON.stringify called twice on the same object in the write path.",
-                      file: "src/cache/writer.ts",
-                      line: 22,
-                      suggestion: "Cache the serialized string in a local variable"
-                    }
-                  ]
-                },
-                pattern: {
-                  status: "complete",
-                  findings: [
-                    {
-                      severity: "suggestion",
-                      title: "God Class Anti-Pattern",
-                      description:
-                        "CacheManager handles reading, writing, invalidation, and metrics — violates single responsibility.",
-                      file: "src/cache/manager.ts",
-                      line: 1,
-                      suggestion:
-                        "Split into CacheReader, CacheWriter, CacheInvalidator"
-                    },
-                    {
-                      severity: "suggestion",
-                      title: "Magic Numbers",
-                      description:
-                        "TTL values hardcoded as raw integers throughout the codebase.",
-                      file: "src/cache/manager.ts",
-                      line: 55,
-                      suggestion:
-                        "Extract to named constants: const DEFAULT_TTL_SECONDS = 3600"
-                    }
-                  ]
-                }
-              },
-              summary: {
-                score: 72,
-                critical: 1,
-                warnings: 3,
-                suggestions: 4,
-                topIssues: [
-                  "Hardcoded API key in config/cache.ts",
-                  "Race condition on cache miss (thundering herd)",
-                  "O(n²) key lookup in invalidation"
-                ]
-              }
-            };
-          }
-        })
-      },
-      stopWhen: stepCountIs(5),
       abortSignal: options?.abortSignal
     });
-
     return result.toUIMessageStreamResponse();
   }
 }
-
