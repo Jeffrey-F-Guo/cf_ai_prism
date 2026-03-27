@@ -1,11 +1,11 @@
 import { createWorkersAI } from "workers-ai-provider";
 import { AIChatAgent, type OnChatMessageOptions } from "@cloudflare/ai-chat";
+import { streamText, convertToModelMessages, pruneMessages } from "ai";
 import {
-  streamText,
-  convertToModelMessages,
-  pruneMessages,
-} from "ai";
-import { parsePRUrl, getPRAnalysisContext, type PRAnalysisContext } from "../tools/github";
+  parsePRUrl,
+  getPRAnalysisContext,
+  type PRAnalysisContext
+} from "../tools/github";
 
 export class ReviewOrchestrator extends AIChatAgent<Env> {
   maxPersistedMessages = 100;
@@ -47,7 +47,8 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       const text = this.extractText();
       const url = this.extractURL(text);
 
-      let response = "Hello! I'm Prism. Paste a GitHub PR URL to start a review.";
+      let response =
+        "Hello! I'm Prism. Paste a GitHub PR URL to start a review.";
 
       if (url) {
         response = `Got URL: ${url}\n\nFetching PR data...`;
@@ -70,20 +71,20 @@ Files: ${context.files.length}`;
     const workersai = createWorkersAI({ binding: this.env.AI });
     const text = this.extractText();
     const url = this.extractURL(text);
-    
+
     if (url) {
       const context = await this.runReview(url);
       const testResponse = await this.env.AI.run(
-  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-  {
-    messages: [
-      {
-        role: "system",
-        content: `You are a code analysis tool. You must respond with ONLY a valid JSON array. No markdown, no explanation, no code fences. Just the raw JSON array.`
-      },
-      {
-        role: "user",
-        content: `Analyze this code change and return findings as a JSON array with this exact shape:
+        "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        {
+          messages: [
+            {
+              role: "system",
+              content: `You are a code analysis tool. You must respond with ONLY a valid JSON array. No markdown, no explanation, no code fences. Just the raw JSON array.`
+            },
+            {
+              role: "user",
+              content: `Analyze this code change and return findings as a JSON array with this exact shape:
 [{"severity":"critical"|"warning"|"suggestion","title":"string","description":"string","file":"string","line":number,"suggestion":"string"}]
 
 Code diff:
@@ -93,16 +94,18 @@ Code diff:
 \`\`\`
 
 Return ONLY the JSON array.`
-      }
-    ]
-  }
-);
-console.log("RAW LLAMA OUTPUT:", JSON.stringify(testResponse));
+            }
+          ]
+        }
+      );
+      console.log("RAW LLAMA OUTPUT:", JSON.stringify(testResponse));
       if (!context) {
         const result = streamText({
           model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
           system: `You are Prism. Tell the user there was an error fetching the PR.`,
-          messages: [{ role: "user", content: `Failed to fetch PR from ${url}` }],
+          messages: [
+            { role: "user", content: `Failed to fetch PR from ${url}` }
+          ],
           abortSignal: options?.abortSignal
         });
         return result.toUIMessageStreamResponse();
@@ -115,7 +118,7 @@ Additions: +${context.files.reduce((sum, f) => sum + f.additions, 0)}
 Deletions: -${context.files.reduce((sum, f) => sum + f.deletions, 0)}
       
 Files:
-${context.files.map(f => `• ${f.filename} (${f.status})`).join("\n")}`;
+${context.files.map((f) => `• ${f.filename} (${f.status})`).join("\n")}`;
 
       const result = streamText({
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),

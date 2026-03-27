@@ -1,4 +1,8 @@
-import type { ReviewStage, ReviewSummary, ReviewHistoryItem } from "../hooks/usePrism";
+import type {
+  ReviewStage,
+  ReviewSummary,
+  ReviewHistoryItem
+} from "../hooks/usePrism";
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
 import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
@@ -18,12 +22,14 @@ export function RepositoryPanel({
   stage,
   hasHistoryRecords,
   reviewSummary,
-  reviewHistory,
+  reviewHistory
 }: RepositoryPanelProps) {
   const agentCount = stage === "processing" ? "3" : "0";
 
   return (
-    <section className={`${rightCollapsed ? "w-12 shrink-0" : "w-[25%] shrink-0"} bg-[#0e0e0e] flex flex-col h-full border-l border-[#494847]/10 transition-all duration-300 relative`}>
+    <section
+      className={`${rightCollapsed ? "w-12 shrink-0" : "w-[25%] shrink-0"} bg-[#0e0e0e] flex flex-col h-full border-l border-[#494847]/10 transition-all duration-300 relative`}
+    >
       {/* Right Collapse Button */}
       <button
         onClick={() => setRightCollapsed(!rightCollapsed)}
@@ -39,13 +45,17 @@ export function RepositoryPanel({
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-4">
               Status
             </h3>
-            
+
             {stage === "landing" && (
               <div className="bg-[#131313]/50 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 bg-[#201f1f] rounded-xl flex items-center justify-center mb-4 opacity-40">
-                  <span className="material-symbols-outlined text-2xl text-white">hourglass_empty</span>
+                  <span className="material-symbols-outlined text-2xl text-white">
+                    hourglass_empty
+                  </span>
                 </div>
-                <p className="text-sm font-medium text-white">No reviews in progress</p>
+                <p className="text-sm font-medium text-white">
+                  No reviews in progress
+                </p>
                 <p className="text-[10px] text-[#adaaaa] mt-1">
                   Submit a PR URL to begin analysis
                 </p>
@@ -55,10 +65,14 @@ export function RepositoryPanel({
             {stage === "processing" && (
               <div className="bg-[#131313]/50 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 bg-[#bd9dff]/10 rounded-xl flex items-center justify-center mb-4 relative">
-                  <span className="material-symbols-outlined text-2xl text-[#bd9dff]">sync</span>
+                  <span className="material-symbols-outlined text-2xl text-[#bd9dff]">
+                    sync
+                  </span>
                   <div className="absolute inset-0 border-2 border-[#bd9dff]/30 rounded-xl animate-ping" />
                 </div>
-                <p className="text-sm font-medium text-[#bd9dff]">Review in progress</p>
+                <p className="text-sm font-medium text-[#bd9dff]">
+                  Review in progress
+                </p>
                 <p className="text-[10px] text-[#adaaaa] mt-1">
                   {agentCount} agents analyzing...
                 </p>
@@ -72,7 +86,10 @@ export function RepositoryPanel({
 
           {/* Bottom Half: Review History */}
           <div className="flex-1 overflow-hidden">
-            <ReviewHistory hasRecords={hasHistoryRecords} reviews={reviewHistory} />
+            <ReviewHistory
+              hasRecords={hasHistoryRecords}
+              reviews={reviewHistory}
+            />
           </div>
 
           {/* Footer */}

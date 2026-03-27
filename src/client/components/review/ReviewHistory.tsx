@@ -49,12 +49,16 @@ export function ReviewHistory({ hasRecords, reviews }: ReviewHistoryProps) {
             <span className="text-xs font-bold">
               #{review.prNumber} {review.prTitle}
             </span>
-            <div className={`px-2 py-0.5 text-[10px] font-bold rounded ${getScoreColor(review.score)}`}>
+            <div
+              className={`px-2 py-0.5 text-[10px] font-bold rounded ${getScoreColor(review.score)}`}
+            >
               {review.score}/100
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-gray-500 font-mono">{review.timeAgo}</span>
+            <span className="text-[10px] text-gray-500 font-mono">
+              {review.timeAgo}
+            </span>
             <ChevronRight />
           </div>
         </div>

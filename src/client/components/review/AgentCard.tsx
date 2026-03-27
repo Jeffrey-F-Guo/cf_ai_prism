@@ -3,16 +3,16 @@ import type { Agent } from "../../hooks/usePrism";
 const iconColors = {
   error: {
     bg: "bg-[#a70138]/20",
-    text: "text-[#ff6e84]",
+    text: "text-[#ff6e84]"
   },
   primary: {
     bg: "bg-[#bd9dff]/20",
-    text: "text-[#bd9dff]",
+    text: "text-[#bd9dff]"
   },
   secondary: {
     bg: "bg-[#612b8f]/20",
-    text: "text-[#c38bf5]",
-  },
+    text: "text-[#c38bf5]"
+  }
 };
 
 export function AgentCard({ agent }: { agent: Agent }) {
@@ -27,7 +27,9 @@ export function AgentCard({ agent }: { agent: Agent }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center`}>
+          <div
+            className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center`}
+          >
             <span
               className={`material-symbols-outlined ${colors.text}`}
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -36,17 +38,19 @@ export function AgentCard({ agent }: { agent: Agent }) {
             </span>
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider">{agent.title}</h3>
-            <p className="text-[10px] text-[#adaaaa] font-mono">{agent.subtitle}</p>
+            <h3 className="text-xs font-bold uppercase tracking-wider">
+              {agent.title}
+            </h3>
+            <p className="text-[10px] text-[#adaaaa] font-mono">
+              {agent.subtitle}
+            </p>
           </div>
         </div>
 
         {/* Status Badge */}
         <div
           className={`px-2 py-1 rounded flex items-center gap-1.5 ${
-            agent.status === "queued"
-              ? "bg-[#262626]"
-              : "bg-[#bd9dff]/10"
+            agent.status === "queued" ? "bg-[#262626]" : "bg-[#bd9dff]/10"
           }`}
         >
           {agent.status === "analyzing" && (
@@ -54,9 +58,7 @@ export function AgentCard({ agent }: { agent: Agent }) {
           )}
           <span
             className={`text-[8px] font-bold tracking-widest ${
-              agent.status === "queued"
-                ? "text-gray-500"
-                : "text-[#bd9dff]"
+              agent.status === "queued" ? "text-gray-500" : "text-[#bd9dff]"
             }`}
           >
             {agent.status === "analyzing" && "ANALYZING"}
@@ -75,8 +77,8 @@ export function AgentCard({ agent }: { agent: Agent }) {
               task.status === "completed"
                 ? "opacity-30"
                 : task.status === "pending"
-                ? "opacity-60"
-                : ""
+                  ? "opacity-60"
+                  : ""
             }`}
           >
             <span className={`${colors.text} opacity-50`}>
@@ -84,7 +86,9 @@ export function AgentCard({ agent }: { agent: Agent }) {
             </span>
             <span
               className={`${
-                task.status === "active" ? "text-white stream-text" : "text-[#adaaaa]"
+                task.status === "active"
+                  ? "text-white stream-text"
+                  : "text-[#adaaaa]"
               }`}
             >
               {task.text}

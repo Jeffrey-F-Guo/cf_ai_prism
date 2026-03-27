@@ -7,7 +7,10 @@ export function Nav({ activeTab, onTabChange }: NavProps) {
   return (
     <header className="sticky top-0 z-50 bg-[#131313]/70 backdrop-blur-xl border-b border-[#bd9dff]/10 shadow-[0_4px_20px_rgba(189,157,255,0.05)] flex items-center justify-between w-full px-8 h-16">
       <div className="text-xl font-black text-[#bd9dff] tracking-tighter flex items-center gap-2 uppercase">
-        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+        <span
+          className="material-symbols-outlined"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
           filter_vintage
         </span>
         PRISM

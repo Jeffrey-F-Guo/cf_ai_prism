@@ -28,10 +28,12 @@ export function ChatSidebar({
   clearHistory,
   stop,
   isStreaming,
-  send,
+  send
 }: ChatSidebarProps) {
   return (
-    <section className={`${leftCollapsed ? "w-12 shrink-0" : "w-[30%] shrink-0"} bg-[#131313] border-r border-[#494847]/10 flex flex-col transition-all duration-300 relative`}>
+    <section
+      className={`${leftCollapsed ? "w-12 shrink-0" : "w-[30%] shrink-0"} bg-[#131313] border-r border-[#494847]/10 flex flex-col transition-all duration-300 relative`}
+    >
       {/* Left Collapse Button */}
       <button
         onClick={() => setLeftCollapsed(!leftCollapsed)}
@@ -44,8 +46,12 @@ export function ChatSidebar({
       <div className="p-4 border-b border-[#494847]/10 flex items-center justify-between">
         {!leftCollapsed && (
           <div className="flex items-center gap-2">
-            <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
-            <span className="text-xs text-[#777575]">{connected ? "Connected" : "Disconnected"}</span>
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
+            />
+            <span className="text-xs text-[#777575]">
+              {connected ? "Connected" : "Disconnected"}
+            </span>
           </div>
         )}
         {!leftCollapsed && (
@@ -65,8 +71,12 @@ export function ChatSidebar({
             {messages.length === 0 && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-2 opacity-40">
-                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#bd9dff]">Session Log</p>
-                  <p className="text-sm font-mono italic">Awaiting deployment...</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#bd9dff]">
+                    Session Log
+                  </p>
+                  <p className="text-sm font-mono italic">
+                    Awaiting deployment...
+                  </p>
                 </div>
               </div>
             )}

@@ -3,9 +3,25 @@ import { useAgent } from "agents/react";
 import { useAgentChat } from "@cloudflare/ai-chat/react";
 import type { UIMessage } from "ai";
 import type { ReviewOrchestrator } from "../../server/agents/ReviewOrchestrator";
-import type { ReviewStage, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem } from "../../types/review";
+import type {
+  ReviewStage,
+  Agent,
+  Finding,
+  PRMetadata,
+  ReviewSummary,
+  ReviewHistoryItem
+} from "../../types/review";
 
-export type { ReviewStage, FindingSeverity, Agent, Finding, PRMetadata, ReviewSummary, ReviewHistoryItem, AgentTask } from "../../types/review";
+export type {
+  ReviewStage,
+  FindingSeverity,
+  Agent,
+  Finding,
+  PRMetadata,
+  ReviewSummary,
+  ReviewHistoryItem,
+  AgentTask
+} from "../../types/review";
 
 // Mock Data
 const mockPRMetadata: PRMetadata = {
@@ -13,7 +29,7 @@ const mockPRMetadata: PRMetadata = {
   repoName: "prism-ai / core-engine",
   prNumber: 842,
   filesChanged: 8,
-  contributors: 3,
+  contributors: 3
 };
 
 const mockAgents: Agent[] = [
@@ -25,10 +41,22 @@ const mockAgents: Agent[] = [
     subtitle: "Scanning for vulnerabilities...",
     status: "analyzing",
     tasks: [
-      { id: "1", text: 'Checking encryption constants in `auth/vault.go`', status: "active" },
-      { id: "2", text: "Verifying cross-origin policy changes in `api/middleware.ts`", status: "pending" },
-      { id: "3", text: "Evaluating SQL injection surface area", status: "pending" },
-    ],
+      {
+        id: "1",
+        text: "Checking encryption constants in `auth/vault.go`",
+        status: "active"
+      },
+      {
+        id: "2",
+        text: "Verifying cross-origin policy changes in `api/middleware.ts`",
+        status: "pending"
+      },
+      {
+        id: "3",
+        text: "Evaluating SQL injection surface area",
+        status: "pending"
+      }
+    ]
   },
   {
     id: "logic",
@@ -38,9 +66,17 @@ const mockAgents: Agent[] = [
     subtitle: "Evaluating business rules...",
     status: "analyzing",
     tasks: [
-      { id: "1", text: "Validating cache invalidation logic on high-concurrency", status: "active" },
-      { id: "2", text: "Checking race conditions in `worker/sync.go`", status: "pending" },
-    ],
+      {
+        id: "1",
+        text: "Validating cache invalidation logic on high-concurrency",
+        status: "active"
+      },
+      {
+        id: "2",
+        text: "Checking race conditions in `worker/sync.go`",
+        status: "pending"
+      }
+    ]
   },
   {
     id: "performance",
@@ -50,8 +86,12 @@ const mockAgents: Agent[] = [
     subtitle: "Measuring complexity overhead...",
     status: "analyzing",
     tasks: [
-      { id: "1", text: "Simulating O(n) impact on large dataset fetch", status: "active" },
-    ],
+      {
+        id: "1",
+        text: "Simulating O(n) impact on large dataset fetch",
+        status: "active"
+      }
+    ]
   },
   {
     id: "pattern",
@@ -61,9 +101,9 @@ const mockAgents: Agent[] = [
     subtitle: "Ensuring repo consistency...",
     status: "queued",
     tasks: [
-      { id: "1", text: "Waiting for Security completion...", status: "pending" },
-    ],
-  },
+      { id: "1", text: "Waiting for Security completion...", status: "pending" }
+    ]
+  }
 ];
 
 const mockFindings: Finding[] = [
@@ -71,40 +111,62 @@ const mockFindings: Finding[] = [
     id: "1",
     severity: "critical",
     title: "Insecure Session Token Generation",
-    description: "The use of Math.random() for token generation is cryptographically insecure. Use crypto.getRandomValues() to prevent session hijacking via token prediction.",
+    description:
+      "The use of Math.random() for token generation is cryptographically insecure. Use crypto.getRandomValues() to prevent session hijacking via token prediction.",
     fileLocation: "src/auth/session.ts:L42",
     codeDiff: [
       { type: "deletion", code: "const token = Math.random().toString(36);" },
-      { type: "addition", code: "const token = crypto.randomUUID();" },
-    ],
+      { type: "addition", code: "const token = crypto.randomUUID();" }
+    ]
   },
   {
     id: "2",
     severity: "warning",
     title: "Potential Memory Leak in Logger",
-    description: "Event listeners are being attached within the request handler without cleanup. This will cause heap exhaustion under high load.",
-    fileLocation: "src/api/middleware.ts:L114",
+    description:
+      "Event listeners are being attached within the request handler without cleanup. This will cause heap exhaustion under high load.",
+    fileLocation: "src/api/middleware.ts:L114"
   },
   {
     id: "3",
     severity: "suggestion",
     title: "Extract Constants",
-    description: "Hardcoded timeout values found. Moving these to a configuration file would improve maintainability across environments.",
-    fileLocation: "src/lib/utils.ts:L12",
+    description:
+      "Hardcoded timeout values found. Moving these to a configuration file would improve maintainability across environments.",
+    fileLocation: "src/lib/utils.ts:L12"
   },
   {
     id: "4",
     severity: "success",
     title: "Optimal Complexity Scores",
-    description: "Cyclomatic complexity is below the threshold for all new functions. Excellent separation of concerns.",
-    fileLocation: "Project-wide",
-  },
+    description:
+      "Cyclomatic complexity is below the threshold for all new functions. Excellent separation of concerns.",
+    fileLocation: "Project-wide"
+  }
 ];
 
 const mockReviewHistory: ReviewHistoryItem[] = [
-  { id: "1", prNumber: 841, prTitle: "Redux Store Refactor", score: 98, timeAgo: "2 hours ago" },
-  { id: "2", prNumber: 840, prTitle: "Fix OAuth Leak", score: 42, timeAgo: "Yesterday" },
-  { id: "3", prNumber: 839, prTitle: "New Landing Grid", score: 86, timeAgo: "2 days ago" },
+  {
+    id: "1",
+    prNumber: 841,
+    prTitle: "Redux Store Refactor",
+    score: 98,
+    timeAgo: "2 hours ago"
+  },
+  {
+    id: "2",
+    prNumber: 840,
+    prTitle: "Fix OAuth Leak",
+    score: 42,
+    timeAgo: "Yesterday"
+  },
+  {
+    id: "3",
+    prNumber: 839,
+    prTitle: "New Landing Grid",
+    score: 86,
+    timeAgo: "2 days ago"
+  }
 ];
 
 const mockReviewSummary: ReviewSummary = {
@@ -114,7 +176,7 @@ const mockReviewSummary: ReviewSummary = {
   warnings: 4,
   suggestions: 12,
   duration: "12s",
-  cost: "$0.004",
+  cost: "$0.004"
 };
 
 // State interface
@@ -130,18 +192,18 @@ export interface PrismState {
   stage: ReviewStage;
   setStage: (stage: ReviewStage) => void;
   hasHistoryRecords: boolean;
-  
+
   // Refs
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  
+
   // Chat
   messages: UIMessage[];
   clearHistory: () => void;
   stop: () => void;
   isStreaming: boolean;
   send: () => void;
-  
+
   // Review Data
   prMetadata: PRMetadata | null;
   agents: Agent[];
@@ -164,7 +226,9 @@ export function usePrism(): PrismState {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [reviewHistory] = useState<ReviewHistoryItem[]>(mockReviewHistory);
-  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(
+    null
+  );
 
   const agent = useAgent<ReviewOrchestrator>({
     agent: "ReviewOrchestrator",
@@ -241,6 +305,6 @@ export function usePrism(): PrismState {
     agents,
     findings,
     reviewHistory,
-    reviewSummary,
+    reviewSummary
   };
 }

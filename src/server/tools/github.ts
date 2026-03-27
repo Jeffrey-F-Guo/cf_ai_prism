@@ -1,4 +1,4 @@
-import { tool } from 'ai'
+import { tool } from "ai";
 import { z } from "zod";
 
 export interface GitHubFile {
@@ -33,7 +33,9 @@ export interface PRAnalysisContext {
 }
 
 // parses github URL into components for API call
-export function parsePRUrl(url: string): { owner: string; repo: string; prNumber: number } | null {
+export function parsePRUrl(
+  url: string
+): { owner: string; repo: string; prNumber: number } | null {
   const match = url.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
   if (!match) return null;
   return {
@@ -44,27 +46,44 @@ export function parsePRUrl(url: string): { owner: string; repo: string; prNumber
 }
 
 // github api wrapper helper
-export async function fetchPR(owner: string, repo: string, prNum: number): Promise<PRData> {
-    const headers = {
+export async function fetchPR(
+  owner: string,
+  repo: string,
+  prNum: number
+): Promise<PRData> {
+  const headers = {
     Accept: "application/vnd.github.v3+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "cf-ai-prism"
-    };
+  };
 
   const [prResponse, filesResponse] = await Promise.all([
-    fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}`, { headers }),
-    fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}/files?per_page=100`, { headers }),
+    fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}`, {
+      headers
+    }),
+    fetch(
+      `https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}/files?per_page=100`,
+      { headers }
+    )
   ]);
 
   if (!prResponse.ok) {
-    throw new Error(`GitHub API error: ${prResponse.status} ${prResponse.statusText}`);
+    throw new Error(
+      `GitHub API error: ${prResponse.status} ${prResponse.statusText}`
+    );
   }
 
   if (!filesResponse.ok) {
-    throw new Error(`GitHub API error: ${filesResponse.status} ${filesResponse.statusText}`);
+    throw new Error(
+      `GitHub API error: ${filesResponse.status} ${filesResponse.statusText}`
+    );
   }
 
-  const pr = (await prResponse.json()) as { title: string; state: string; diff_url: string };
+  const pr = (await prResponse.json()) as {
+    title: string;
+    state: string;
+    diff_url: string;
+  };
   const files: GitHubFile[] = await filesResponse.json();
 
   return {
@@ -73,28 +92,34 @@ export async function fetchPR(owner: string, repo: string, prNum: number): Promi
     prNumber: prNum,
     title: pr.title,
     state: pr.state,
-    files,
+    files
   };
 }
 
-
 export const fetchFileContentTool = tool({
-  description: "Fetch the raw text content of a specific file from a GitHub repository. Use this when you need to read the actual code inside a file.",
+  description:
+    "Fetch the raw text content of a specific file from a GitHub repository. Use this when you need to read the actual code inside a file.",
   inputSchema: z.object({
-    contentsUrl: z.string().describe("The raw download URL or API contents URL of the file to fetch.")
+    contentsUrl: z
+      .string()
+      .describe(
+        "The raw download URL or API contents URL of the file to fetch."
+      )
   }),
   execute: async ({ contentsUrl }: { contentsUrl: string }) => {
     try {
       const response = await fetch(contentsUrl, {
         headers: {
-          Accept: "application/vnd.github.v3.raw", 
+          Accept: "application/vnd.github.v3.raw",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "cf-ai-prism"
         }
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch file content: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch file content: ${response.status} ${response.statusText}`
+        );
       }
 
       return await response.text();
@@ -123,7 +148,7 @@ export async function getPRAnalysisContext(
   return {
     prData,
     diff,
-    files: prData.files.map(f => ({
+    files: prData.files.map((f) => ({
       filename: f.filename,
       status: f.status,
       additions: f.additions,

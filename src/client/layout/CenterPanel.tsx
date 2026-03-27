@@ -1,4 +1,10 @@
-import type { ReviewStage, Agent, Finding, PRMetadata, ReviewSummary } from "../hooks/usePrism";
+import type {
+  ReviewStage,
+  Agent,
+  Finding,
+  PRMetadata,
+  ReviewSummary
+} from "../hooks/usePrism";
 import { AgentCard } from "../components/review/AgentCard";
 import { PRMetadataBar } from "../components/review/PRMetadataBar";
 import { FindingCard } from "../components/review/FindingCard";
@@ -16,7 +22,7 @@ export function CenterPanel({
   prMetadata,
   agents,
   findings,
-  reviewSummary,
+  reviewSummary
 }: CenterPanelProps) {
   if (stage === "landing") {
     return (
