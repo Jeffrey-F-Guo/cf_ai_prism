@@ -1,6 +1,7 @@
-export { ReviewOrchestrator } from "./agents/ReviewOrchestrator";
 import { routeAgentRequest } from "agents";
+import { ReviewOrchestrator } from "./agents/ReviewOrchestrator";
 
+export { ReviewOrchestrator };
 export default {
   async fetch(request: Request, env: Env) {
     return (
