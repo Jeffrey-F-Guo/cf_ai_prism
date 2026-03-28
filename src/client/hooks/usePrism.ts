@@ -237,7 +237,68 @@ export function usePrism(): PrismState {
     onError: useCallback(
       (error: Event) => console.error("WebSocket error:", error),
       []
-    )
+    ),
+    onMessage: useCallback((event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("Broadcast event:", data);
+
+        if (data.type === "stage_change") {
+          setStage(data.stage);
+        } else if (data.type === "agent_update") {
+          setAgents((prev) => {
+            const existing = prev.find((a) => a.id === data.agent);
+            if (existing) {
+              return prev.map((a) =>
+                a.id === data.agent ? { ...a, status: data.status } : a
+              );
+            } else {
+              // Create a new agent entry
+              const iconMap: Record<string, string> = {
+                logic: "psychology",
+                security: "security",
+                performance: "speed",
+                pattern: "hub"
+              };
+              const colorMap: Record<
+                string,
+                "error" | "primary" | "secondary"
+              > = {
+                logic: "primary",
+                security: "error",
+                performance: "secondary",
+                pattern: "primary"
+              };
+              const titleMap: Record<string, string> = {
+                logic: "Logic & Edge Cases",
+                security: "Security Agent",
+                performance: "Performance Profiler",
+                pattern: "Pattern Recognition"
+              };
+              return [
+                ...prev,
+                {
+                  id: data.agent,
+                  icon: iconMap[data.agent] || "help",
+                  iconColor: colorMap[data.agent] || "primary",
+                  title: titleMap[data.agent] || `${data.agent} Agent`,
+                  subtitle: "",
+                  status: data.status,
+                  tasks: []
+                }
+              ];
+            }
+          });
+        } else if (data.type === "pr_loaded") {
+          setPRMetadata(data.prMetadata);
+        } else if (data.type === "review_complete") {
+          setFindings(data.findings || []);
+          setReviewSummary(data.summary);
+        }
+      } catch {
+        // Not JSON, ignore
+      }
+    }, [])
   });
 
   const { messages, sendMessage, clearHistory, stop, status } = useAgentChat({
@@ -246,18 +307,13 @@ export function usePrism(): PrismState {
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  // Load mock data based on stage
+  // Load mock data based on stage - DISABLED for debugging
   useEffect(() => {
+    // Keep empty for now, rely on broadcasts
     if (stage === "processing") {
-      setPRMetadata(mockPRMetadata);
-      setAgents(mockAgents);
-      setFindings([]);
-      setReviewSummary(null);
+      // No mock data
     } else if (stage === "completed") {
-      setPRMetadata(mockPRMetadata);
-      setAgents([]);
-      setFindings(mockFindings);
-      setReviewSummary(mockReviewSummary);
+      // No mock data
     } else {
       setPRMetadata(null);
       setAgents([]);
