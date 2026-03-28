@@ -1,6 +1,6 @@
 import { Agent } from "agents";
 import { createWorkersAI } from "workers-ai-provider";
-import { generateText } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { fetchFileContentTool } from "../tools/github";
 import { smartLogicEval } from "../tools/LogicTools";
 
@@ -8,42 +8,19 @@ export class LogicAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
     const workersai = createWorkersAI({ binding: this.env.AI });
 
-    console.log("LogicAgent: Starting analysis with diff:", diff);
-
-    let result = await generateText({
-      model: workersai("@cf/moonshotai/kimi-k2.5"),
-      system: `You are a logic correctness reviewer. 
-Call the smartLogicEval tool first with the diff to get an initial assessment.
-After receiving the tool result, provide your detailed findings about logical correctness.
-Focus on: null/undefined handling, off-by-one errors, incorrect conditionals, unreachable code, missing edge cases, incorrect return values, and logical contradictions.`,
+    const result = await generateText({
+      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+      system: `You are a logic correctness reviewer.
+IMPORTANT: You MUST use the smartLogicEval tool to evaluate the code diff first.
+After calling the tool and getting the result, you MUST provide your detailed analysis as text. Do NOT just call tools - generate a final response.`,
       prompt: `Analyze this code diff for logic errors:\n\n${diff}`,
       tools: {
         fetchFileContent: fetchFileContentTool,
         smartLogicEval: smartLogicEval
-      }
+      },
+      stopWhen: stepCountIs(3)
     });
 
-    // If model stopped at tool-calls without generating text, make a second call with tool results
-//     if (!result.text && result.toolResults && result.toolResults.length > 0) {
-//       console.log("LogicAgent: Making second call with tool results...");
-//       const toolOutput = result.toolResults
-//         .map((tr) => `${tr.toolName}: ${tr.output}`)
-//         .join("\n");
-
-//       result = await generateText({
-//         model: workersai("@cf/moonshotai/kimi-k2.5"),
-//         system: `You are a logic correctness reviewer. 
-// You called a tool and got this result:
-// ${toolOutput}
-
-// Now provide your detailed findings based on the tool assessment.`,
-//         prompt: `Analyze this code diff for logic errors:\n\n${diff}`
-//       });
-//     }
-
-    console.log("LogicAgent: text value:", result.text);
-    console.log("LogicAgent: finishReason:", result.finishReason);
-
-    return result.text || "No analysis generated";
+    return result.text || "Analysis completed but no text was generated";
   }
 }

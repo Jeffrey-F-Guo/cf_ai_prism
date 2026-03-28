@@ -7,7 +7,7 @@ export class PerformanceAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
     const workersai = createWorkersAI({ binding: this.env.AI });
     const { text } = await generateText({
-      model: workersai("@cf/moonshotai/kimi-k2.5"),
+      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
       system: `You are a performance reviewer. Focus on: O(n) complexity, memory leaks, N+1 queries, inefficient algorithms.`,
       prompt: `Analyze this code diff for performance issues:\n\n${diff}`,
       maxRetries: 5,

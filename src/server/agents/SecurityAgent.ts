@@ -7,7 +7,7 @@ export class SecurityAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
     const workersai = createWorkersAI({ binding: this.env.AI });
     const { text } = await generateText({
-      model: workersai("@cf/moonshotai/kimi-k2.5"),
+      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
       system: `You are a security reviewer. Focus on: SQL injection, XSS, auth issues, secrets exposure, insecure dependencies.`,
       prompt: `Analyze this code diff for security issues:\n\n${diff}`,
       maxRetries: 5,
