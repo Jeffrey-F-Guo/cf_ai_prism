@@ -15,5 +15,5 @@
     "noUnusedLocals": true,
     "types": ["@cloudflare/workers-types", "vite/client"]
   },
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "env.d.ts"]
 }
