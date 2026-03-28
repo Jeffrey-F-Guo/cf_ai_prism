@@ -1,11 +1,12 @@
-import { createWorkersAI } from "workers-ai-provider";
 import { AIChatAgent, type OnChatMessageOptions } from "@cloudflare/ai-chat";
 import { streamText, convertToModelMessages, pruneMessages } from "ai";
+import { createWorkersAI } from "workers-ai-provider";
 import {
   parsePRUrl,
   getPRAnalysisContext,
   type PRAnalysisContext
 } from "../tools/github";
+import { LogicAgent } from "./LogicAgent";
 
 export class ReviewOrchestrator extends AIChatAgent<Env> {
   maxPersistedMessages = 100;
@@ -41,10 +42,69 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
   }
 
   async onChatMessage(_onFinish: unknown, options?: OnChatMessageOptions) {
+    const text = this.extractText();
+
+    // TEST MODE: Call LogicAgent directly
+    if (text.includes("test logic")) {
+      const testDiff = `--- a/src/auth/session.ts
++++ b/src/auth/session.ts
+@@ -10,7 +10,7 @@ export function createSession(userId: string) {
+-  const token = Math.random().toString(36);
++  const token = crypto.randomUUID();
+   return { token, userId };
+ }`;
+
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "processing" })
+      );
+      this.broadcast(
+        JSON.stringify({
+          type: "agent_update",
+          agent: "logic",
+          status: "analyzing"
+        })
+      );
+
+      // Simulate agent thinking
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // Call LogicAgent DO
+      const env = this.env as Env & {
+        LogicAgent: DurableObjectNamespace<LogicAgent>;
+      };
+      const id = env.LogicAgent.newUniqueId();
+      const logicAgent = env.LogicAgent.get(id);
+      const result = await logicAgent.analyzeCode(testDiff);
+
+      this.broadcast(
+        JSON.stringify({
+          type: "agent_update",
+          agent: "logic",
+          status: "complete",
+          findings: []
+        })
+      );
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "completed" })
+      );
+
+      return new Response(`Logic Agent Result:\n\n${result}`, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
+
+    // TEST MODE: testing without llm
+    if (text.includes("test hello")) {
+      return new Response(
+        "Hello! I'm Prism. Type 'test logic' to run the logic agent.",
+        {
+          headers: { "Content-Type": "text/plain" }
+        }
+      );
+    }
+
     const TEST_MODE = false;
-    // testing without llm
     if (TEST_MODE) {
-      const text = this.extractText();
       const url = this.extractURL(text);
 
       let response =
@@ -69,39 +129,16 @@ Files: ${context.files.length}`;
     }
 
     const workersai = createWorkersAI({ binding: this.env.AI });
-    const text = this.extractText();
     const url = this.extractURL(text);
 
+    // Route: User provided a GitHub PR URL - fetch and summarize the PR
     if (url) {
       const context = await this.runReview(url);
-      const testResponse = await this.env.AI.run(
-        "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-        {
-          messages: [
-            {
-              role: "system",
-              content: `You are a code analysis tool. You must respond with ONLY a valid JSON array. No markdown, no explanation, no code fences. Just the raw JSON array.`
-            },
-            {
-              role: "user",
-              content: `Analyze this code change and return findings as a JSON array with this exact shape:
-[{"severity":"critical"|"warning"|"suggestion","title":"string","description":"string","file":"string","line":number,"suggestion":"string"}]
 
-Code diff:
-\`\`\`
-- const token = Math.random().toString(36)
-+ const token = crypto.randomUUID()
-\`\`\`
-
-Return ONLY the JSON array.`
-            }
-          ]
-        }
-      );
-      console.log("RAW LLAMA OUTPUT:", JSON.stringify(testResponse));
+      // If PR fetch failed, tell the user
       if (!context) {
         const result = streamText({
-          model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+          model: workersai("@cf/moonshotai/kimi-k2.5"),
           system: `You are Prism. Tell the user there was an error fetching the PR.`,
           messages: [
             { role: "user", content: `Failed to fetch PR from ${url}` }
@@ -111,6 +148,7 @@ Return ONLY the JSON array.`
         return result.toUIMessageStreamResponse();
       }
 
+      // PR fetched successfully - generate summary
       const summary = `PR: ${context.prData.title}
 Repo: ${context.prData.owner}/${context.prData.repo}
 Files changed: ${context.files.length}
@@ -121,7 +159,7 @@ Files:
 ${context.files.map((f) => `• ${f.filename} (${f.status})`).join("\n")}`;
 
       const result = streamText({
-        model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+        model: workersai("@cf/moonshotai/kimi-k2.5"),
         system: `You are Prism. Display the PR summary clearly formatted.`,
         messages: [{ role: "user", content: summary }],
         abortSignal: options?.abortSignal
@@ -129,8 +167,10 @@ ${context.files.map((f) => `• ${f.filename} (${f.status})`).join("\n")}`;
       return result.toUIMessageStreamResponse();
     }
 
+    // Route: Default - conversational chat (no URL provided)
+    // Uses full message history for context
     const result = streamText({
-      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+      model: workersai("@cf/moonshotai/kimi-k2.5"),
       system: `You are Prism, an AI-powered code review system. 
 Ask the user for a GitHub PR URL to start a review.`,
       messages: pruneMessages({
