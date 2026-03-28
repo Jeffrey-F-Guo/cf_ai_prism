@@ -108,6 +108,7 @@ export const fetchFileContentTool = tool({
   }),
   execute: async ({ contentsUrl }: { contentsUrl: string }) => {
     try {
+      console.log("fetch tool called");
       const response = await fetch(contentsUrl, {
         headers: {
           Accept: "application/vnd.github.v3.raw",
