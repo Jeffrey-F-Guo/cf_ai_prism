@@ -1,10 +1,12 @@
 import type {
   ReviewStage,
   ReviewSummary,
-  ReviewHistoryItem
-} from "../hooks/usePrism";
+  ReviewHistoryItem,
+  LogEntry
+} from "../../types/review";
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
+import { ActivityLog } from "../components/review/ActivityLog";
 import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
 
 interface RepositoryPanelProps {
@@ -14,6 +16,7 @@ interface RepositoryPanelProps {
   hasHistoryRecords: boolean;
   reviewSummary: ReviewSummary | null;
   reviewHistory: ReviewHistoryItem[];
+  logs: LogEntry[];
 }
 
 export function RepositoryPanel({
@@ -22,7 +25,8 @@ export function RepositoryPanel({
   stage,
   hasHistoryRecords,
   reviewSummary,
-  reviewHistory
+  reviewHistory,
+  logs
 }: RepositoryPanelProps) {
   const agentCount = stage === "processing" ? "3" : "0";
 
@@ -83,6 +87,13 @@ export function RepositoryPanel({
               <SummaryCard summary={reviewSummary} />
             )}
           </div>
+
+          {/* Activity Log: visible during and after review */}
+          {stage === "processing" && (
+            <div className="h-48 shrink-0 p-4 border-b border-[#494847]/10 overflow-hidden flex flex-col">
+              <ActivityLog logs={logs} />
+            </div>
+          )}
 
           {/* Bottom Half: Review History */}
           <div className="flex-1 overflow-hidden">

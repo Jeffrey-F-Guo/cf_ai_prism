@@ -1,4 +1,4 @@
-import type { Agent } from "../../hooks/usePrism";
+import type { Agent } from "../../../types/review";
 
 const iconColors = {
   error: {

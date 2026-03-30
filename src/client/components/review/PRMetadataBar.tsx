@@ -1,4 +1,4 @@
-import type { PRMetadata } from "../../hooks/usePrism";
+import type { PRMetadata } from "../../../types/review";
 
 export function PRMetadataBar({
   title,

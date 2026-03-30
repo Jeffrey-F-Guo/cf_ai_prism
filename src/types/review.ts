@@ -30,6 +30,7 @@ export interface Finding {
   severity: FindingSeverity;
   title: string;
   description: string;
+  agent?: string;
   fileLocation?: string;
   codeDiff?: FindingCodeBlock[];
 }
@@ -58,4 +59,10 @@ export interface ReviewHistoryItem {
   prTitle: string;
   score: number;
   timeAgo: string;
+}
+
+export interface LogEntry {
+  id: string;
+  message: string;
+  ts: number;
 }

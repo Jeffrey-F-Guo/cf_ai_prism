@@ -23,6 +23,7 @@ export function ReviewPage() {
         hasHistoryRecords={prism.hasHistoryRecords}
         reviewSummary={prism.reviewSummary}
         reviewHistory={prism.reviewHistory}
+        logs={prism.logs}
       />
     </div>
   );

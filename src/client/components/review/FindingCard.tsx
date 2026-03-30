@@ -1,4 +1,4 @@
-import type { Finding, FindingSeverity } from "../../hooks/usePrism";
+import type { Finding, FindingSeverity } from "../../../types/review";
 
 const severityConfig = {
   critical: {
@@ -77,6 +77,11 @@ export function FindingCard({
           >
             {severityLabels[finding.severity]}
           </span>
+          {finding.agent && (
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#494847]">
+              {finding.agent} agent
+            </span>
+          )}
           {finding.fileLocation && (
             <span className="font-mono text-xs text-[#adaaaa]">
               {finding.fileLocation}

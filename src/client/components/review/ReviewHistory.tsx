@@ -1,4 +1,4 @@
-import type { ReviewHistoryItem } from "../../hooks/usePrism";
+import type { ReviewHistoryItem } from "../../../types/review";
 import { ChevronRight } from "../shared/Icons";
 
 interface ReviewHistoryProps {

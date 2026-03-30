@@ -4,7 +4,7 @@ import type {
   Finding,
   PRMetadata,
   ReviewSummary
-} from "../hooks/usePrism";
+} from "../../types/review";
 import { AgentCard } from "../components/review/AgentCard";
 import { PRMetadataBar } from "../components/review/PRMetadataBar";
 import { FindingCard } from "../components/review/FindingCard";

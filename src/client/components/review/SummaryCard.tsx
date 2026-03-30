@@ -1,4 +1,4 @@
-import type { ReviewSummary } from "../../hooks/usePrism";
+import type { ReviewSummary } from "../../../types/review";
 
 interface SummaryCardProps {
   summary: ReviewSummary;
