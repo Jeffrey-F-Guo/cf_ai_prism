@@ -9,18 +9,8 @@ import type {
   Finding,
   PRMetadata,
   ReviewSummary,
-  ReviewHistoryItem
-} from "../../types/review";
-
-export type {
-  ReviewStage,
-  FindingSeverity,
-  Agent,
-  Finding,
-  PRMetadata,
-  ReviewSummary,
   ReviewHistoryItem,
-  AgentTask
+  LogEntry
 } from "../../types/review";
 
 // Mock Data
@@ -210,6 +200,7 @@ export interface PrismState {
   findings: Finding[];
   reviewHistory: ReviewHistoryItem[];
   reviewSummary: ReviewSummary | null;
+  logs: LogEntry[];
 }
 
 export function usePrism(): PrismState {
@@ -226,9 +217,8 @@ export function usePrism(): PrismState {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [reviewHistory] = useState<ReviewHistoryItem[]>(mockReviewHistory);
-  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(
-    null
-  );
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const agent = useAgent<ReviewOrchestrator>({
     agent: "ReviewOrchestrator",
@@ -243,7 +233,12 @@ export function usePrism(): PrismState {
         const data = JSON.parse(event.data);
         console.log("Broadcast event:", data);
 
-        if (data.type === "stage_change") {
+        if (data.type === "log_entry") {
+          setLogs((prev) => [
+            ...prev,
+            { id: crypto.randomUUID(), message: data.message, ts: Date.now() }
+          ]);
+        } else if (data.type === "stage_change") {
           setStage(data.stage);
         } else if (data.type === "agent_update") {
           setAgents((prev) => {
@@ -319,6 +314,7 @@ export function usePrism(): PrismState {
       setAgents([]);
       setFindings([]);
       setReviewSummary(null);
+      setLogs([]);
     }
   }, [stage]);
 
@@ -361,6 +357,7 @@ export function usePrism(): PrismState {
     agents,
     findings,
     reviewHistory,
-    reviewSummary
+    reviewSummary,
+    logs
   };
 }

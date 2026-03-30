@@ -29,6 +29,7 @@ export class ReviewWorkflow extends AgentWorkflow<
           { retries: { limit: 2, delay: "10 seconds" } },
           async () => {
             await this.reportProgress({ agent: "logic", status: "running" });
+            this.broadcastToClients({ type: "log_entry", message: "Logic agent: analyzing edge cases and null handling..." });
             const env = this.env as Env & {
               LogicAgent: DurableObjectNamespace<LogicAgent>;
             };
@@ -36,6 +37,7 @@ export class ReviewWorkflow extends AgentWorkflow<
             const agent = env.LogicAgent.get(id);
             const result = await agent.analyzeCode(diff);
             await this.reportProgress({ agent: "logic", status: "complete" });
+            this.broadcastToClients({ type: "log_entry", message: "Logic agent: complete" });
             return result;
           }
         ),
@@ -45,6 +47,7 @@ export class ReviewWorkflow extends AgentWorkflow<
           { retries: { limit: 2, delay: "10 seconds" } },
           async () => {
             await this.reportProgress({ agent: "security", status: "running" });
+            this.broadcastToClients({ type: "log_entry", message: "Security agent: scanning for vulnerabilities..." });
             const env = this.env as Env & {
               SecurityAgent: DurableObjectNamespace<SecurityAgent>;
             };
@@ -52,6 +55,7 @@ export class ReviewWorkflow extends AgentWorkflow<
             const agent = env.SecurityAgent.get(id);
             const result = await agent.analyzeCode(diff);
             await this.reportProgress({ agent: "security", status: "complete" });
+            this.broadcastToClients({ type: "log_entry", message: "Security agent: complete" });
             return result;
           }
         ),
@@ -61,6 +65,7 @@ export class ReviewWorkflow extends AgentWorkflow<
           { retries: { limit: 2, delay: "10 seconds" } },
           async () => {
             await this.reportProgress({ agent: "performance", status: "running" });
+            this.broadcastToClients({ type: "log_entry", message: "Performance agent: profiling complexity and memory..." });
             const env = this.env as Env & {
               PerformanceAgent: DurableObjectNamespace<PerformanceAgent>;
             };
@@ -68,6 +73,7 @@ export class ReviewWorkflow extends AgentWorkflow<
             const agent = env.PerformanceAgent.get(id);
             const result = await agent.analyzeCode(diff);
             await this.reportProgress({ agent: "performance", status: "complete" });
+            this.broadcastToClients({ type: "log_entry", message: "Performance agent: complete" });
             return result;
           }
         ),
@@ -77,6 +83,7 @@ export class ReviewWorkflow extends AgentWorkflow<
           { retries: { limit: 2, delay: "10 seconds" } },
           async () => {
             await this.reportProgress({ agent: "pattern", status: "running" });
+            this.broadcastToClients({ type: "log_entry", message: "Pattern agent: checking SOLID principles and anti-patterns..." });
             const env = this.env as Env & {
               PatternAgent: DurableObjectNamespace<PatternAgent>;
             };
@@ -84,6 +91,7 @@ export class ReviewWorkflow extends AgentWorkflow<
             const agent = env.PatternAgent.get(id);
             const result = await agent.analyzeCode(diff);
             await this.reportProgress({ agent: "pattern", status: "complete" });
+            this.broadcastToClients({ type: "log_entry", message: "Pattern agent: complete" });
             return result;
           }
         )
@@ -95,6 +103,7 @@ export class ReviewWorkflow extends AgentWorkflow<
       { retries: { limit: 2, delay: "10 seconds" } },
       async () => {
         await this.reportProgress({ agent: "summary", status: "running" });
+        this.broadcastToClients({ type: "log_entry", message: "Summary agent: compiling and deduplicating findings..." });
         const env = this.env as Env & {
           SummaryAgent: DurableObjectNamespace<SummaryAgent>;
         };
@@ -107,6 +116,7 @@ export class ReviewWorkflow extends AgentWorkflow<
           pattern: patternResult
         });
         await this.reportProgress({ agent: "summary", status: "complete" });
+        this.broadcastToClients({ type: "log_entry", message: `Review complete — ${result.findings.length} findings, score ${result.summary.score}/100` });
         // Spread into a plain object to strip the Disposable intersection added by DO RPC
         return { findings: result.findings, summary: result.summary };
       }

@@ -67,6 +67,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       }
 
       // Start processing stage
+      this.broadcast(JSON.stringify({ type: "log_entry", message: `PR #${context.prData.prNumber} loaded — ${context.prData.files.length} files changed` }));
       this.broadcast(
         JSON.stringify({ type: "stage_change", stage: "processing" })
       );
@@ -102,6 +103,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       // Start workflow in background
       let workflowStarted = false;
       try {
+        this.broadcast(JSON.stringify({ type: "log_entry", message: "Deploying 4 agents in parallel..." }));
         await this.runWorkflow("REVIEW_WORKFLOW", {
           diff: context.diff
         });

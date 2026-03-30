@@ -51,6 +51,7 @@ Output ONLY a valid JSON object matching this exact schema, no markdown, no expl
       "severity": "critical" | "warning" | "suggestion" | "success",
       "title": "string",
       "description": "string",
+      "agent": "logic" | "security" | "performance" | "pattern",
       "fileLocation": "string (optional, only if agent mentioned a specific file)"
     }
   ],
@@ -85,6 +86,7 @@ ${results.pattern}`
           severity: f.severity ?? "suggestion",
           title: f.title ?? "Finding",
           description: f.description ?? "",
+          ...(f.agent ? { agent: f.agent } : {}),
           ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
         })
       );
