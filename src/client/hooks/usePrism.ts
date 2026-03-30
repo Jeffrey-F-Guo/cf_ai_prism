@@ -292,8 +292,20 @@ export function usePrism(): PrismState {
         } else if (data.type === "pr_loaded") {
           setPRMetadata(data.prMetadata);
         } else if (data.type === "review_complete") {
-          setFindings(data.findings || []);
-          setReviewSummary(data.summary);
+          if (data.result) {
+            const agentFindings: Finding[] = Object.entries(
+              data.result as Record<string, string>
+            )
+              .filter(([, text]) => text)
+              .map(([agent, text], i) => ({
+                id: String(i + 1),
+                severity: "suggestion" as const,
+                title: `${agent.charAt(0).toUpperCase() + agent.slice(1)} Review`,
+                description: text
+              }));
+            setFindings(agentFindings);
+          }
+          setReviewSummary(data.summary || null);
         }
       } catch {
         // Not JSON, ignore

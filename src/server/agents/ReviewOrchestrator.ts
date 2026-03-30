@@ -10,6 +10,7 @@ import {
 export class ReviewOrchestrator extends AIChatAgent<Env> {
   maxPersistedMessages = 100;
 
+  // get the text from the most recent message
   private extractText(): string {
     const lastMessage = this.messages[this.messages.length - 1];
     if (!lastMessage) return "";
@@ -19,11 +20,13 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       .join("");
   }
 
+  // get url from text
   private extractURL(text: string): string | null {
     const match = text.match(/https?:\/\/github\.com\/[^\s]+\/pull\/\d+/);
     return match ? match[0] : null;
   }
 
+  // init the review pipeline
   private async runReview(url: string): Promise<PRAnalysisContext | null> {
     const parsed = parsePRUrl(url);
     if (!parsed) {
@@ -53,7 +56,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       // If PR fetch failed, tell the user
       if (!context) {
         const result = streamText({
-          model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+          model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
           system: `You are Prism. Tell the user there was an error fetching the PR.`,
           messages: [
             { role: "user", content: `Failed to fetch PR from ${url}` }
@@ -108,44 +111,38 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
         console.error("Failed to start workflow:", err);
       }
 
-      // If workflow failed to start, run agents directly as fallback
-      if (!workflowStarted) {
-        // TODO: Run agents directly as fallback when workflows unavailable
-        this.broadcast(
-          JSON.stringify({
-            type: "review_error",
-            error: "Background processing unavailable. Please try again."
-          })
-        );
-      }
+      // // If workflow failed to start, run agents directly as fallback
+      // if (!workflowStarted) {
+      //   // TODO: Run agents directly as fallback when workflows unavailable
+      //   this.broadcast(
+      //     JSON.stringify({
+      //       type: "review_error",
+      //       error: "Background processing unavailable. Please try again."
+      //     })
+      //   );
+      // }
 
-      // Immediately return acknowledgement while workflow runs
-      const ackMessage = `I've started a comprehensive code review for this PR.
-
-**PR:** ${context.prData.title}
-**Repo:** ${context.prData.owner}/${context.prData.repo}
-**Files:** ${context.files.length}
-
-The review is running in the background with 4 agents:
-- Logic & Edge Cases
-- Security
-- Performance
-- Patterns
-
-You'll see updates as each agent completes. The full report will be ready shortly!`;
-
-      const result = streamText({
-        model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-        system: `You are Prism, an AI code review assistant.`,
-        messages: [{ role: "user", content: ackMessage }],
-        abortSignal: options?.abortSignal
+      // Immediately return a hardcoded acknowledgement — no LLM call needed here
+      const encoder = new TextEncoder();
+      const ackStream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode('0:"Acknowledged code review request. Deploying agents."\n'));
+          controller.enqueue(encoder.encode('e:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0},"isContinued":false}\n'));
+          controller.enqueue(encoder.encode('d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n'));
+          controller.close();
+        }
       });
-      return result.toUIMessageStreamResponse();
+      return new Response(ackStream, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "X-Vercel-AI-Data-Stream": "v1"
+        }
+      });
     }
 
     // Route: Default - conversational chat (no URL provided)
     const result = streamText({
-      model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+      model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
       system: `You are Prism, an AI-powered code review system. 
 Ask the user for a GitHub PR URL to start a review.`,
       messages: pruneMessages({
