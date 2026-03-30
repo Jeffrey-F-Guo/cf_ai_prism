@@ -38,6 +38,10 @@
       {
         "class_name": "PatternAgent",
         "name": "PatternAgent"
+      },
+      {
+        "class_name": "SummaryAgent",
+        "name": "SummaryAgent"
       }
     ]
   },
@@ -48,7 +52,8 @@
         "SecurityAgent",
         "LogicAgent",
         "PerformanceAgent",
-        "PatternAgent"
+        "PatternAgent",
+        "SummaryAgent"
       ],
       "tag": "v1"
     }
