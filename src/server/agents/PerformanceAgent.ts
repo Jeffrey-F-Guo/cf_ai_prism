@@ -1,14 +1,14 @@
 import { Agent } from "agents";
-import { createWorkersAI } from "workers-ai-provider";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateText, stepCountIs } from "ai";
 import { fetchFileContentTool } from "../tools/github";
 import { performanceAnalyze } from "../tools/PerformanceTools";
 
 export class PerformanceAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
-    const workersai = createWorkersAI({ binding: this.env.AI });
+    const deepseek = createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY });
     const { text } = await generateText({
-      model: workersai("@cf/zai-org/glm-4.7-flash"),
+      model: deepseek("deepseek-chat"),
       system: `You are a performance reviewer. Analyze code diffs for O(n) complexity issues, memory leaks, N+1 queries, and inefficient algorithms. Do NOT comment on security or logic concerns.
 
 Rules for reporting findings:

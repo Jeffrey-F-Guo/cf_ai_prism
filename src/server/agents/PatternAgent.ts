@@ -1,14 +1,14 @@
 import { Agent } from "agents";
-import { createWorkersAI } from "workers-ai-provider";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateText, stepCountIs } from "ai";
 import { fetchFileContentTool } from "../tools/github";
 import { patternAnalyze } from "../tools/PatternTools";
 
 export class PatternAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
-    const workersai = createWorkersAI({ binding: this.env.AI });
+    const deepseek = createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY });
     const { text } = await generateText({
-      model: workersai("@cf/zai-org/glm-4.7-flash"),
+      model: deepseek("deepseek-chat"),
       system: `You are a pattern reviewer. Analyze code diffs for code style consistency, SOLID principle violations, anti-patterns, and code duplication. Do NOT comment on security or performance concerns.
 
 Rules for reporting findings:

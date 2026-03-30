@@ -1,5 +1,5 @@
 import { Agent } from "agents";
-import { createWorkersAI } from "workers-ai-provider";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { generateText } from "ai";
 import type { Finding, ReviewSummary } from "../../types/review";
 
@@ -27,10 +27,10 @@ export class SummaryAgent extends Agent<Env> {
     performance: string;
     pattern: string;
   }): Promise<SummaryResult> {
-    const workersai = createWorkersAI({ binding: this.env.AI });
+    const deepseek = createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY });
 
     const { text } = await generateText({
-      model: workersai("@cf/moonshotai/kimi-k2.5"),
+      model: deepseek("deepseek-chat"),
       system: `You are a senior code reviewer compiling reports from 4 specialized agents into structured findings.
 
 Your job:
@@ -76,7 +76,6 @@ ${results.pattern}`
     });
 
     try {
-      // Strip markdown code fences if model wraps the output
       const cleaned = text.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
       const parsed = JSON.parse(cleaned);
 
