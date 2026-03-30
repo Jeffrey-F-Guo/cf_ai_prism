@@ -8,6 +8,7 @@ import type {
 import { AgentCard } from "../components/review/AgentCard";
 import { PRMetadataBar } from "../components/review/PRMetadataBar";
 import { FindingCard } from "../components/review/FindingCard";
+import { SummaryCard } from "../components/review/SummaryCard";
 
 interface CenterPanelProps {
   stage: ReviewStage;
@@ -69,8 +70,10 @@ export function CenterPanel({
         </p>
       </div>
 
+      {reviewSummary && <SummaryCard summary={reviewSummary} />}
+
       {/* Findings Grid */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 mt-6">
         {findings.map((finding) => (
           <FindingCard key={finding.id} finding={finding} />
         ))}
