@@ -163,12 +163,7 @@ Ask the user for a GitHub PR URL to start a review.`,
   async onWorkflowComplete(
     _workflowName: string,
     instanceId: string,
-    result?: {
-      logic: string;
-      security: string;
-      performance: string;
-      pattern: string;
-    }
+    result?: import("../agents/SummaryAgent").SummaryResult
   ) {
     console.log("Workflow complete:", instanceId, result);
     this.broadcast(
@@ -207,7 +202,8 @@ Ask the user for a GitHub PR URL to start a review.`,
       this.broadcast(
         JSON.stringify({
           type: "review_complete",
-          result
+          findings: result.findings,
+          summary: result.summary
         })
       );
     }
