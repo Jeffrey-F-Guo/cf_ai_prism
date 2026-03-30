@@ -43,7 +43,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
     }
   }
 
-  async onChatMessage(_onFinish: unknown, options?: OnChatMessageOptions) {
+  async onChatMessage(onFinish: unknown, options?: OnChatMessageOptions) {
     const text = this.extractText();
     const workersai = createWorkersAI({ binding: this.env.AI });
     const url = this.extractURL(text);
@@ -121,23 +121,13 @@ export class ReviewOrchestrator extends AIChatAgent<Env> {
       //     })
       //   );
       // }
+      (onFinish as (() => void) | undefined)?.();
+      if (workflowStarted) {
+        return new Response("Acknowledged code review request. Deploying agents.");
+      } else {
+        return new Response("Failed to start the background workflow. Please check the server logs.");
+      }
 
-      // Immediately return a hardcoded acknowledgement — no LLM call needed here
-      const encoder = new TextEncoder();
-      const ackStream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(encoder.encode('0:"Acknowledged code review request. Deploying agents."\n'));
-          controller.enqueue(encoder.encode('e:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0},"isContinued":false}\n'));
-          controller.enqueue(encoder.encode('d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":0}}\n'));
-          controller.close();
-        }
-      });
-      return new Response(ackStream, {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          "X-Vercel-AI-Data-Stream": "v1"
-        }
-      });
     }
 
     // Route: Default - conversational chat (no URL provided)

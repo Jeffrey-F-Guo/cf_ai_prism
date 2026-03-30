@@ -8,12 +8,12 @@ export class PerformanceAgent extends Agent<Env> {
   async analyzeCode(diff: string): Promise<string> {
     const workersai = createWorkersAI({ binding: this.env.AI });
     const { text } = await generateText({
-      model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
-      system: `You are a performance reviewer. Focus on: O(n) complexity, memory leaks, N+1 queries, inefficient algorithms.
-IMPORTANT: You MUST use the performanceAnalyze tool first to analyze the diff before providing your analysis.`,
+      model: workersai("@cf/zai-org/glm-4.7-flash"),
+      system: `You are a performance reviewer. Analyze code diffs for O(n) complexity issues, memory leaks, N+1 queries, and inefficient algorithms. Do NOT comment on security or logic concerns.
+IMPORTANT: You MUST use the performanceAnalyze tool first to analyze the diff. After the tool result, provide your detailed analysis as text.`,
       prompt: `Analyze this code diff for performance issues:\n\n${diff}`,
-      stopWhen: stepCountIs(3),
-      tools: { fetchFileContent: fetchFileContentTool, performanceAnalyze }
+      tools: { fetchFileContent: fetchFileContentTool, performanceAnalyze },
+      stopWhen: stepCountIs(3)
     });
     return text;
   }
