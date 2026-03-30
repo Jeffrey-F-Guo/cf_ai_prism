@@ -23,13 +23,6 @@ export interface PRData {
 export interface PRAnalysisContext {
   prData: PRData;
   diff: string;
-  files: {
-    filename: string;
-    status: string;
-    additions: number;
-    deletions: number;
-    patch: string;
-  }[];
 }
 
 // parses github URL into components for API call
@@ -147,15 +140,5 @@ export async function getPRAnalysisContext(
     }
   }
 
-  return {
-    prData,
-    diff,
-    files: prData.files.map((f) => ({
-      filename: f.filename,
-      status: f.status,
-      additions: f.additions,
-      deletions: f.deletions,
-      patch: f.patch ?? ""
-    }))
-  };
+  return { prData, diff };
 }
