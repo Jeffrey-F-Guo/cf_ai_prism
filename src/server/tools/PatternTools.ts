@@ -8,6 +8,6 @@ export const patternAnalyze = tool({
   }),
   execute: async ({ code }: { code: string }) => {
     console.log("patternAnalyze called with code length:", code.length);
-    return "Pattern analysis complete. Code follows consistent style.";
+    return `Pattern analysis tool invoked for ${code.length} chars of diff. Proceed with your own analysis.`;
   }
 });

@@ -8,6 +8,6 @@ export const securityScan = tool({
   }),
   execute: async ({ code }: { code: string }) => {
     console.log("securityScan called with code length:", code.length);
-    return "Security scan complete. No critical vulnerabilities found.";
+    return `Security scan tool invoked for ${code.length} chars of diff. Proceed with your own analysis.`;
   }
 });

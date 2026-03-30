@@ -142,6 +142,7 @@ export async function getPRAnalysisContext(
   for (const file of prData.files) {
     if (file.patch) {
       diff += `File: ${file.filename} (${file.status}, +${file.additions} -${file.deletions})\n`;
+      diff += `Contents URL: ${file.contents_url}\n`;
       diff += `${file.patch}\n\n`;
     }
   }

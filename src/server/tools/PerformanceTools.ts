@@ -8,6 +8,6 @@ export const performanceAnalyze = tool({
   }),
   execute: async ({ code }: { code: string }) => {
     console.log("performanceAnalyze called with code length:", code.length);
-    return "Performance analysis complete. No significant issues found.";
+    return `Performance analysis tool invoked for ${code.length} chars of diff. Proceed with your own analysis.`;
   }
 });
