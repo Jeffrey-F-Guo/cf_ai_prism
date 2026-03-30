@@ -4,6 +4,7 @@ import { LogicAgent } from "./agents/LogicAgent";
 import { PerformanceAgent } from "./agents/PerformanceAgent";
 import { SecurityAgent } from "./agents/SecurityAgent";
 import { PatternAgent } from "./agents/PatternAgent";
+import { SummaryAgent } from "./agents/SummaryAgent";
 import { ReviewWorkflow } from "./workflows/ReviewWorkflow";
 
 export {
@@ -12,6 +13,7 @@ export {
   PerformanceAgent,
   SecurityAgent,
   PatternAgent,
+  SummaryAgent,
   ReviewWorkflow
 };
 

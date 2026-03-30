@@ -5,16 +5,10 @@ import type { LogicAgent } from "../agents/LogicAgent";
 import type { SecurityAgent } from "../agents/SecurityAgent";
 import type { PerformanceAgent } from "../agents/PerformanceAgent";
 import type { PatternAgent } from "../agents/PatternAgent";
+import type { SummaryAgent, SummaryResult } from "../agents/SummaryAgent";
 
 type ReviewParams = {
   diff: string;
-};
-
-type ReviewResult = {
-  logic: string;
-  security: string;
-  performance: string;
-  pattern: string;
 };
 
 export class ReviewWorkflow extends AgentWorkflow<
@@ -27,10 +21,9 @@ export class ReviewWorkflow extends AgentWorkflow<
 
     await this.reportProgress({ agent: "all", status: "starting" });
 
-    // Fan out: run all 4 agents in parallel using step.do
+    // Step 1: Fan out all 4 agents in parallel
     const [logicResult, securityResult, performanceResult, patternResult] =
       await Promise.all([
-        // Logic Agent
         step.do(
           "logic-agent",
           { retries: { limit: 2, delay: "10 seconds" } },
@@ -47,7 +40,6 @@ export class ReviewWorkflow extends AgentWorkflow<
           }
         ),
 
-        // Security Agent
         step.do(
           "security-agent",
           { retries: { limit: 2, delay: "10 seconds" } },
@@ -64,7 +56,6 @@ export class ReviewWorkflow extends AgentWorkflow<
           }
         ),
 
-        // Performance Agent
         step.do(
           "performance-agent",
           { retries: { limit: 2, delay: "10 seconds" } },
@@ -81,7 +72,6 @@ export class ReviewWorkflow extends AgentWorkflow<
           }
         ),
 
-        // Pattern Agent
         step.do(
           "pattern-agent",
           { retries: { limit: 2, delay: "10 seconds" } },
@@ -99,20 +89,39 @@ export class ReviewWorkflow extends AgentWorkflow<
         )
       ]);
 
-    const result: ReviewResult = {
-      logic: logicResult,
-      security: securityResult,
-      performance: performanceResult,
-      pattern: patternResult
-    };
+    // Step 2: SummaryAgent compiles, deduplicates, and chunks all results
+    const summaryResult = await step.do(
+      "summary-agent",
+      { retries: { limit: 2, delay: "10 seconds" } },
+      async () => {
+        await this.reportProgress({ agent: "summary", status: "running" });
+        const env = this.env as Env & {
+          SummaryAgent: DurableObjectNamespace<SummaryAgent>;
+        };
+        const id = env.SummaryAgent.newUniqueId();
+        const agent = env.SummaryAgent.get(id);
+        const result = await agent.summarize({
+          logic: logicResult,
+          security: securityResult,
+          performance: performanceResult,
+          pattern: patternResult
+        });
+        await this.reportProgress({ agent: "summary", status: "complete" });
+        // Spread into a plain object to strip the Disposable intersection added by DO RPC
+        return { findings: result.findings, summary: result.summary };
+      }
+    ) as unknown as SummaryResult;
 
-    // Broadcast to clients
+    const { findings, summary } = summaryResult;
+
+    // Broadcast structured findings to all connected clients
     this.broadcastToClients({
       type: "review_complete",
-      result
+      findings,
+      summary
     });
 
-    await step.reportComplete(result);
-    return result;
+    await step.reportComplete({ findings, summary });
+    return { findings, summary };
   }
 }
