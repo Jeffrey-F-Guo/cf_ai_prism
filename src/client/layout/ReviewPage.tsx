@@ -25,6 +25,7 @@ export function ReviewPage() {
         reviewSummary={prism.reviewSummary}
         reviewHistory={prism.reviewHistory}
         logs={prism.logs}
+        agents={prism.agents}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import type {
   ReviewStage,
+  Agent,
   ReviewSummary,
   ReviewHistoryItem,
   LogEntry
@@ -17,6 +18,7 @@ interface RepositoryPanelProps {
   reviewSummary: ReviewSummary | null;
   reviewHistory: ReviewHistoryItem[];
   logs: LogEntry[];
+  agents: Agent[];
 }
 
 export function RepositoryPanel({
@@ -26,9 +28,11 @@ export function RepositoryPanel({
   hasHistoryRecords,
   reviewSummary,
   reviewHistory,
-  logs
+  logs,
+  agents
 }: RepositoryPanelProps) {
-  const agentCount = stage === "processing" ? "3" : "0";
+  const totalAgents = agents.length;
+  const analyzingCount = agents.filter((a) => a.status === "analyzing").length;
 
   return (
     <section
@@ -78,7 +82,7 @@ export function RepositoryPanel({
                   Review in progress
                 </p>
                 <p className="text-[10px] text-[#adaaaa] mt-1">
-                  {agentCount} agents analyzing...
+                  {analyzingCount} of {totalAgents} agents analyzing...
                 </p>
               </div>
             )}
