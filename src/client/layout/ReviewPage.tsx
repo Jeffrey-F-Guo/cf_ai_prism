@@ -15,6 +15,7 @@ export function ReviewPage() {
         agents={prism.agents}
         findings={prism.findings}
         reviewSummary={prism.reviewSummary}
+        submitSteering={prism.submitSteering}
       />
       <RepositoryPanel
         rightCollapsed={prism.rightCollapsed}

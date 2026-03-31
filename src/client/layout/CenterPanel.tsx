@@ -3,12 +3,14 @@ import type {
   Agent,
   Finding,
   PRMetadata,
-  ReviewSummary
+  ReviewSummary,
+  SteeringConfig
 } from "../../types/review";
 import { AgentCard } from "../components/review/AgentCard";
 import { PRMetadataBar } from "../components/review/PRMetadataBar";
 import { FindingCard } from "../components/review/FindingCard";
 import { SummaryCard } from "../components/review/SummaryCard";
+import { SteeringPanel } from "../components/review/SteeringPanel";
 
 interface CenterPanelProps {
   stage: ReviewStage;
@@ -16,6 +18,7 @@ interface CenterPanelProps {
   agents: Agent[];
   findings: Finding[];
   reviewSummary: ReviewSummary | null;
+  submitSteering: (config: SteeringConfig) => void;
 }
 
 export function CenterPanel({
@@ -23,7 +26,8 @@ export function CenterPanel({
   prMetadata,
   agents,
   findings,
-  reviewSummary
+  reviewSummary,
+  submitSteering
 }: CenterPanelProps) {
   if (stage === "landing") {
     return (
@@ -37,6 +41,11 @@ export function CenterPanel({
         <div className="absolute left-0 right-0 h-px bg-[#bd9dff]/10 top-3/4" />
       </section>
     );
+  }
+
+  if (stage === "steering") {
+    if (!prMetadata) return null;
+    return <SteeringPanel prMetadata={prMetadata} onSubmit={submitSteering} />;
   }
 
   if (stage === "processing") {
@@ -74,9 +83,14 @@ export function CenterPanel({
 
       {/* Findings Grid */}
       <div className="grid grid-cols-1 gap-6 mt-6">
-        {findings.map((finding) => (
-          <FindingCard key={finding.id} finding={finding} />
-        ))}
+        {[...findings]
+          .sort((a, b) => {
+            const priority: Record<string, number> = { critical: 0, warning: 1, suggestion: 2, success: 3 };
+            return (priority[a.severity] ?? 4) - (priority[b.severity] ?? 4);
+          })
+          .map((finding) => (
+            <FindingCard key={finding.id} finding={finding} />
+          ))}
       </div>
     </section>
   );

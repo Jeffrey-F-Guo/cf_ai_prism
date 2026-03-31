@@ -1,32 +1,50 @@
 import { Agent } from "agents";
 import { createDeepSeek } from "@ai-sdk/deepseek";
-import { generateText, stepCountIs } from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { fetchFileContentTool } from "../tools/github";
 import { smartLogicEval } from "../tools/LogicTools";
+import { agentFindingSchema } from "../tools/schemas";
+import type { Finding } from "../../types/review";
 
 export class LogicAgent extends Agent<Env> {
-  async analyzeCode(diff: string): Promise<string> {
+  async analyzeCode(diff: string, focus?: string): Promise<Finding[]> {
     const deepseek = createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY });
 
-    const result = await generateText({
+    const focusClause = focus
+      ? `\n\nThe user specifically wants to focus on: ${focus}. Prioritize findings related to this area.`
+      : "";
+
+    // Step 1: Analyze with tools
+    const { text } = await generateText({
       model: deepseek("deepseek-chat"),
       system: `You are a logic correctness reviewer. Analyze code diffs for logic errors, null handling issues, off-by-one errors, unreachable code, and edge cases. Do NOT comment on security or performance concerns.
 
 Rules for reporting findings:
 - Call smartLogicEval first with the diff, then proceed with your analysis
 - Only report issues you can DIRECTLY QUOTE from the diff text
-- Do NOT invent or estimate line numbers — only reference line numbers explicitly shown in diff hunks (lines beginning with @@)
+- For every finding, include the file path and line number. Extract the file path from the "File: path/to/file" line in the diff, and the line number from the nearest "@@ -X,Y +A,B @@" hunk header above the relevant code (use the +A value). Format as "path/to/file.ts:A". Never invent or interpolate line numbers — only use the exact +A value from a @@ header.
 - If a variable or function appears undefined in the diff, use fetchFileContent with the Contents URL listed in the diff to check if it is defined elsewhere before flagging it
 - If you are uncertain about an issue, do not report it — false positives are worse than missed issues
-- Each finding must reference the specific code change that prompted it`,
+- Each finding must quote the specific code change and include its file:line location${focusClause}`,
       prompt: `Analyze this code diff for logic errors:\n\n${diff}`,
-      tools: {
-        fetchFileContent: fetchFileContentTool,
-        smartLogicEval: smartLogicEval
-      },
+      tools: { fetchFileContent: fetchFileContentTool, smartLogicEval },
       stopWhen: stepCountIs(3)
     });
 
-    return result.text || "Analysis completed but no text was generated";
+    // Step 2: Extract structured findings from the analysis
+    const { output } = await generateText({
+      model: deepseek("deepseek-chat"),
+      output: Output.object({ schema: agentFindingSchema }),
+      prompt: `Extract all findings from this logic analysis as structured data. Include every distinct issue identified.\n\n${text}`
+    });
+
+    return output.findings.map((f, i) => ({
+      id: String(i + 1),
+      agent: "logic",
+      severity: f.severity,
+      title: f.title,
+      description: f.description,
+      ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
+    }));
   }
 }

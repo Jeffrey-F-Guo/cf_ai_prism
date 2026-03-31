@@ -1,4 +1,10 @@
-export type ReviewStage = "landing" | "processing" | "completed";
+export type ReviewStage = "landing" | "steering" | "processing" | "completed";
+
+export interface SteeringConfig {
+  agents: Array<"logic" | "security" | "performance" | "pattern">;
+  rigor: "quick" | "standard" | "deep";
+  focus?: string;
+}
 
 export type AgentStatus = "analyzing" | "queued" | "completed";
 
