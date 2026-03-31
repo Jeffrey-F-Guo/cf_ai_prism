@@ -46,24 +46,8 @@ const severityLabels: Record<FindingSeverity, string> = {
   success: "Success"
 };
 
-export function FindingCard({
-  finding,
-  onExpand,
-  onChat,
-  onAutoFix
-}: {
-  finding: Finding;
-  onExpand?: () => void;
-  onChat?: () => void;
-  onAutoFix?: () => void;
-}) {
+export function FindingCard({ finding }: { finding: Finding }) {
   const config = severityConfig[finding.severity];
-
-  const handleIconClick = () => {
-    if (finding.severity === "critical" && onExpand) onExpand();
-    else if (finding.severity === "warning" && onChat) onChat();
-    else if (finding.severity === "suggestion" && onAutoFix) onAutoFix();
-  };
 
   return (
     <div
@@ -82,19 +66,11 @@ export function FindingCard({
               {finding.agent} agent
             </span>
           )}
-          {finding.fileLocation && (
-            <span className="font-mono text-xs text-[#adaaaa]">
-              {finding.fileLocation}
-            </span>
-          )}
         </div>
         {finding.severity !== "success" && (
-          <button
-            onClick={handleIconClick}
-            className={`text-[#adaaaa] ${config.iconHover} transition-colors cursor-pointer`}
-          >
-            <span className="material-symbols-outlined">{config.icon}</span>
-          </button>
+          <span className={`material-symbols-outlined text-[#adaaaa] ${config.iconHover}`}>
+            {config.icon}
+          </span>
         )}
         {finding.severity === "success" && (
           <span
@@ -110,9 +86,21 @@ export function FindingCard({
       <h3 className="text-lg font-semibold mb-2">{finding.title}</h3>
 
       {/* Description */}
-      <p className="text-[#adaaaa] text-sm mb-4 leading-relaxed">
+      <p className="text-[#adaaaa] text-sm mb-3 leading-relaxed">
         {finding.description}
       </p>
+
+      {/* File location */}
+      {finding.fileLocation && (
+        <div className="flex items-center gap-1.5 mb-4">
+          <span className="material-symbols-outlined text-[#494847] text-sm">
+            code
+          </span>
+          <span className="font-mono text-xs text-[#777575]">
+            {finding.fileLocation}
+          </span>
+        </div>
+      )}
 
       {/* Code Diff */}
       {finding.codeDiff && finding.codeDiff.length > 0 && (
