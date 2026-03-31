@@ -7,7 +7,7 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		AI: Ai;
-		DEEPSEEK_API_KEY: "sk-0823b1f4c07844eabfb8823e397a746c";
+		DEEPSEEK_API_KEY: string;
 		ReviewOrchestrator: DurableObjectNamespace<import("./src/server/index").ReviewOrchestrator>;
 		SecurityAgent: DurableObjectNamespace<import("./src/server/index").SecurityAgent>;
 		LogicAgent: DurableObjectNamespace<import("./src/server/index").LogicAgent>;
