@@ -23,8 +23,6 @@ export class ReviewWorkflow extends AgentWorkflow<
   async run(event: AgentWorkflowEvent<ReviewParams>, step: AgentWorkflowStep) {
     const { diff, agents: enabledAgents, focus } = event.payload;
 
-    await this.reportProgress({ agent: "all", status: "starting" });
-
     // Fan out enabled agents in parallel — skipped agents return [] immediately
     const [logicResult, securityResult, performanceResult, patternResult] =
       await Promise.all([
