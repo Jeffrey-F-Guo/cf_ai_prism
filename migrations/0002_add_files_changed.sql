@@ -1,0 +1,1 @@
+ALTER TABLE reviews ADD COLUMN files_changed INTEGER NOT NULL DEFAULT 0;

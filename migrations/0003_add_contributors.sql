@@ -1,0 +1,1 @@
+ALTER TABLE reviews ADD COLUMN contributors TEXT NOT NULL DEFAULT '[]';
