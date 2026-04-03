@@ -4,13 +4,15 @@ import { createWorkersAI } from "workers-ai-provider";
 import {
   parsePRUrl,
   getPRAnalysisContext,
-  type PRAnalysisContext
+  type PRAnalysisContext,
+  type PRData
 } from "../tools/github";
 import { makeOrchestratorTools } from "../tools/orchestratorTools";
-import type { Finding, SteeringConfig } from "../../types/review";
+import type { Finding, ReviewSummary, SteeringConfig } from "../../types/review";
 
 type OrchestratorState = {
   pendingContext: PRAnalysisContext | null;
+  prData: PRData | null;
   findings: Finding[];
 };
 
@@ -19,10 +21,10 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
 
   initialState: OrchestratorState = {
     pendingContext: null,
+    prData: null,
     findings: []
   };
 
-  // get the text from the most recent message
   private extractText(): string {
     const lastMessage = this.messages[this.messages.length - 1];
     if (!lastMessage) return "";
@@ -32,24 +34,66 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       .join("");
   }
 
-  // get url from text
   private extractURL(text: string): string | null {
     const match = text.match(/https?:\/\/github\.com\/[^\s]+\/pull\/\d+/);
     return match ? match[0] : null;
   }
 
-  // init the review pipeline
   private async runReview(url: string): Promise<PRAnalysisContext | null> {
     const parsed = parsePRUrl(url);
     if (!parsed) return null;
 
     const { owner, repo, prNumber } = parsed;
     try {
-      return await getPRAnalysisContext(owner, repo, prNumber);
+      return await getPRAnalysisContext(owner, repo, prNumber, this.env.GITHUB_TOKEN);
     } catch (err) {
       console.error(`Failed to fetch PR ${owner}/${repo}#${prNumber}:`, err);
       return null;
     }
+  }
+
+  private async persistReview(prData: PRData, prUrl: string, summary: ReviewSummary, findings: Finding[]) {
+    const db = this.env.DB;
+    const reviewId = crypto.randomUUID();
+
+    // Upsert repo
+    await db.prepare(
+      `INSERT INTO repos (owner, repo) VALUES (?, ?) ON CONFLICT(owner, repo) DO NOTHING`
+    ).bind(prData.owner, prData.repo).run();
+
+    const repoRow = await db.prepare(
+      `SELECT id FROM repos WHERE owner = ? AND repo = ?`
+    ).bind(prData.owner, prData.repo).first<{ id: number }>();
+
+    if (!repoRow) throw new Error("Failed to upsert repo");
+
+    // Insert review
+    await db.prepare(`
+      INSERT INTO reviews (id, repo_id, pr_number, pr_title, pr_url, score, critical, warnings, suggestions, files_changed, contributors, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(reviewId, repoRow.id, prData.prNumber, prData.title, prUrl, summary.score, summary.critical, summary.warnings, summary.suggestions, prData.files.length, JSON.stringify(prData.contributors), Date.now()).run();
+
+    // Batch insert findings
+    if (findings.length > 0) {
+      await db.batch(findings.map((f) =>
+        db.prepare(`
+          INSERT INTO findings (id, review_id, agent, severity, title, description, file_location)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(f.id, reviewId, f.agent ?? null, f.severity, f.title, f.description, f.fileLocation ?? null)
+      ));
+    }
+
+    console.log(`Persisted review ${reviewId} to D1 (${findings.length} findings)`);
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    if (url.pathname === "/internal/agent-task" && request.method === "POST") {
+      const { agent, text } = await request.json() as { agent: string; text: string };
+      this.broadcast(JSON.stringify({ type: "agent_task", agent, text }));
+      return new Response(null, { status: 204 });
+    }
+    return super.fetch(request);
   }
 
   async onChatMessage(onFinish: unknown, options?: OnChatMessageOptions) {
@@ -73,11 +117,9 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       const { agents, rigor, focus } = config;
       const agentList = agents.join(", ");
 
-      // Broadcast agent queued status for selected agents only
       for (const agentId of agents) {
         this.broadcast(JSON.stringify({ type: "agent_update", agent: agentId, status: "queued" }));
       }
-      // Mark first agent as analyzing
       if (agents.length > 0) {
         this.broadcast(JSON.stringify({ type: "agent_update", agent: agents[0], status: "analyzing" }));
       }
@@ -90,8 +132,9 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
           diff: context.diff,
           agents,
           rigor,
+          orchestratorId: this.name,
           ...(focus ? { focus } : {})
-        });
+        }, { id: crypto.randomUUID() });
       } catch (err) {
         console.error("Failed to start workflow:", err);
         return new Response("Failed to start the review workflow. Please check the server logs.");
@@ -116,8 +159,8 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
         return result.toUIMessageStreamResponse();
       }
 
-      // Store context in DO state for the next turn
-      this.setState({ pendingContext: context, findings: [] });
+      // Store context + prData in DO state for subsequent turns
+      this.setState({ pendingContext: context, prData: context.prData, findings: [] });
 
       const { prData } = context;
       this.broadcast(JSON.stringify({
@@ -127,7 +170,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
           repoName: `${prData.owner}/${prData.repo}`,
           prNumber: prData.prNumber,
           filesChanged: prData.files.length,
-          contributors: 1
+          contributors: prData.contributors
         }
       }));
       this.broadcast(JSON.stringify({ type: "log_entry", message: `PR #${prData.prNumber} loaded — ${prData.files.length} files changed` }));
@@ -158,13 +201,14 @@ Be direct and specific. When suggesting fixes, show before/after code.`
     return result.toUIMessageStreamResponse();
   }
 
-  // Workflow callbacks
   async onWorkflowProgress(
     _workflowName: string,
     _instanceId: string,
     progress: { agent: string; status: string }
   ) {
     console.log("Workflow progress:", progress);
+    const knownAgents = ["logic", "security", "performance", "pattern", "summary"];
+    if (!knownAgents.includes(progress.agent)) return;
     this.broadcast(JSON.stringify({
       type: "agent_update",
       agent: progress.agent,
@@ -180,8 +224,20 @@ Be direct and specific. When suggesting fixes, show before/after code.`
     console.log("Workflow complete:", instanceId, result);
 
     if (result) {
-      // Persist findings in DO state for post-review chat tools
-      this.setState({ pendingContext: null, findings: result.findings });
+      const prData = this.state?.prData ?? null;
+
+      // Persist to D1
+      if (prData) {
+        const prUrl = `https://github.com/${prData.owner}/${prData.repo}/pull/${prData.prNumber}`;
+        try {
+          await this.persistReview(prData, prUrl, result.summary, result.findings);
+        } catch (err) {
+          console.error("Failed to persist review to D1:", err);
+        }
+      }
+
+      // Update DO state: clear pending context, store findings for chat tools
+      this.setState({ pendingContext: null, prData: null, findings: result.findings });
 
       this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
       this.broadcast(JSON.stringify({
