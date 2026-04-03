@@ -7,7 +7,9 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		AI: Ai;
+		DB: D1Database;
 		DEEPSEEK_API_KEY: string;
+		GITHUB_TOKEN: string;
 		ReviewOrchestrator: DurableObjectNamespace<import("./src/server/index").ReviewOrchestrator>;
 		SecurityAgent: DurableObjectNamespace<import("./src/server/index").SecurityAgent>;
 		LogicAgent: DurableObjectNamespace<import("./src/server/index").LogicAgent>;

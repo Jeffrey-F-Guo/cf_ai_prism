@@ -3,93 +3,111 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cf-ai-prism",
-  "main": "src/server/index.ts",
-  "compatibility_date": "2026-03-17",
-  "compatibility_flags": ["nodejs_compat"],
-  "ai": {
-    "binding": "AI",
-    "remote": true
-  },
-  "assets": {
-    "directory": "./public",
-    "not_found_handling": "single-page-application",
-    "run_worker_first": ["/agents/*", "/oauth/*"]
-  },
-  "durable_objects": {
-    "bindings": [
-      {
-        "class_name": "ReviewOrchestrator",
-        "name": "ReviewOrchestrator"
-      },
-      {
-        "class_name": "SecurityAgent",
-        "name": "SecurityAgent"
-      },
-      {
-        "class_name": "LogicAgent",
-        "name": "LogicAgent"
-      },
-      {
-        "class_name": "PerformanceAgent",
-        "name": "PerformanceAgent"
-      },
-      {
-        "class_name": "PatternAgent",
-        "name": "PatternAgent"
-      },
-      {
-        "class_name": "SummaryAgent",
-        "name": "SummaryAgent"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "new_sqlite_classes": [
-        "ReviewOrchestrator",
-        "SecurityAgent",
-        "LogicAgent",
-        "PerformanceAgent",
-        "PatternAgent",
-        "SummaryAgent"
-      ],
-      "tag": "v1"
-    }
-  ],
-  "observability": {
-    "enabled": true
-  },
-  "workflows": [
-    {
-      "name": "review-workflow",
-      "binding": "REVIEW_WORKFLOW",
-      "class_name": "ReviewWorkflow"
-    }
-  ],
-  "upload_source_maps": true
-  /**
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "cf-ai-prism",
+	"main": "src/server/index.ts",
+	"compatibility_date": "2026-03-17",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"ai": {
+		"binding": "AI",
+		"remote": true
+	},
+	"assets": {
+		"directory": "./public",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": [
+			"/agents/*",
+			"/oauth/*",
+			"/api/*"
+		]
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "ReviewOrchestrator",
+				"name": "ReviewOrchestrator"
+			},
+			{
+				"class_name": "SecurityAgent",
+				"name": "SecurityAgent"
+			},
+			{
+				"class_name": "LogicAgent",
+				"name": "LogicAgent"
+			},
+			{
+				"class_name": "PerformanceAgent",
+				"name": "PerformanceAgent"
+			},
+			{
+				"class_name": "PatternAgent",
+				"name": "PatternAgent"
+			},
+			{
+				"class_name": "SummaryAgent",
+				"name": "SummaryAgent"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"new_sqlite_classes": [
+				"ReviewOrchestrator"
+			],
+			"tag": "v1"
+		},
+		{
+			"new_sqlite_classes": [
+				"SecurityAgent",
+				"LogicAgent",
+				"PerformanceAgent",
+				"PatternAgent",
+				"SummaryAgent"
+			],
+			"tag": "v2"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"workflows": [
+		{
+			"name": "review-workflow",
+			"binding": "REVIEW_WORKFLOW",
+			"class_name": "ReviewWorkflow"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "prism-reviews",
+			"database_id": "d2d96525-28bc-47c8-b4df-fda1556f1c81"
+		}
+	],
+	"upload_source_maps": true
+	/**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
-  // "placement": {  "mode": "smart" }
-  /**
+	// "placement": {  "mode": "smart" }
+	/**
    * Bindings
    * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
    * databases, object storage, AI inference, real-time communication and more.
    * https://developers.cloudflare.com/workers/runtime-apis/bindings/
    */
-  /**
+	/**
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
    */
-  // "vars": {  "MY_VARIABLE": "production_value" }
-  /**
+	// "vars": {  "MY_VARIABLE": "production_value" }
+	/**
    * Service Bindings (communicate between multiple Workers)
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
    */
-  // "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
 }
