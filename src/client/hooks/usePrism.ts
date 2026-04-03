@@ -14,29 +14,24 @@ import type {
   SteeringConfig
 } from "../../types/review";
 
-const mockReviewHistory: ReviewHistoryItem[] = [
-  {
-    id: "1",
-    prNumber: 841,
-    prTitle: "Redux Store Refactor",
-    score: 98,
-    timeAgo: "2 hours ago"
-  },
-  {
-    id: "2",
-    prNumber: 840,
-    prTitle: "Fix OAuth Leak",
-    score: 42,
-    timeAgo: "Yesterday"
-  },
-  {
-    id: "3",
-    prNumber: 839,
-    prTitle: "New Landing Grid",
-    score: 86,
-    timeAgo: "2 days ago"
-  }
-];
+function formatTimeAgo(ts: number): string {
+  const seconds = Math.floor((Date.now() - ts) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days !== 1 ? "s" : ""} ago`;
+}
+
+type HistoryRow = {
+  id: string;
+  pr_number: number;
+  pr_title: string;
+  score: number;
+  created_at: number;
+};
 
 // State interface
 export interface PrismState {
@@ -71,6 +66,8 @@ export interface PrismState {
   reviewHistory: ReviewHistoryItem[];
   reviewSummary: ReviewSummary | null;
   logs: LogEntry[];
+  loadHistoryReview: (id: string) => void;
+  deleteReview: (id: string) => void;
 }
 
 export function usePrism(): PrismState {
@@ -82,13 +79,31 @@ export function usePrism(): PrismState {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Review data state
   const [prMetadata, setPRMetadata] = useState<PRMetadata | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
-  const [reviewHistory] = useState<ReviewHistoryItem[]>(mockReviewHistory);
+  const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItem[]>([]);
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+
+  const fetchHistory = useCallback(() => {
+    fetch("/api/reviews?limit=20")
+      .then((r) => r.json())
+      .then((rows: unknown) => (rows as HistoryRow[]))
+      .then((rows) => {
+        setReviewHistory(rows.map((row) => ({
+          id: row.id,
+          prNumber: row.pr_number,
+          prTitle: row.pr_title,
+          score: row.score,
+          timeAgo: formatTimeAgo(row.created_at)
+        })));
+      })
+      .catch(() => {});
+  }, []);
+
+  // Load history on mount
+  useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
   const agent = useAgent<ReviewOrchestrator>({
     agent: "ReviewOrchestrator",
@@ -110,24 +125,39 @@ export function usePrism(): PrismState {
           ]);
         } else if (data.type === "stage_change") {
           setStage(data.stage);
+        } else if (data.type === "agent_task") {
+          setAgents((prev) => prev.map((a) => {
+            if (a.id !== data.agent) return a;
+            // Mark previous active task as completed, append new active one
+            const updatedTasks = (a.tasks ?? []).map((t) =>
+              t.status === "active" ? { ...t, status: "completed" as const } : t
+            );
+            const newTask: import("../../types/review").AgentTask = {
+              id: crypto.randomUUID(),
+              text: data.text,
+              status: "active"
+            };
+            return { ...a, tasks: [...updatedTasks, newTask] };
+          }));
         } else if (data.type === "agent_update") {
           setAgents((prev) => {
             const existing = prev.find((a) => a.id === data.agent);
             if (existing) {
+              // On completion, mark all tasks as completed
+              const updatedTasks = data.status === "completed"
+                ? existing.tasks.map((t) => ({ ...t, status: "completed" as const }))
+                : existing.tasks;
               return prev.map((a) =>
-                a.id === data.agent ? { ...a, status: data.status } : a
+                a.id === data.agent ? { ...a, status: data.status, tasks: updatedTasks } : a
               );
             } else {
               const iconMap: Record<string, string> = {
                 logic: "psychology",
                 security: "security",
                 performance: "speed",
-                pattern: "hub"
+                pattern: "account_tree"
               };
-              const colorMap: Record<
-                string,
-                "error" | "primary" | "secondary"
-              > = {
+              const colorMap: Record<string, "error" | "primary" | "secondary"> = {
                 logic: "primary",
                 security: "error",
                 performance: "secondary",
@@ -158,11 +188,13 @@ export function usePrism(): PrismState {
         } else if (data.type === "review_complete") {
           setFindings(data.findings || []);
           setReviewSummary(data.summary || null);
+          // Refresh history list after a short delay to let D1 write settle
+          setTimeout(fetchHistory, 500);
         }
       } catch {
         // Not JSON, ignore
       }
-    }, [])
+    }, [fetchHistory])
   });
 
   const { messages: rawMessages, sendMessage, clearHistory, stop, status } = useAgentChat({
@@ -171,7 +203,7 @@ export function usePrism(): PrismState {
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  // Filter steering config messages from the chat display
+  // Filter steering config messages from chat display
   const messages = rawMessages.filter((m) => {
     if (m.role !== "user") return true;
     const text = m.parts?.find((p) => p.type === "text") as { text?: string } | undefined;
@@ -209,6 +241,57 @@ export function usePrism(): PrismState {
     sendMessage({ role: "user", parts: [{ type: "text", text: `PRISM_STEERING:${JSON.stringify(config)}` }] });
   }, [sendMessage]);
 
+  const deleteReview = useCallback((id: string) => {
+    // Optimistic removal
+    setReviewHistory((prev) => prev.filter((r) => r.id !== id));
+    fetch(`/api/reviews/${id}`, { method: "DELETE" }).catch(() => {
+      // Restore on failure
+      fetchHistory();
+    });
+  }, [fetchHistory]);
+
+  const loadHistoryReview = useCallback((id: string) => {
+    Promise.all([
+      fetch(`/api/reviews/${id}`).then((r) => r.json()),
+      fetch(`/api/reviews/${id}/findings`).then((r) => r.json())
+    ]).then(([reviewRaw, findingsRaw]) => {
+      const review = reviewRaw as {
+        pr_number: number; pr_title: string; score: number;
+        critical: number; warnings: number; suggestions: number;
+        files_changed: number; owner: string; repo: string;
+        contributors: Array<{ login: string; avatarUrl: string }>;
+      };
+      const dbFindings = findingsRaw as Array<{
+        id: string; agent: string | null; severity: string; title: string;
+        description: string; file_location: string | null;
+      }>;
+
+      setPRMetadata({
+        title: review.pr_title,
+        repoName: `${review.owner}/${review.repo}`,
+        prNumber: review.pr_number,
+        filesChanged: review.files_changed,
+        contributors: review.contributors ?? []
+      });
+      setReviewSummary({
+        score: review.score,
+        critical: review.critical,
+        warnings: review.warnings,
+        suggestions: review.suggestions
+      });
+      setFindings(dbFindings.map((f) => ({
+        id: f.id,
+        severity: f.severity as Finding["severity"],
+        title: f.title,
+        description: f.description,
+        agent: f.agent ?? undefined,
+        fileLocation: f.file_location ?? undefined
+      })));
+      setAgents([]);
+      setStage("completed");
+    }).catch(() => {});
+  }, []);
+
   return {
     connected,
     input,
@@ -228,6 +311,8 @@ export function usePrism(): PrismState {
     isStreaming,
     send,
     submitSteering,
+    loadHistoryReview,
+    deleteReview,
     prMetadata,
     agents,
     findings,

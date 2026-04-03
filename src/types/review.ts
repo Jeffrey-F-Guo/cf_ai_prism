@@ -41,17 +41,21 @@ export interface Finding {
   codeDiff?: FindingCodeBlock[];
 }
 
+export interface PRContributor {
+  login: string;
+  avatarUrl: string;
+}
+
 export interface PRMetadata {
   title: string;
   repoName: string;
   prNumber: number;
   filesChanged: number;
-  contributors: number;
+  contributors: PRContributor[];
 }
 
 export interface ReviewSummary {
   score: number;
-  grade: string;
   critical: number;
   warnings: number;
   suggestions: number;
