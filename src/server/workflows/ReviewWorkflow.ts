@@ -13,6 +13,7 @@ type ReviewParams = {
   agents: Array<"logic" | "security" | "performance" | "pattern">;
   rigor: "quick" | "standard" | "deep";
   focus?: string;
+  orchestratorId?: string;
 };
 
 export class ReviewWorkflow extends AgentWorkflow<
@@ -21,7 +22,7 @@ export class ReviewWorkflow extends AgentWorkflow<
   { agent: string; status: string }
 > {
   async run(event: AgentWorkflowEvent<ReviewParams>, step: AgentWorkflowStep) {
-    const { diff, agents: enabledAgents, focus } = event.payload;
+    const { diff, agents: enabledAgents, focus, orchestratorId } = event.payload;
 
     // Fan out enabled agents in parallel — skipped agents return [] immediately
     const [logicResult, securityResult, performanceResult, patternResult] =
@@ -38,7 +39,7 @@ export class ReviewWorkflow extends AgentWorkflow<
                 };
                 const id = env.LogicAgent.newUniqueId();
                 const agent = env.LogicAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus);
+                const result = await agent.analyzeCode(diff, focus, orchestratorId);
                 await this.reportProgress({ agent: "logic", status: "complete" });
                 this.broadcastToClients({ type: "log_entry", message: `Logic agent: complete (${result.length} findings)` });
                 return [...result] as Finding[];
@@ -58,7 +59,7 @@ export class ReviewWorkflow extends AgentWorkflow<
                 };
                 const id = env.SecurityAgent.newUniqueId();
                 const agent = env.SecurityAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus);
+                const result = await agent.analyzeCode(diff, focus, orchestratorId);
                 await this.reportProgress({ agent: "security", status: "complete" });
                 this.broadcastToClients({ type: "log_entry", message: `Security agent: complete (${result.length} findings)` });
                 return [...result] as Finding[];
@@ -78,7 +79,7 @@ export class ReviewWorkflow extends AgentWorkflow<
                 };
                 const id = env.PerformanceAgent.newUniqueId();
                 const agent = env.PerformanceAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus);
+                const result = await agent.analyzeCode(diff, focus, orchestratorId);
                 await this.reportProgress({ agent: "performance", status: "complete" });
                 this.broadcastToClients({ type: "log_entry", message: `Performance agent: complete (${result.length} findings)` });
                 return [...result] as Finding[];
@@ -98,7 +99,7 @@ export class ReviewWorkflow extends AgentWorkflow<
                 };
                 const id = env.PatternAgent.newUniqueId();
                 const agent = env.PatternAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus);
+                const result = await agent.analyzeCode(diff, focus, orchestratorId);
                 await this.reportProgress({ agent: "pattern", status: "complete" });
                 this.broadcastToClients({ type: "log_entry", message: `Pattern agent: complete (${result.length} findings)` });
                 return [...result] as Finding[];
