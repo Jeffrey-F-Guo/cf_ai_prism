@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-
+import type { PRContributor } from "../../types/review";
 export interface GitHubFile {
   filename: string;
   status: "added" | "modified" | "removed" | "renamed" | "copied";
@@ -11,6 +11,8 @@ export interface GitHubFile {
   contents_url: string;
 }
 
+
+
 export interface PRData {
   owner: string;
   repo: string;
@@ -18,6 +20,7 @@ export interface PRData {
   title: string;
   state: string;
   files: GitHubFile[];
+  contributors: PRContributor[];
 }
 
 export interface PRAnalysisContext {
@@ -42,20 +45,26 @@ export function parsePRUrl(
 export async function fetchPR(
   owner: string,
   repo: string,
-  prNum: number
+  prNum: number,
+  token?: string
 ): Promise<PRData> {
-  const headers = {
+  const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "cf-ai-prism"
   };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const [prResponse, filesResponse] = await Promise.all([
+  const [prResponse, filesResponse, commitsResponse] = await Promise.all([
     fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}`, {
       headers
     }),
     fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}/files?per_page=100`,
+      { headers }
+    ),
+    fetch(
+      `https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}/commits?per_page=100`,
       { headers }
     )
   ]);
@@ -76,8 +85,27 @@ export async function fetchPR(
     title: string;
     state: string;
     diff_url: string;
+    user: { login: string; avatar_url: string };
   };
   const files: GitHubFile[] = await filesResponse.json();
+
+  // Extract unique contributors from commits; fall back to PR author if commits fetch fails
+  let contributors: PRContributor[] = [];
+  if (commitsResponse.ok) {
+    const commits = (await commitsResponse.json()) as Array<{
+      author?: { login: string; avatar_url: string } | null;
+    }>;
+    const seen = new Set<string>();
+    for (const commit of commits) {
+      if (commit.author && !seen.has(commit.author.login)) {
+        seen.add(commit.author.login);
+        contributors.push({ login: commit.author.login, avatarUrl: commit.author.avatar_url });
+      }
+    }
+  }
+  if (contributors.length === 0 && pr.user) {
+    contributors = [{ login: pr.user.login, avatarUrl: pr.user.avatar_url }];
+  }
 
   return {
     owner,
@@ -85,51 +113,55 @@ export async function fetchPR(
     prNumber: prNum,
     title: pr.title,
     state: pr.state,
-    files
+    files,
+    contributors
   };
 }
 
-export const fetchFileContentTool = tool({
-  description:
-    "Fetch the raw text content of a specific file from a GitHub repository. Use this when you need to read the actual code inside a file.",
-  inputSchema: z.object({
-    contentsUrl: z
-      .string()
-      .describe(
-        "The raw download URL or API contents URL of the file to fetch."
-      )
-  }),
-  execute: async ({ contentsUrl }: { contentsUrl: string }) => {
-    try {
-      console.log("fetch tool called");
-      const response = await fetch(contentsUrl, {
-        headers: {
+export function makeFetchFileContentTool(token?: string) {
+  return tool({
+    description:
+      "Fetch the raw text content of a specific file from a GitHub repository. Use this when you need to read the actual code inside a file.",
+    inputSchema: z.object({
+      contentsUrl: z
+        .string()
+        .describe(
+          "The raw download URL or API contents URL of the file to fetch."
+        )
+    }),
+    execute: async ({ contentsUrl }: { contentsUrl: string }) => {
+      try {
+        console.log("fetch tool called");
+        const headers: Record<string, string> = {
           Accept: "application/vnd.github.v3.raw",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "cf-ai-prism"
+        };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const response = await fetch(contentsUrl, { headers });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch file content: ${response.status} ${response.statusText}`
+          );
         }
-      });
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch file content: ${response.status} ${response.statusText}`
-        );
+        return await response.text();
+      } catch (error) {
+        return `Error fetching file: ${error instanceof Error ? error.message : String(error)}`;
       }
-
-      return await response.text();
-    } catch (error) {
-      return `Error fetching file: ${error instanceof Error ? error.message : String(error)}`;
     }
-  }
-});
+  });
+}
 
 // compile all info about the PR for agents to use
 export async function getPRAnalysisContext(
   owner: string,
   repo: string,
-  prNum: number
+  prNum: number,
+  token?: string
 ): Promise<PRAnalysisContext> {
-  const prData = await fetchPR(owner, repo, prNum);
+  const prData = await fetchPR(owner, repo, prNum, token);
 
   let diff = "";
   for (const file of prData.files) {
