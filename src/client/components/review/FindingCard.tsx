@@ -1,4 +1,5 @@
 import type { Finding, FindingSeverity } from "../../../types/review";
+import { DangerousIcon, WarningTriangleIcon, LightbulbIcon, SuccessCircleIcon } from "../shared/Icons";
 
 const severityConfig = {
   critical: {
@@ -7,7 +8,7 @@ const severityConfig = {
     badgeBg: "bg-[#ff6e84]/10",
     badgeText: "text-[#ff6e84]",
     codeText: "text-[#d73357]",
-    icon: "unfold_more",
+    icon: "dangerous",
     iconHover: "group-hover:text-[#ff6e84]"
   },
   warning: {
@@ -16,7 +17,7 @@ const severityConfig = {
     badgeBg: "bg-[#ffb800]/10",
     badgeText: "text-[#ffb800]",
     codeText: "text-[#ffb800]",
-    icon: "chat_bubble_outline",
+    icon: "warning",
     iconHover: "group-hover:text-[#ffb800]"
   },
   suggestion: {
@@ -25,15 +26,15 @@ const severityConfig = {
     badgeBg: "bg-[#bd9dff]/10",
     badgeText: "text-[#bd9dff]",
     codeText: "text-[#bd9dff]",
-    icon: "auto_fix",
+    icon: "lightbulb",
     iconHover: "group-hover:text-[#bd9dff]"
   },
   success: {
-    border: "border-[#ff97b2]",
+    border: "border-[#4cc9a0]",
     bg: "hover:bg-[#1a1919]",
-    badgeBg: "bg-[#ff97b2]/10",
-    badgeText: "text-[#ff97b2]",
-    codeText: "text-[#ff97b2]",
+    badgeBg: "bg-[#4cc9a0]/10",
+    badgeText: "text-[#4cc9a0]",
+    codeText: "text-[#4cc9a0]",
     icon: "check_circle",
     iconHover: ""
   }
@@ -67,19 +68,14 @@ export function FindingCard({ finding }: { finding: Finding }) {
             </span>
           )}
         </div>
-        {finding.severity !== "success" && (
-          <span className={`material-symbols-outlined text-[#adaaaa] ${config.iconHover}`}>
-            {config.icon}
-          </span>
-        )}
-        {finding.severity === "success" && (
-          <span
-            className="material-symbols-outlined text-[#ff97b2]"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            check_circle
-          </span>
-        )}
+        <span className={`text-[#adaaaa] ${config.iconHover} transition-colors`}>
+          {finding.severity === "critical" && <DangerousIcon size={18} />}
+          {finding.severity === "warning" && <WarningTriangleIcon size={18} />}
+          {finding.severity === "suggestion" && <LightbulbIcon size={18} />}
+          {finding.severity === "success" && (
+            <span className="text-[#4cc9a0]"><SuccessCircleIcon size={18} /></span>
+          )}
+        </span>
       </div>
 
       {/* Title */}
@@ -93,9 +89,10 @@ export function FindingCard({ finding }: { finding: Finding }) {
       {/* File location */}
       {finding.fileLocation && (
         <div className="flex items-center gap-1.5 mb-4">
-          <span className="material-symbols-outlined text-[#494847] text-sm">
-            code
-          </span>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="text-[#494847] shrink-0">
+            <path d="M1.5 3.5L5 6.5L1.5 9.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6.5 9.5H11.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+          </svg>
           <span className="font-mono text-xs text-[#777575]">
             {finding.fileLocation}
           </span>

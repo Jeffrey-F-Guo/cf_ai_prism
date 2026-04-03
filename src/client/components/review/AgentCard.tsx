@@ -1,4 +1,5 @@
 import type { Agent } from "../../../types/review";
+import { CheckmarkIcon, AgentIcon, type AgentType } from "../shared/Icons";
 
 const iconColors = {
   error: {
@@ -28,14 +29,9 @@ export function AgentCard({ agent }: { agent: Agent }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center`}
+            className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center ${colors.text}`}
           >
-            <span
-              className={`material-symbols-outlined ${colors.text}`}
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              {agent.icon}
-            </span>
+            <AgentIcon type={agent.id as AgentType} size={20} />
           </div>
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider">
@@ -50,20 +46,33 @@ export function AgentCard({ agent }: { agent: Agent }) {
         {/* Status Badge */}
         <div
           className={`px-2 py-1 rounded flex items-center gap-1.5 ${
-            agent.status === "queued" ? "bg-[#262626]" : "bg-[#bd9dff]/10"
+            agent.status === "queued"
+              ? "bg-[#262626]"
+              : agent.status === "completed"
+                ? "bg-[#4cc9a0]/10"
+                : "bg-[#bd9dff]/10"
           }`}
         >
           {agent.status === "analyzing" && (
             <div className="w-1 h-1 rounded-full bg-[#bd9dff] animate-pulse" />
           )}
+          {agent.status === "completed" && (
+            <span className="text-[#4cc9a0]">
+              <CheckmarkIcon size={9} />
+            </span>
+          )}
           <span
             className={`text-[8px] font-bold tracking-widest ${
-              agent.status === "queued" ? "text-gray-500" : "text-[#bd9dff]"
+              agent.status === "queued"
+                ? "text-[#494847]"
+                : agent.status === "completed"
+                  ? "text-[#4cc9a0]"
+                  : "text-[#bd9dff]"
             }`}
           >
             {agent.status === "analyzing" && "ANALYZING"}
             {agent.status === "queued" && "QUEUED"}
-            {agent.status === "completed" && "COMPLETED"}
+            {agent.status === "completed" && "DONE"}
           </span>
         </div>
       </div>

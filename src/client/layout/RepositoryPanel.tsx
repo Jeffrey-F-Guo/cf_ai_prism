@@ -8,7 +8,7 @@ import type {
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
 import { ActivityLog } from "../components/review/ActivityLog";
-import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
+import { ChevronLeft, ChevronRight, HourglassIcon, SyncIcon } from "../components/shared/Icons";
 
 interface RepositoryPanelProps {
   rightCollapsed: boolean;
@@ -19,6 +19,8 @@ interface RepositoryPanelProps {
   reviewHistory: ReviewHistoryItem[];
   logs: LogEntry[];
   agents: Agent[];
+  onSelectReview: (id: string) => void;
+  onDeleteReview: (id: string) => void;
 }
 
 export function RepositoryPanel({
@@ -29,7 +31,9 @@ export function RepositoryPanel({
   reviewSummary,
   reviewHistory,
   logs,
-  agents
+  agents,
+  onSelectReview,
+  onDeleteReview
 }: RepositoryPanelProps) {
   const totalAgents = agents.length;
   const analyzingCount = agents.filter((a) => a.status === "analyzing").length;
@@ -56,10 +60,8 @@ export function RepositoryPanel({
 
             {stage === "landing" && (
               <div className="bg-[#131313]/50 rounded-xl p-6 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-[#201f1f] rounded-xl flex items-center justify-center mb-4 opacity-40">
-                  <span className="material-symbols-outlined text-2xl text-white">
-                    hourglass_empty
-                  </span>
+                <div className="w-12 h-12 bg-[#201f1f] rounded-xl flex items-center justify-center mb-4 opacity-40 text-white">
+                  <HourglassIcon size={24} />
                 </div>
                 <p className="text-sm font-medium text-white">
                   No reviews in progress
@@ -72,10 +74,8 @@ export function RepositoryPanel({
 
             {stage === "processing" && (
               <div className="bg-[#131313]/50 rounded-xl p-6 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-[#bd9dff]/10 rounded-xl flex items-center justify-center mb-4 relative">
-                  <span className="material-symbols-outlined text-2xl text-[#bd9dff]">
-                    sync
-                  </span>
+                <div className="w-12 h-12 bg-[#bd9dff]/10 rounded-xl flex items-center justify-center mb-4 relative text-[#bd9dff]">
+                  <SyncIcon size={24} />
                   <div className="absolute inset-0 border-2 border-[#bd9dff]/30 rounded-xl animate-ping" />
                 </div>
                 <p className="text-sm font-medium text-[#bd9dff]">
@@ -104,6 +104,8 @@ export function RepositoryPanel({
             <ReviewHistory
               hasRecords={hasHistoryRecords}
               reviews={reviewHistory}
+              onSelect={onSelectReview}
+              onDelete={onDeleteReview}
             />
           </div>
 
@@ -120,7 +122,7 @@ export function RepositoryPanel({
               <div className="h-full bg-[#bd9dff]/40 w-1/3" />
             </div>
             <p className="text-[9px] text-[#adaaaa] leading-relaxed">
-              PRISM AI v2.0.4-stable
+              PRISM AI v1.0.0
             </p>
           </div>
         </>

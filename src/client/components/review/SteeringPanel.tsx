@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { PRMetadata, SteeringConfig } from "../../../types/review";
+import { AgentIcon, CheckmarkIcon, PlayIcon, type AgentType } from "../shared/Icons";
 
-const AGENTS: Array<{ id: SteeringConfig["agents"][number]; label: string; icon: string }> = [
-  { id: "logic", label: "Logic & Edge Cases", icon: "psychology" },
-  { id: "security", label: "Security", icon: "security" },
-  { id: "performance", label: "Performance", icon: "speed" },
-  { id: "pattern", label: "Code Patterns", icon: "hub" }
+const AGENTS: Array<{ id: SteeringConfig["agents"][number]; label: string }> = [
+  { id: "logic", label: "Logic & Edge Cases" },
+  { id: "security", label: "Security" },
+  { id: "performance", label: "Performance" },
+  { id: "pattern", label: "Code Patterns" }
 ];
 
 const RIGOR_OPTIONS: Array<{ value: SteeringConfig["rigor"]; label: string; description: string }> = [
@@ -82,11 +83,13 @@ export function SteeringPanel({ prMetadata, onSubmit }: SteeringPanelProps) {
                       : "border-white/10 bg-white/5 text-white/40"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-lg">{agent.icon}</span>
+                  <span className={active ? "text-[#bd9dff]" : "text-white/30"}>
+                    <AgentIcon type={agent.id as AgentType} size={16} />
+                  </span>
                   <span className="text-sm font-medium">{agent.label}</span>
                   {active && (
-                    <span className="material-symbols-outlined text-sm ml-auto text-[#bd9dff]">
-                      check_circle
+                    <span className="ml-auto text-[#bd9dff]">
+                      <CheckmarkIcon size={10} />
                     </span>
                   )}
                 </button>
@@ -140,7 +143,7 @@ export function SteeringPanel({ prMetadata, onSubmit }: SteeringPanelProps) {
           onClick={handleSubmit}
           className="flex items-center gap-2 px-6 py-3 bg-[#bd9dff] hover:bg-[#d0baff] text-black font-bold text-sm rounded-lg transition-colors"
         >
-          <span className="material-symbols-outlined text-lg">play_arrow</span>
+          <PlayIcon size={16} />
           Start Review
         </button>
       </div>

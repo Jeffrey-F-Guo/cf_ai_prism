@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { ChevronLeft, ChevronRight } from "../components/shared/Icons";
+import { ChevronLeft, ChevronRight, BotIcon, SendIcon, StopIcon } from "../components/shared/Icons";
 
 interface ChatSidebarProps {
   connected: boolean;
@@ -34,7 +34,7 @@ export function ChatSidebar({
     <section
       className={`${leftCollapsed ? "w-12 shrink-0" : "w-[30%] shrink-0"} bg-[#131313] border-r border-[#494847]/10 flex flex-col transition-all duration-300 relative`}
     >
-      {/* Left Collapse Button */}
+      {/* Collapse Toggle */}
       <button
         onClick={() => setLeftCollapsed(!leftCollapsed)}
         className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-6 h-12 bg-[#131313] border border-[#494847]/20 rounded-r-md flex items-center justify-center text-[#777575] hover:text-white hover:bg-[#201f1f] transition-colors"
@@ -43,77 +43,75 @@ export function ChatSidebar({
       </button>
 
       {/* Header */}
-      <div className="p-4 border-b border-[#494847]/10 flex items-center justify-between">
+      <div className="px-4 h-12 border-b border-[#494847]/10 flex items-center justify-between shrink-0">
         {!leftCollapsed && (
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
-            />
-            <span className="text-xs text-[#777575]">
-              {connected ? "Connected" : "Disconnected"}
-            </span>
-          </div>
-        )}
-        {!leftCollapsed && (
-          <button
-            onClick={clearHistory}
-            className="px-3 py-1.5 text-xs font-medium bg-[#14b8a6] text-white rounded-md hover:bg-[#0d9488] transition-colors"
-          >
-            Clear
-          </button>
+          <>
+            <div className="flex items-center gap-2">
+              <span className={`w-1.5 h-1.5 rounded-full transition-colors ${connected ? "bg-[#4cc9a0]" : "bg-[#ff6e84]"}`} />
+              <span className="text-[11px] font-medium text-[#777575]">
+                {connected ? "Connected" : "Disconnected"}
+              </span>
+            </div>
+            <button
+              onClick={clearHistory}
+              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border border-[#494847]/30 text-[#777575] rounded hover:border-[#ff6e84]/40 hover:text-[#ff6e84] transition-all duration-200"
+            >
+              Clear
+            </button>
+          </>
         )}
       </div>
 
       {!leftCollapsed && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {messages.length === 0 && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-2 opacity-40">
-                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#bd9dff]">
-                    Session Log
-                  </p>
-                  <p className="text-sm font-mono italic">
-                    Awaiting deployment...
-                  </p>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full gap-3 opacity-30">
+                <div className="w-10 h-10 rounded-full bg-[#bd9dff]/15 flex items-center justify-center">
+                  <BotIcon size={18} />
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#bd9dff]">Prism</p>
+                  <p className="text-xs text-[#777575] mt-1">Paste a PR URL to begin</p>
                 </div>
               </div>
-            )}
+            ) : (
+              messages.map((message: UIMessage) => {
+                const isUser = message.role === "user";
+                const text = message.parts
+                  .filter((p) => p.type === "text")
+                  .map((p) => (p as { type: "text"; text: string }).text)
+                  .join("");
 
-            {messages.map((message: UIMessage) => {
-              const isUser = message.role === "user";
-              const text = message.parts
-                .filter((p) => p.type === "text")
-                .map((p) => (p as { type: "text"; text: string }).text)
-                .join("");
+                if (!text) return null;
 
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] px-4 py-2.5 rounded-lg text-sm leading-relaxed ${
-                      isUser
-                        ? "bg-[#bd9dff] text-[#3c0089]"
-                        : "bg-[#1a1919] text-white border border-[#494847]/20"
-                    }`}
-                  >
-                    {text}
+                return isUser ? (
+                  <div key={message.id} className="flex justify-end">
+                    <div className="max-w-[82%] px-3.5 py-2.5 bg-[#bd9dff] text-[#3c0089] text-sm leading-relaxed font-medium rounded-xl rounded-br-sm">
+                      {text}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-
+                ) : (
+                  <div key={message.id} className="flex gap-2.5 items-start">
+                    <div className="w-6 h-6 rounded-full bg-[#bd9dff]/15 border border-[#bd9dff]/20 flex items-center justify-center shrink-0 mt-0.5 text-[#bd9dff]">
+                      <BotIcon size={13} />
+                    </div>
+                    <div className="max-w-[82%] px-3.5 py-2.5 bg-[#1a1919] text-white text-sm leading-relaxed border border-[#494847]/20 rounded-xl rounded-tl-sm">
+                      {text}
+                    </div>
+                  </div>
+                );
+              })
+            )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Layer */}
-          <div className="p-4 bg-gradient-to-t from-[#131313] to-transparent">
+          {/* Input */}
+          <div className="p-4 shrink-0">
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-[#bd9dff]/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
-              <div className="relative bg-[#1a1919]/70 backdrop-blur-xl border border-[#494847]/20 rounded-lg flex items-center gap-2">
+              <div className="absolute -inset-0.5 bg-[#bd9dff]/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+              <div className="relative bg-[#1a1919] border border-[#494847]/25 rounded-xl flex items-end gap-2 group-focus-within:border-[#bd9dff]/30 transition-colors">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -124,29 +122,34 @@ export function ChatSidebar({
                       send();
                     }
                   }}
-                  placeholder="Paste a PR URL to deploy your review agents..."
+                  placeholder="Paste a PR URL or ask a question..."
                   disabled={!connected || isStreaming}
                   rows={1}
-                  className="flex-1 bg-transparent text-sm text-white placeholder-[#777575] outline-none resize-none p-3"
+                  className="flex-1 bg-transparent text-sm text-white placeholder-[#494847] outline-none resize-none p-3 leading-relaxed"
                 />
                 {isStreaming ? (
                   <button
                     onClick={stop}
-                    className="mx-2 text-xs text-[#777575] hover:text-white transition-colors shrink-0"
+                    className="mb-3 mr-3 text-[#777575] hover:text-[#ff6e84] transition-colors shrink-0"
+                    title="Stop"
                   >
-                    Stop
+                    <StopIcon size={16} />
                   </button>
                 ) : (
                   <button
                     onClick={send}
                     disabled={!input.trim() || !connected}
-                    className="mx-2 text-[#bd9dff] hover:text-[#8a4cfc] transition-colors disabled:opacity-30 shrink-0"
+                    className="mb-3 mr-3 text-[#bd9dff] hover:text-[#d0baff] transition-colors disabled:opacity-25 shrink-0"
+                    title="Send"
                   >
-                    <span className="material-symbols-outlined">send</span>
+                    <SendIcon size={17} />
                   </button>
                 )}
               </div>
             </div>
+            <p className="text-[10px] text-[#494847] mt-2 text-center">
+              Enter to send · Shift+Enter for newline
+            </p>
           </div>
         </>
       )}

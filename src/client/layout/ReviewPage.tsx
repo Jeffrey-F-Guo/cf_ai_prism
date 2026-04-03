@@ -26,6 +26,8 @@ export function ReviewPage() {
         reviewHistory={prism.reviewHistory}
         logs={prism.logs}
         agents={prism.agents}
+        onSelectReview={prism.loadHistoryReview}
+        onDeleteReview={prism.deleteReview}
       />
     </div>
   );

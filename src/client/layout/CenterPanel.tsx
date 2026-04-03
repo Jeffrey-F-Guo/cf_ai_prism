@@ -6,6 +6,7 @@ import type {
   ReviewSummary,
   SteeringConfig
 } from "../../types/review";
+import { AgentIcon, type AgentType } from "../components/shared/Icons";
 import { AgentCard } from "../components/review/AgentCard";
 import { PRMetadataBar } from "../components/review/PRMetadataBar";
 import { FindingCard } from "../components/review/FindingCard";
@@ -31,13 +32,34 @@ export function CenterPanel({
   if (stage === "landing") {
     return (
       <section className="flex-1 relative flex items-center justify-center px-12 overflow-hidden transition-all duration-300">
-        <div className="text-center z-10">
-          <h1 className="text-6xl md:text-7xl font-black tracking-[-0.06em] text-white mb-4 italic">
-            PRISM
-          </h1>
+        <div className="text-center z-10 space-y-7">
+          <div>
+            <h1 className="text-6xl md:text-7xl font-black tracking-[-0.06em] text-white mb-3 italic">
+              PRISM
+            </h1>
+            <p className="text-[#777575] text-sm font-medium tracking-wide">
+              Parallel AI agents. One clear verdict.
+            </p>
+          </div>
+
+          <div className="flex gap-2 justify-center flex-wrap">
+            {(["logic", "security", "performance", "pattern"] as AgentType[]).map((type) => (
+              <div
+                key={type}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#bd9dff]/15 bg-[#bd9dff]/5 text-[11px] font-medium text-[#bd9dff]/60"
+              >
+                <AgentIcon type={type} size={13} />
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[10px] text-[#494847] font-mono tracking-widest uppercase">
+            Paste a PR URL in the chat to begin →
+          </p>
         </div>
-        <div className="absolute left-0 right-0 h-px bg-[#bd9dff]/20 top-1/4" />
-        <div className="absolute left-0 right-0 h-px bg-[#bd9dff]/10 top-3/4" />
+        <div className="absolute left-0 right-0 h-px bg-[#bd9dff]/15 top-1/4" />
+        <div className="absolute left-0 right-0 h-px bg-[#bd9dff]/8 top-3/4" />
       </section>
     );
   }

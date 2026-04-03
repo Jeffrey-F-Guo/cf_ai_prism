@@ -5,72 +5,63 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ summary }: SummaryCardProps) {
-  const scorePercentage = (summary.score / 100) * 352;
+  const scoreColor = summary.score >= 80 ? "#bd9dff" : summary.score >= 60 ? "#ffb800" : "#ff6e84";
+  const glowColor =
+    summary.score >= 80
+      ? "rgba(189,157,255,0.4)"
+      : summary.score >= 60
+        ? "rgba(255,184,0,0.4)"
+        : "rgba(255,110,132,0.4)";
 
   return (
     <div className="bg-[#131313]/50 rounded-xl p-4 relative overflow-hidden">
-      <div className="absolute -top-8 -right-8 w-24 h-24 bg-[#bd9dff]/20 blur-[40px] rounded-full" />
+      <div
+        className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-[40px]"
+        style={{ background: `${scoreColor}33` }}
+      />
       <div className="relative z-10 text-center flex flex-col items-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa] mb-4">
-          Overall Analysis Score
+          Analysis Score
         </p>
-        <div className="relative flex items-center justify-center mb-4">
-          <svg className="w-32 h-32 transform -rotate-90">
+        <div className="relative flex items-center justify-center mb-4 w-28 h-28">
+          <svg viewBox="0 0 112 112" className="w-28 h-28 -rotate-90">
             <circle
-              className="text-[#262626]"
-              cx="64"
-              cy="64"
+              cx="56" cy="56"
               fill="transparent"
-              r="56"
-              stroke="currentColor"
+              r="48"
+              stroke="#262626"
               strokeWidth="6"
             />
             <circle
-              className="text-[#bd9dff] drop-shadow-[0_0_8px_rgba(189,157,255,0.4)]"
-              cx="64"
-              cy="64"
+              cx="56" cy="56"
               fill="transparent"
-              r="56"
-              stroke="currentColor"
-              strokeDasharray="352"
-              strokeDashoffset={352 - scorePercentage}
+              r="48"
+              stroke={scoreColor}
+              strokeDasharray="301"
+              strokeDashoffset={301 - (summary.score / 100) * 301}
               strokeLinecap="round"
               strokeWidth="6"
+              style={{ filter: `drop-shadow(0 0 6px ${glowColor})` }}
             />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-black text-white tracking-tighter">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+            <span className="text-2xl font-black text-white leading-none tabular-nums">
               {summary.score}
-            </span>
-            <span className="text-[9px] text-[#adaaaa] font-medium">
-              {summary.grade}
             </span>
           </div>
         </div>
-        <div className="flex gap-6 w-full justify-around">
-          <div className="flex flex-col items-center">
-            <span className="text-[#ff6e84] font-bold text-lg">
-              {summary.critical}
-            </span>
-            <span className="text-[9px] uppercase text-[#adaaaa] font-bold">
-              Critical
-            </span>
+        <div className="w-full space-y-1.5 pt-2 border-t border-white/5">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Critical</span>
+            <span className="text-[#ff6e84] font-black text-sm tabular-nums leading-none">{summary.critical}</span>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[#ffb800] font-bold text-lg">
-              {summary.warnings}
-            </span>
-            <span className="text-[9px] uppercase text-[#adaaaa] font-bold">
-              Warnings
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Warnings</span>
+            <span className="text-[#ffb800] font-black text-sm tabular-nums leading-none">{summary.warnings}</span>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[#bd9dff] font-bold text-lg">
-              {summary.suggestions}
-            </span>
-            <span className="text-[9px] uppercase text-[#adaaaa] font-bold">
-              Suggestions
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Suggestions</span>
+            <span className="text-[#bd9dff] font-black text-sm tabular-nums leading-none">{summary.suggestions}</span>
           </div>
         </div>
       </div>
