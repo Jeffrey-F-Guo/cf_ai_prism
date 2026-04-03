@@ -27,7 +27,6 @@ export const summarySchema = z.object({
     })
   ),
   score: z.number().min(0).max(100),
-  grade: z.string(),
   critical: z.number(),
   warnings: z.number(),
   suggestions: z.number(),
