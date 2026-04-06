@@ -117,6 +117,46 @@ export function CommitIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+export function ReviewsIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2.5" y="1.5" width="11" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M5 5.5H11M5 8H11M5 10.5H8.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function StarIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 1.5L9.545 5.763L14 6.09L10.75 8.887L11.805 13.25L8 10.9L4.195 13.25L5.25 8.887L2 6.09L6.455 5.763L8 1.5Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" fill="currentColor" fillOpacity="0.1" />
+    </svg>
+  );
+}
+
+export function TerminalIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M4 6L6.5 8L4 10" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 10H12" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function BugIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 10C10.34 10 9 11.34 9 13V17C9 18.66 10.34 20 12 20C13.66 20 15 18.66 15 17V13C15 11.34 13.66 10 12 10Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" fill="currentColor" fillOpacity="0.07" />
+      <path d="M9 12H5M15 12H19M9 16H5M15 16H19" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M9 10.5L7 8M15 10.5L17 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M9.5 10C9.5 8.07 10.62 6.5 12 6.5C13.38 6.5 14.5 8.07 14.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M10.5 6.5C10.5 5.67 11.17 5 12 5C12.83 5 13.5 5.67 13.5 6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M9 20L8 22M15 20L16 22" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function CheckmarkIcon({ size = 10 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">

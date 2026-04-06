@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BugIcon, ChevronRight, DangerousIcon, WarningTriangleIcon, LightbulbIcon, ReviewsIcon, StarIcon, TerminalIcon } from "../shared/Icons";
 
 interface DashboardData {
   stats: {
@@ -26,7 +27,8 @@ const AGENT_META: Record<string, { label: string; color: string }> = {
 const SEVERITY_META: Record<string, { label: string; color: string }> = {
   critical:   { label: "Critical",   color: "#ff6e84" },
   warning:    { label: "Warning",    color: "#ffb800" },
-  suggestion: { label: "Suggestion", color: "#bd9dff" }
+  suggestion: { label: "Suggestion", color: "#bd9dff" },
+  success:    { label: "Success",    color: "#4cc9a0" }
 };
 
 function getLast7Days(): string[] {
@@ -57,7 +59,7 @@ function buildDonut(severitySplit: Array<{ severity: string; count: number }>) {
   const total = severitySplit.reduce((s, r) => s + r.count, 0);
   if (total === 0) return { segments: [], total: 0 };
   let offset = 0;
-  const order = ["critical", "warning", "suggestion"];
+  const order = ["critical", "warning", "suggestion", "success"];
   const segments = order.map((sev) => {
     const row = severitySplit.find((r) => r.severity === sev);
     const pct = row ? (row.count / total) * 100 : 0;
@@ -110,28 +112,28 @@ export function Dashboard() {
       value: stats.totalReviews.toLocaleString(),
       change: "all time",
       changeType: "neutral" as const,
-      icon: "history_edu"
+      icon: <ReviewsIcon size={18} />
     },
     {
       label: "Avg Score",
       value: stats.totalReviews === 0 ? "—" : stats.avgScore.toFixed(1),
       change: stats.totalReviews === 0 ? "no data yet" : `across ${stats.totalReviews} review${stats.totalReviews !== 1 ? "s" : ""}`,
       changeType: stats.avgScore >= 70 ? "positive" as const : "negative" as const,
-      icon: "star"
+      icon: <StarIcon size={18} />
     },
     {
       label: "Critical Findings",
       value: stats.totalCritical.toLocaleString(),
       change: stats.totalWarnings > 0 ? `${stats.totalWarnings} warnings` : "no warnings",
       changeType: stats.totalCritical === 0 ? "positive" as const : "negative" as const,
-      icon: "warning"
+      icon: <WarningTriangleIcon size={18} />
     },
     {
       label: "Primary Repo",
       value: stats.primaryRepo ? stats.primaryRepo.split("/")[1] : "—",
       change: stats.primaryRepo ? `${stats.primaryRepoCount} review${stats.primaryRepoCount !== 1 ? "s" : ""}` : "no reviews yet",
       changeType: "neutral" as const,
-      icon: "terminal"
+      icon: <TerminalIcon size={18} />
     }
   ];
 
@@ -166,7 +168,7 @@ export function Dashboard() {
           >
             <div className="flex justify-between items-start mb-4">
               <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">{card.label}</p>
-              <span className="material-symbols-outlined text-[#bd9dff] text-xl">{card.icon}</span>
+              <span className="text-[#bd9dff]">{card.icon}</span>
             </div>
             <div className="flex items-baseline gap-3 mb-4">
               <h2 className="text-3xl font-black tracking-tighter">{card.value}</h2>
@@ -330,7 +332,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="mt-8 space-y-3">
-            {["critical", "warning", "suggestion"].map((sev) => {
+            {["critical", "warning", "suggestion", "success"].map((sev) => {
               const row = data?.severitySplit.find((r) => r.severity === sev);
               const count = row?.count ?? 0;
               const pct = totalFindings > 0 ? `${((count / totalFindings) * 100).toFixed(0)}%` : "0%";
@@ -358,7 +360,7 @@ export function Dashboard() {
           </div>
           {topIssues.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-center">
-              <span className="material-symbols-outlined text-3xl text-[#adaaaa]/30 mb-2">bug_report</span>
+              <span className="text-[#adaaaa]/30 mb-2"><BugIcon size={32} /></span>
               <p className="text-sm text-[#adaaaa]">No findings yet</p>
               <p className="text-xs text-[#777575] mt-1">Complete a review to see recurring patterns</p>
             </div>
@@ -372,11 +374,8 @@ export function Dashboard() {
                   <div key={i} className="group flex items-center justify-between p-4 rounded-lg bg-[#201f1f]/30 hover:bg-[#201f1f]/60 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded flex items-center justify-center ${isCritical ? "bg-[#ff6e84]/10" : isWarning ? "bg-[#ffb800]/10" : "bg-[#bd9dff]/10"}`}>
-                        <span
-                          className={`material-symbols-outlined text-lg ${isCritical ? "text-[#ff6e84]" : isWarning ? "text-[#ffb800]" : "text-[#bd9dff]"}`}
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          {isCritical ? "security" : isWarning ? "cycle" : "network_check"}
+                        <span className={isCritical ? "text-[#ff6e84]" : isWarning ? "text-[#ffb800]" : "text-[#bd9dff]"}>
+                          {isCritical ? <DangerousIcon size={18} /> : isWarning ? <WarningTriangleIcon size={18} /> : <LightbulbIcon size={18} />}
                         </span>
                       </div>
                       <div>
@@ -392,7 +391,7 @@ export function Dashboard() {
                         <p className="text-sm font-bold">{issue.count}</p>
                         <p className="text-[9px] uppercase tracking-widest text-[#777575]">Hits</p>
                       </div>
-                      <span className="material-symbols-outlined text-[#777575] group-hover:text-white transition-colors">chevron_right</span>
+                      <span className="text-[#777575] group-hover:text-white transition-colors"><ChevronRight /></span>
                     </div>
                   </div>
                 );
