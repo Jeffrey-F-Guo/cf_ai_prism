@@ -157,6 +157,14 @@ export function BugIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+export function ReplyIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 5L5 1V4C10 4 12 7 12 12C10.5 9.5 8 8.5 5 8.5V11.5L1 8" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function CheckmarkIcon({ size = 10 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">

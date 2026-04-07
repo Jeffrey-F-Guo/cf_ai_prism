@@ -58,6 +58,9 @@ export interface PrismState {
   isStreaming: boolean;
   send: () => void;
   submitSteering: (config: SteeringConfig) => void;
+  quotedFinding: Finding | null;
+  quoteFinding: (finding: Finding) => void;
+  clearQuotedFinding: () => void;
 
   // Review Data
   prMetadata: PRMetadata | null;
@@ -85,6 +88,7 @@ export function usePrism(): PrismState {
   const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItem[]>([]);
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [quotedFinding, setQuotedFinding] = useState<Finding | null>(null);
 
   const fetchHistory = useCallback(() => {
     fetch("/api/reviews?limit=20")
@@ -203,12 +207,28 @@ export function usePrism(): PrismState {
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  // Filter steering config messages from chat display
-  const messages = rawMessages.filter((m) => {
-    if (m.role !== "user") return true;
-    const text = m.parts?.find((p) => p.type === "text") as { text?: string } | undefined;
-    return !text?.text?.startsWith("PRISM_STEERING:");
-  });
+  // Filter/transform internal protocol messages from chat display
+  const messages = rawMessages
+    .filter((m) => {
+      if (m.role !== "user") return true;
+      const text = m.parts?.find((p) => p.type === "text") as { text?: string } | undefined;
+      return !text?.text?.startsWith("PRISM_STEERING:");
+    }) // filter out steering config messages from chat display
+    .map((m) => {
+      if (m.role !== "user") return m;
+      const textPart = m.parts?.find((p) => p.type === "text") as { type: "text"; text?: string } | undefined;
+      if (!textPart?.text?.startsWith("PRISM_FIND:")) return m;
+      // Replace structured prefix with human-readable label
+      const nl = textPart.text.indexOf("\n");
+      const userQuestion = nl >= 0 ? textPart.text.slice(nl + 1) : ""; // flag to check if user provided a question
+      try {
+        const payload = JSON.parse(textPart.text.slice("PRISM_FIND:".length, nl >= 0 ? nl : textPart.text.length)) as { id: string; title: string };
+        const label = `Regarding finding #${payload.id} "${payload.title}": ${userQuestion ? `\n${userQuestion}` : ""}`;
+        return { ...m, parts: m.parts.map((p) => p.type === "text" ? { ...p, text: label } : p) };
+      } catch {
+        return { ...m, parts: m.parts.map((p) => p.type === "text" ? { ...p, text: userQuestion } : p) };
+      }
+    });
 
   useEffect(() => {
     if (stage === "landing") {
@@ -217,6 +237,7 @@ export function usePrism(): PrismState {
       setFindings([]);
       setReviewSummary(null);
       setLogs([]);
+      setQuotedFinding(null);
     }
   }, [stage]);
 
@@ -230,12 +251,34 @@ export function usePrism(): PrismState {
     }
   }, [isStreaming]);
 
+  const quoteFinding = useCallback((finding: Finding) => {
+    setQuotedFinding(finding);
+    setLeftCollapsed(false);
+    textareaRef.current?.focus();
+  }, []);
+
+  const clearQuotedFinding = useCallback(() => setQuotedFinding(null), []);
+
   const send = useCallback(() => {
     const text = input.trim();
     if (!text || isStreaming) return;
     setInput("");
-    sendMessage({ role: "user", parts: [{ type: "text", text }] });
-  }, [input, isStreaming, sendMessage]);
+    let messageText = text;
+    if (quotedFinding) {
+      const [owner, repo] = (prMetadata?.repoName ?? "/").split("/");
+      const payload = {
+        id: quotedFinding.id,
+        title: quotedFinding.title,
+        severity: quotedFinding.severity,
+        description: quotedFinding.description,
+        ...(quotedFinding.fileLocation ? { fileLocation: quotedFinding.fileLocation } : {}),
+        ...(owner && repo ? { owner, repo } : {})
+      };
+      messageText = `PRISM_FIND:${JSON.stringify(payload)}\n${text}`;
+      setQuotedFinding(null);
+    }
+    sendMessage({ role: "user", parts: [{ type: "text", text: messageText }] });
+  }, [input, isStreaming, sendMessage, quotedFinding, prMetadata]);
 
   const submitSteering = useCallback((config: SteeringConfig) => {
     sendMessage({ role: "user", parts: [{ type: "text", text: `PRISM_STEERING:${JSON.stringify(config)}` }] });
@@ -311,6 +354,9 @@ export function usePrism(): PrismState {
     isStreaming,
     send,
     submitSteering,
+    quotedFinding,
+    quoteFinding,
+    clearQuotedFinding,
     loadHistoryReview,
     deleteReview,
     prMetadata,

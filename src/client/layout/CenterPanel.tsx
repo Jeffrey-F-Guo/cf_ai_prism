@@ -19,6 +19,7 @@ interface CenterPanelProps {
   findings: Finding[];
   reviewSummary: ReviewSummary | null;
   submitSteering: (config: SteeringConfig) => void;
+  onReplyToFinding: (finding: Finding) => void;
 }
 
 export function CenterPanel({
@@ -27,7 +28,8 @@ export function CenterPanel({
   agents,
   findings,
   reviewSummary,
-  submitSteering
+  submitSteering,
+  onReplyToFinding
 }: CenterPanelProps) {
   if (stage === "landing") {
     return (
@@ -110,7 +112,7 @@ export function CenterPanel({
             return (priority[a.severity] ?? 4) - (priority[b.severity] ?? 4);
           })
           .map((finding) => (
-            <FindingCard key={finding.id} finding={finding} />
+            <FindingCard key={finding.id} finding={finding} onReply={() => onReplyToFinding(finding)} />
           ))}
       </div>
     </section>

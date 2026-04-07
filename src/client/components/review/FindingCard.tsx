@@ -1,5 +1,5 @@
 import type { Finding, FindingSeverity } from "../../../types/review";
-import { DangerousIcon, WarningTriangleIcon, LightbulbIcon, SuccessCircleIcon } from "../shared/Icons";
+import { DangerousIcon, WarningTriangleIcon, LightbulbIcon, SuccessCircleIcon, ReplyIcon } from "../shared/Icons";
 
 const severityConfig = {
   critical: {
@@ -47,7 +47,7 @@ const severityLabels: Record<FindingSeverity, string> = {
   success: "Success"
 };
 
-export function FindingCard({ finding }: { finding: Finding }) {
+export function FindingCard({ finding, onReply }: { finding: Finding; onReply: () => void }) {
   const config = severityConfig[finding.severity];
 
   return (
@@ -118,6 +118,15 @@ export function FindingCard({ finding }: { finding: Finding }) {
           ))}
         </div>
       )}
+
+      {/* Reply button */}
+      <button
+        onClick={onReply}
+        className="absolute bottom-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-[#494847] hover:text-[#bd9dff] border border-transparent hover:border-[#bd9dff]/30 opacity-0 group-hover:opacity-100 transition-all duration-200"
+      >
+        <ReplyIcon size={12} />
+        Ask
+      </button>
     </div>
   );
 }

@@ -1,5 +1,125 @@
+import React from "react";
 import type { UIMessage } from "ai";
+import type { Finding } from "../../types/review";
+import { Streamdown } from "streamdown";
 import { ChevronLeft, ChevronRight, BotIcon, SendIcon, StopIcon } from "../components/shared/Icons";
+
+function GithubDiff({ lines }: { lines: string[] }) {
+  let oldLine = 1;
+  let newLine = 1;
+
+  // Extract starting line numbers from first @@ hunk header if present
+  const firstHunk = lines.find((l) => l.startsWith("@@"));
+  if (firstHunk) {
+    const m = firstHunk.match(/@@ -(\d+).*\+(\d+)/);
+    if (m) { oldLine = parseInt(m[1]); newLine = parseInt(m[2]); }
+  }
+
+  return (
+    <div className="rounded-lg overflow-hidden border border-[#494847]/20 my-3 font-mono text-xs leading-6 select-text">
+      {lines.map((line, i) => {
+        // Hunk header
+        if (line.startsWith("@@")) {
+          const m = line.match(/@@ -(\d+).*\+(\d+)/);
+          if (m) { oldLine = parseInt(m[1]); newLine = parseInt(m[2]); }
+          return (
+            <div key={i} className="flex bg-[#1a1919] text-[#494847] px-3 py-px">
+              <span className="w-8 shrink-0 text-right pr-4 select-none">{" "}</span>
+              <span className="w-8 shrink-0 text-right pr-4 select-none">{" "}</span>
+              <span className="text-[#494847]">{line}</span>
+            </div>
+          );
+        }
+
+        if (line.startsWith("-")) {
+          const n = oldLine++;
+          return (
+            <div key={i} className="flex bg-[#ff6e84]/10 border-l-2 border-[#ff6e84]/50">
+              <span className="w-8 shrink-0 text-right pr-3 text-[#ff6e84]/50 select-none">{n}</span>
+              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none">{" "}</span>
+              <span className="w-4 shrink-0 text-[#ff6e84] select-none">-</span>
+              <span className="text-[#ff6e84] flex-1 pr-3">{line.slice(1)}</span>
+            </div>
+          );
+        }
+
+        if (line.startsWith("+")) {
+          const n = newLine++;
+          return (
+            <div key={i} className="flex bg-[#4cc9a0]/10 border-l-2 border-[#4cc9a0]/50">
+              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none">{" "}</span>
+              <span className="w-8 shrink-0 text-right pr-3 text-[#4cc9a0]/50 select-none">{n}</span>
+              <span className="w-4 shrink-0 text-[#4cc9a0] select-none">+</span>
+              <span className="text-[#4cc9a0] flex-1 pr-3">{line.slice(1)}</span>
+            </div>
+          );
+        }
+
+        // Unchanged context line
+        const o = oldLine++; const n = newLine++;
+        return (
+          <div key={i} className="flex bg-[#0e0e0e] border-l-2 border-transparent">
+            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">{o}</span>
+            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">{n}</span>
+            <span className="w-4 shrink-0 select-none">{" "}</span>
+            <span className="text-[#777575] flex-1 pr-3">{line.startsWith(" ") ? line.slice(1) : line}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const markdownComponents = {
+  pre: ({ children }: { children?: React.ReactNode }) => {
+    const codeEl = React.Children.toArray(children).find(
+      (c): c is React.ReactElement<{ className?: string; children?: React.ReactNode }> =>
+        React.isValidElement(c)
+    );
+    // hast-util-to-jsx-runtime passes children as string | string[] — normalize to string
+    const raw = codeEl?.props?.children;
+    const text = typeof raw === "string"
+      ? raw
+      : Array.isArray(raw)
+        ? raw.map((c) => (typeof c === "string" ? c : "")).join("")
+        : "";
+    const lang = (codeEl?.props?.className ?? "").replace("language-", "");
+    const lines = text
+      .split("\n")
+      .filter((l, i, arr) => !(i === arr.length - 1 && l === ""));
+    const isDiff =
+      lang === "diff" ||
+      (lines.length > 1 && lines.some((l) => l.startsWith("+") || l.startsWith("-")));
+
+    if (isDiff) return <GithubDiff lines={lines} />;
+
+    return (
+      <pre className="bg-[#0e0e0e] rounded-lg border border-[#494847]/20 p-4 my-3 overflow-x-auto text-xs font-mono text-[#adaaaa] leading-relaxed">
+        {children}
+      </pre>
+    );
+  },
+  code: ({ className, children }: { className?: string; children?: React.ReactNode }) => (
+    <code className={`${className ?? ""} font-mono text-[#bd9dff] bg-[#bd9dff]/10 px-1 py-px rounded text-xs`}>
+      {children}
+    </code>
+  ),
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li className="text-[#adaaaa]">{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-white">{children}</strong>
+  ),
+};
 
 interface ChatSidebarProps {
   connected: boolean;
@@ -14,6 +134,8 @@ interface ChatSidebarProps {
   stop: () => void;
   isStreaming: boolean;
   send: () => void;
+  quotedFinding: Finding | null;
+  clearQuotedFinding: () => void;
 }
 
 export function ChatSidebar({
@@ -28,7 +150,9 @@ export function ChatSidebar({
   clearHistory,
   stop,
   isStreaming,
-  send
+  send,
+  quotedFinding,
+  clearQuotedFinding
 }: ChatSidebarProps) {
   return (
     <section
@@ -98,7 +222,9 @@ export function ChatSidebar({
                       <BotIcon size={13} />
                     </div>
                     <div className="max-w-[82%] px-3.5 py-2.5 bg-[#1a1919] text-white text-sm leading-relaxed border border-[#494847]/20 rounded-xl rounded-tl-sm">
-                      {text}
+                      <Streamdown components={markdownComponents} isAnimating={isStreaming}>
+                        {text}
+                      </Streamdown>
                     </div>
                   </div>
                 );
@@ -106,6 +232,27 @@ export function ChatSidebar({
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Quoted finding preview */}
+          {quotedFinding && (
+            <div className="mx-4 mb-1 flex items-start gap-2 px-3 py-2 rounded-lg bg-[#bd9dff]/8 border border-[#bd9dff]/20">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#bd9dff] mb-0.5">
+                  Replying to finding #{quotedFinding.id}
+                </p>
+                <p className="text-xs text-[#adaaaa] truncate">{quotedFinding.title}</p>
+                {quotedFinding.fileLocation && (
+                  <p className="font-mono text-[10px] text-[#494847] truncate mt-0.5">{quotedFinding.fileLocation}</p>
+                )}
+              </div>
+              <button
+                onClick={clearQuotedFinding}
+                className="text-[#494847] hover:text-white shrink-0 mt-0.5 text-xs leading-none"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Input */}
           <div className="p-4 shrink-0">
