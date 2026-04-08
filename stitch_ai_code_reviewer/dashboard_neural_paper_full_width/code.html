@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ReviewerAI Dashboard</title>
+<!-- Google Fonts: Noto Serif & Public Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fbf9f6",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-secondary-fixed-variant": "#42407a",
+                        "surface-container": "#efeeeb",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf9f6",
+                        "on-surface": "#1b1c1a",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary": "#5a5893",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-variant": "#e4e2df",
+                        "surface-dim": "#dbdad7",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "surface-container-low": "#f5f3f0",
+                        "surface-tint": "#5148d7",
+                        "secondary-fixed": "#e3dfff",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1b1c1a",
+                        "surface": "#fbf9f6",
+                        "on-tertiary-container": "#ffb393",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c3c0ff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb597",
+                        "on-secondary-fixed": "#16124c",
+                        "tertiary-fixed": "#ffdbcd",
+                        "secondary-container": "#c0bdff",
+                        "inverse-surface": "#30312f",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#8f3400",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-surface-variant": "#464554",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "primary-container": "#4338ca",
+                        "tertiary": "#692400",
+                        "surface-container-high": "#eae8e5",
+                        "primary": "#2a14b4",
+                        "outline-variant": "#c7c4d7",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e4e2df",
+                        "on-secondary-container": "#4c4a84",
+                        "on-primary-fixed": "#100069",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#e3dfff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#372abf"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #fbf9f6; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .noto-serif { font-family: 'Noto Serif', serif; }
+        .public-sans { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="text-on-surface bg-surface min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#fbf9f6]/70 backdrop-blur-xl shadow-sm flex justify-between items-center px-12 h-20">
+<div class="font-serif text-2xl font-semibold text-indigo-900">ReviewerAI</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-serif text-lg tracking-tight text-indigo-700 font-semibold border-b-2 border-indigo-600 transition-colors" href="#">Dashboard</a>
+<a class="font-serif text-lg tracking-tight text-stone-500 hover:text-indigo-600 transition-colors" href="#">Active Analysis</a>
+<a class="font-serif text-lg tracking-tight text-stone-500 hover:text-indigo-600 transition-colors" href="#">History</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:block relative group">
+<input class="bg-surface-container-low border-none rounded-full px-6 py-2 text-sm w-64 focus:ring-1 focus:ring-primary/20 transition-all" placeholder="Search records..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-stone-500">
+<span class="material-symbols-outlined cursor-pointer hover:text-indigo-600">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-indigo-600">help_outline</span>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-surface-container-highest">
+<img alt="Lead Developer Profile" class="object-cover h-full w-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNeRcdktooIyqiqYo7Ma9GjE6ibZxjeJEG6TuXOkHGR14Qe0-gPQrFB_S9HBj6Ut4jyA_sgOLSCYAuoMZrTlp1oTX7aVUP2CAPhQS9GkkoqYKxNDFAsR5MRdMCa0YxWQU30sIdGHdlMN2aFIQq9RaXBpYsNtowiqKWPCHckZ3QV99ffexgJqZNUzh72lsILxg5x3ArLQSmKy8FAol6A4SRWhHPCwjs9bGse94g_rta5-c3jCPvifE85sSnWLiFBzydgptbPx6036a-"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas - Updated to remove sidebar padding and take full width -->
+<main class="pt-20 min-h-screen">
+<div class="max-w-7xl mx-auto px-8 py-12">
+<!-- Header Section -->
+<header class="mb-12 flex justify-between items-end">
+<div>
+<h1 class="font-serif text-5xl text-on-surface mb-2 tracking-tight">Executive Dashboard</h1>
+<p class="text-on-surface-variant font-light text-lg">Detailed analysis for Project Alpha system integrity.</p>
+</div>
+<div class="hidden md:flex items-center gap-3 bg-surface-container-low px-4 py-2 rounded-xl border border-outline-variant/20">
+<div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">memory</span>
+</div>
+<div>
+<h3 class="font-serif text-sm text-indigo-900 leading-tight">Project Alpha</h3>
+<p class="text-[8px] uppercase tracking-widest text-stone-500">main</p>
+</div>
+</div>
+</header>
+<!-- KPI Row: Asymmetric Tonal Layout -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/15 flex flex-col gap-1">
+<span class="text-on-surface-variant text-sm font-medium">Total reviews</span>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-semibold text-on-surface">156</span>
+<span class="text-emerald-600 text-sm font-bold flex items-center">+12%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/15 flex flex-col gap-1">
+<span class="text-on-surface-variant text-sm font-medium">Avg Score</span>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-semibold text-on-surface">84.2</span>
+<span class="text-stone-400 text-sm">/ 100</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/15 flex flex-col gap-1">
+<span class="text-on-surface-variant text-sm font-medium">Total Warnings</span>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-semibold text-on-surface">312</span>
+<span class="text-error text-sm font-bold flex items-center">-8%</span>
+</div>
+</div>
+<div class="bg-primary text-white p-8 rounded-2xl shadow-lg shadow-primary/20 flex flex-col gap-1">
+<span class="text-white/70 text-sm font-medium">Critical Issues</span>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-semibold">42</span>
+<span class="material-symbols-outlined text-white/50" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-12 gap-8 mb-12">
+<!-- Score Trend Chart (Weekly) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low p-8 rounded-2xl">
+<div class="flex justify-between items-center mb-10">
+<h2 class="font-serif text-2xl text-on-surface">Score Trend Chart</h2>
+<div class="flex gap-4">
+<button class="px-4 py-1.5 bg-surface-container-lowest rounded-full text-xs font-semibold shadow-sm">Weekly</button>
+<button class="px-4 py-1.5 text-stone-500 text-xs font-medium">Monthly</button>
+</div>
+</div>
+<!-- Visual Placeholder for Line Chart -->
+<div class="h-64 relative flex items-end justify-between gap-2">
+<div class="absolute inset-0 border-b border-stone-200"></div>
+<div class="w-full h-32 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">72</div>
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-40 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-36 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-48 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-56 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-52 bg-indigo-500/10 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-1 bg-indigo-500"></div>
+</div>
+<div class="w-full h-60 bg-indigo-600/20 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full h-2 bg-primary"></div>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] text-stone-400 uppercase tracking-widest px-2">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+<!-- Finding Distribution (Circle chart) -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/15 flex flex-col justify-between">
+<h2 class="font-serif text-2xl text-on-surface mb-8">Finding Distribution</h2>
+<div class="relative w-48 h-48 mx-auto mb-8">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-emerald-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="15, 100" stroke-width="3"></path>
+<path class="text-orange-400" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="25, 100" stroke-dashoffset="-15" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="30, 100" stroke-dashoffset="-40" stroke-width="3"></path>
+<path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="30, 100" stroke-dashoffset="-70" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-bold">1.2k</span>
+<span class="text-[10px] text-stone-400 uppercase">Total Items</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-error"></div>Critical</div>
+<span class="font-semibold">42</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-orange-400"></div>Warning</div>
+<span class="font-semibold">312</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary"></div>Suggestion</div>
+<span class="font-semibold">480</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div>Success</div>
+<span class="font-semibold">366</span>
+</div>
+</div>
+</div>
+<!-- Agent Performance (Horizontal Bars) -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-low p-8 rounded-2xl">
+<h2 class="font-serif text-2xl text-on-surface mb-8">Agent Performance</h2>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between text-sm mb-2 font-medium">
+<span>Security</span>
+<span>94%</span>
+</div>
+<div class="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[94%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2 font-medium">
+<span>Logic</span>
+<span>82%</span>
+</div>
+<div class="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[82%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2 font-medium">
+<span>Performance</span>
+<span>76%</span>
+</div>
+<div class="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[76%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2 font-medium">
+<span>Pattern Compliance</span>
+<span>88%</span>
+</div>
+<div class="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[88%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Recurring Issues (List) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/15">
+<h2 class="font-serif text-2xl text-on-surface mb-8">Top Recurring Issues</h2>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-surface rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-error/10 text-error flex items-center justify-center font-bold">01</div>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">Memory Leak in Async Pools</h4>
+<p class="text-xs text-stone-400">Security &amp; Performance</p>
+</div>
+</div>
+<span class="bg-surface-container px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant">12 Occurrences</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-orange-400/10 text-orange-600 flex items-center justify-center font-bold">02</div>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">Unvalidated Input in Webhook Handler</h4>
+<p class="text-xs text-stone-400">Security</p>
+</div>
+</div>
+<span class="bg-surface-container px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant">8 Occurrences</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface rounded-xl">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">03</div>
+<div>
+<h4 class="text-sm font-semibold text-on-surface">Deprioritized Log Writing</h4>
+<p class="text-xs text-stone-400">Infrastructure</p>
+</div>
+</div>
+<span class="bg-surface-container px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant">5 Occurrences</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Review History (Table) -->
+<section class="mt-16">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-serif text-3xl text-on-surface">Recent Review History</h2>
+<p class="text-stone-500 text-sm">Detailed logs of the last 5 analysis cycles.</p>
+</div>
+<button class="text-primary font-semibold text-sm hover:underline">View All Records</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-separate border-spacing-y-4">
+<thead class="text-[10px] uppercase tracking-widest text-stone-400">
+<tr>
+<th class="px-6 pb-2">PR Title</th>
+<th class="px-6 pb-2">Repository</th>
+<th class="px-6 pb-2">Score</th>
+<th class="px-6 pb-2">Date</th>
+<th class="px-6 pb-2">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface-container-lowest group hover:shadow-md transition-shadow">
+<td class="px-6 py-5 rounded-l-2xl font-medium text-on-surface">Auth-module optimization #291</td>
+<td class="px-6 py-5 text-on-surface-variant">core-engine</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="font-semibold text-emerald-600">92</span>
+</div>
+</td>
+<td class="px-6 py-5 text-on-surface-variant">Oct 24, 2023</td>
+<td class="px-6 py-5 rounded-r-2xl">
+<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase">Passed</span>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest group hover:shadow-md transition-shadow">
+<td class="px-6 py-5 rounded-l-2xl font-medium text-on-surface">Hotfix: API Gateway Timeout</td>
+<td class="px-6 py-5 text-on-surface-variant">cloud-gate</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-semibold text-error">48</span>
+</div>
+</td>
+<td class="px-6 py-5 text-on-surface-variant">Oct 23, 2023</td>
+<td class="px-6 py-5 rounded-r-2xl">
+<span class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-[10px] font-bold uppercase">Failed</span>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest group hover:shadow-md transition-shadow">
+<td class="px-6 py-5 rounded-l-2xl font-medium text-on-surface">Feature: Billing Dashboard</td>
+<td class="px-6 py-5 text-on-surface-variant">web-portal</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-orange-400"></div>
+<span class="font-semibold text-orange-600">76</span>
+</div>
+</td>
+<td class="px-6 py-5 text-on-surface-variant">Oct 21, 2023</td>
+<td class="px-6 py-5 rounded-r-2xl">
+<span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase">Warning</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- Curator's Tray (Bottom Bar) -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#fbf9f6]/70 backdrop-blur-2xl px-8 py-4 rounded-full shadow-2xl flex items-center gap-8 border border-outline-variant/20 z-50">
+<div class="flex items-center gap-3 border-r border-stone-200 pr-8">
+<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">System Optimal</span>
+</div>
+<div class="flex gap-6 items-center">
+<button class="flex items-center gap-2 bg-primary px-4 py-2 rounded-full text-white text-xs font-semibold hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Analysis
+            </button>
+<div class="w-px h-6 bg-stone-200 mx-1"></div>
+<button class="p-2 text-stone-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+<button class="p-2 text-stone-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+<button class="p-2 text-stone-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</body></html>

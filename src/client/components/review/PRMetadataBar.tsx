@@ -1,12 +1,9 @@
 import { useState } from "react";
 import type { PRMetadata } from "../../../types/review";
-import { CommitIcon } from "../shared/Icons";
 
-// GitHub-style default identicon used when no avatar URL is available or image fails
 function DefaultAvatar({ size = 28 }: { size?: number }) {
   const teal = "#6cc3d5";
   const bg = "#f0f0f0";
-  // 5×5 symmetric grid — matches GitHub identicon aesthetic
   const cells = [
     [1, 0, 0, 0, 1],
     [0, 1, 0, 1, 0],
@@ -32,7 +29,7 @@ function AvatarImg({ login, avatarUrl, size, style }: { login: string; avatarUrl
     return (
       <div
         title={login}
-        className="rounded-full border border-[#0e0e0e] shadow-sm overflow-hidden shrink-0"
+        className="rounded-full border border-[#c7c4d7]/30 overflow-hidden shrink-0"
         style={{ width: size, height: size, ...style }}
       >
         <DefaultAvatar size={size} />
@@ -45,70 +42,54 @@ function AvatarImg({ login, avatarUrl, size, style }: { login: string; avatarUrl
       alt={login}
       title={login}
       onError={() => setErrored(true)}
-      className="rounded-full border border-[#0e0e0e] shadow-sm object-cover shrink-0"
+      className="rounded-full border border-[#c7c4d7]/30 object-cover shrink-0"
       style={{ width: size, height: size, ...style }}
     />
   );
 }
 
-function ContributorAvatars({ contributors }: { contributors: PRMetadata["contributors"] }) {
-  if (contributors.length === 0) {
-    return (
-      <div className="rounded-full border border-[#0e0e0e] shadow-sm overflow-hidden shrink-0" style={{ width: 28, height: 28 }}>
-        <DefaultAvatar size={28} />
-      </div>
-    );
-  }
+export function PRMetadataBar({ title, repoName, prNumber, filesChanged, contributors }: PRMetadata) {
   const shown = contributors.slice(0, 3);
-  return (
-    <div className="flex items-center">
-      {shown.map((c, i) => (
-        <AvatarImg
-          key={c.login}
-          login={c.login}
-          avatarUrl={c.avatarUrl}
-          size={28}
-          style={{ marginLeft: i > 0 ? -6 : 0, zIndex: shown.length - i }}
-        />
-      ))}
-    </div>
-  );
-}
 
-export function PRMetadataBar({
-  title,
-  repoName,
-  prNumber,
-  filesChanged,
-  contributors
-}: PRMetadata) {
   return (
-    <div className="bg-[#201f1f]/40 backdrop-blur-xl p-4 rounded-xl border border-white/5 flex items-center justify-between shadow-2xl">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 bg-[#262626] rounded-lg flex items-center justify-center text-[#777575] shrink-0">
-          <CommitIcon size={16} />
+    <div className="bg-white rounded-2xl p-6 shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center justify-between border border-[#c7c4d7]/15">
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="w-10 h-10 bg-[#efeeeb] rounded-xl flex items-center justify-center shrink-0">
+          <span className="material-symbols-outlined text-[#2a14b4] text-lg">merge</span>
         </div>
         <div className="min-w-0">
-          <h1 className="text-sm font-bold tracking-tight truncate max-w-[280px]">{title}</h1>
-          <p className="text-[10px] font-mono text-[#777575] mt-0.5">
-            {repoName} · <span className="text-[#adaaaa]">PR #{prNumber}</span>
+          <h2 className="text-sm font-bold tracking-tight text-[#1b1c1a] truncate max-w-[320px]">{title}</h2>
+          <p className="text-[10px] font-mono text-[#777586] mt-0.5">
+            {repoName} · <span className="text-[#464554]">PR #{prNumber}</span>
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-5 shrink-0">
+      <div className="flex items-center gap-6 shrink-0">
         <div className="text-right">
-          <span className="block text-[10px] font-mono text-[#777575] uppercase tracking-wider">
-            Files
-          </span>
-          <span className="text-sm font-bold text-[#bd9dff]">
-            {filesChanged}
-          </span>
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-[#464554]">Files</span>
+          <span className="text-sm font-bold text-[#2a14b4]">{filesChanged}</span>
         </div>
-        <div className="h-8 w-px bg-white/10" />
+        <div className="w-px h-8 bg-[#c7c4d7]/30" />
         <div className="flex items-center gap-2">
-          <ContributorAvatars contributors={contributors} />
-          <span className="text-[10px] font-mono text-[#777575]">
+          <div className="flex items-center">
+            {shown.length > 0 ? (
+              shown.map((c, i) => (
+                <AvatarImg
+                  key={c.login}
+                  login={c.login}
+                  avatarUrl={c.avatarUrl}
+                  size={28}
+                  style={{ marginLeft: i > 0 ? -6 : 0, zIndex: shown.length - i }}
+                />
+              ))
+            ) : (
+              <div className="rounded-full border border-[#c7c4d7]/30 overflow-hidden" style={{ width: 28, height: 28 }}>
+                <DefaultAvatar size={28} />
+              </div>
+            )}
+          </div>
+          <span className="text-[10px] font-mono text-[#777586]">
             {contributors.length || "—"} author{contributors.length !== 1 ? "s" : ""}
           </span>
         </div>

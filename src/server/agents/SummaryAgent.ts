@@ -35,19 +35,24 @@ Your jobs:
 2. Preserve all unique findings exactly as-is — do not rewrite titles, descriptions, or severity
 3. Preserve the "agent" and "fileLocation" fields from each original finding
 4. Assign sequential numeric IDs ("1", "2", ...) to the final deduplicated list
-5. Compute score (0–100): start at 100, subtract 20 per critical, 5 per warning, 1 per suggestion (floor at 0)
+5. Compute score (0–100): start at 100, subtract 10 per critical, 3 per warning, 1 per suggestion (floor at 0)
 6. Count criticals, warnings, suggestions in the final list`,
       prompt: `Deduplicate and score these findings from 4 agents:\n\n${JSON.stringify(allFindings, null, 2)}`
     });
 
-    const findings: Finding[] = output.findings.map((f, i) => ({
-      id: f.id || String(i + 1),
-      severity: f.severity,
-      title: f.title,
-      description: f.description,
-      ...(f.agent ? { agent: f.agent } : {}),
-      ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
-    }));
+    const severityPriority: Record<string, number> = { critical: 0, warning: 1, suggestion: 2, success: 3 };
+
+    const findings: Finding[] = output.findings
+      .map((f) => ({
+        id: "",
+        severity: f.severity,
+        title: f.title,
+        description: f.description,
+        ...(f.agent ? { agent: f.agent } : {}),
+        ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
+      }))
+      .sort((a, b) => (severityPriority[a.severity] ?? 4) - (severityPriority[b.severity] ?? 4))
+      .map((f, i) => ({ ...f, id: String(i + 1) }));
 
     const summary: ReviewSummary = {
       score: output.score,

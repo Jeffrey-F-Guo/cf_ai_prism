@@ -1,35 +1,31 @@
-import { usePrism } from "../hooks/usePrism";
+import type { PrismState } from "../hooks/usePrism";
 import { ChatSidebar } from "./ChatSidebar";
 import { CenterPanel } from "./CenterPanel";
-import { RepositoryPanel } from "./RepositoryPanel";
 
-export function ReviewPage() {
-  const prism = usePrism();
+interface ReviewPageProps {
+  prism: PrismState;
+}
+
+export function ReviewPage({ prism }: ReviewPageProps) {
+  const isCompleted = prism.stage === "completed";
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-[#0e0e0e] text-white overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      <ChatSidebar {...prism} />
+    <div className={`flex mt-20 bg-[#fbf9f6] ${isCompleted ? "h-[calc(100vh-5rem)] overflow-hidden" : "min-h-[calc(100vh-5rem)] flex-col"}`}>
       <CenterPanel
         stage={prism.stage}
+        input={prism.input}
+        setInput={prism.setInput}
+        send={prism.send}
+        isStreaming={prism.isStreaming}
         prMetadata={prism.prMetadata}
         agents={prism.agents}
         findings={prism.findings}
         reviewSummary={prism.reviewSummary}
         submitSteering={prism.submitSteering}
         onReplyToFinding={prism.quoteFinding}
-      />
-      <RepositoryPanel
-        rightCollapsed={prism.rightCollapsed}
-        setRightCollapsed={prism.setRightCollapsed}
-        stage={prism.stage}
-        hasHistoryRecords={prism.hasHistoryRecords}
-        reviewSummary={prism.reviewSummary}
-        reviewHistory={prism.reviewHistory}
         logs={prism.logs}
-        agents={prism.agents}
-        onSelectReview={prism.loadHistoryReview}
-        onDeleteReview={prism.deleteReview}
       />
+      {isCompleted && <ChatSidebar {...prism} />}
     </div>
   );
 }

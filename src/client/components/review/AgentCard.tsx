@@ -1,119 +1,112 @@
 import type { Agent } from "../../../types/review";
-import { CheckmarkIcon, AgentIcon, type AgentType } from "../shared/Icons";
 
-const iconColors = {
-  error: {
-    bg: "bg-[#a70138]/20",
-    text: "text-[#ff6e84]"
+const agentConfig: Record<string, {
+  iconBg: string;
+  iconText: string;
+  icon: string;
+  description: string;
+}> = {
+  security: {
+    iconBg: "bg-[#ffdad6]/30",
+    iconText: "text-[#ba1a1a]",
+    icon: "verified_user",
+    description: "Reviewing encryption protocols and dependency vulnerabilities."
   },
-  primary: {
-    bg: "bg-[#bd9dff]/20",
-    text: "text-[#bd9dff]"
+  performance: {
+    iconBg: "bg-[#c0bdff]/20",
+    iconText: "text-[#5a5893]",
+    icon: "speed",
+    description: "Benchmarking execution speed and resource allocation curves."
   },
-  secondary: {
-    bg: "bg-[#612b8f]/20",
-    text: "text-[#c38bf5]"
+  logic: {
+    iconBg: "bg-[#e3dfff]/30",
+    iconText: "text-[#2a14b4]",
+    icon: "account_tree",
+    description: "Mapping branch complexity and redundant condition states."
+  },
+  pattern: {
+    iconBg: "bg-[#eae8e5]",
+    iconText: "text-[#777586]",
+    icon: "grain",
+    description: "Semantic similarity check and architectural alignment."
   }
 };
 
 export function AgentCard({ agent }: { agent: Agent }) {
-  const colors = iconColors[agent.iconColor];
+  const config = agentConfig[agent.id] ?? agentConfig.pattern;
+  const isQueued = agent.status === "queued";
+  const isCompleted = agent.status === "completed";
+  const isActive = agent.status === "analyzing";
+
+  const activeTasks = agent.tasks.filter((t) => t.status === "active");
+  const lastTask = activeTasks[activeTasks.length - 1] ?? agent.tasks[agent.tasks.length - 1];
 
   return (
-    <div
-      className={`bg-[#1a1919] p-5 rounded-xl border border-white/5 relative group overflow-hidden ${
-        agent.status === "analyzing" ? "pulsing-border" : ""
-      }`}
-    >
+    <div className={`bg-white rounded-[24px] p-6 shadow-sm border border-[#c7c4d7]/10 hover:shadow-md transition-shadow ${isQueued ? "opacity-60" : ""}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center ${colors.text}`}
-          >
-            <AgentIcon type={agent.id as AgentType} size={20} />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider">
-              {agent.title}
-            </h3>
-            <p className="text-[10px] text-[#adaaaa] font-mono">
-              {agent.subtitle}
-            </p>
-          </div>
-        </div>
-
-        {/* Status Badge */}
-        <div
-          className={`px-2 py-1 rounded flex items-center gap-1.5 ${
-            agent.status === "queued"
-              ? "bg-[#262626]"
-              : agent.status === "completed"
-                ? "bg-[#4cc9a0]/10"
-                : "bg-[#bd9dff]/10"
-          }`}
-        >
-          {agent.status === "analyzing" && (
-            <div className="w-1 h-1 rounded-full bg-[#bd9dff] animate-pulse" />
-          )}
-          {agent.status === "completed" && (
-            <span className="text-[#4cc9a0]">
-              <CheckmarkIcon size={9} />
-            </span>
-          )}
+      <div className="flex justify-between items-start mb-8">
+        <div className={`p-3 ${config.iconBg} rounded-xl ${config.iconText}`}>
           <span
-            className={`text-[8px] font-bold tracking-widest ${
-              agent.status === "queued"
-                ? "text-[#494847]"
-                : agent.status === "completed"
-                  ? "text-[#4cc9a0]"
-                  : "text-[#bd9dff]"
-            }`}
+            className="material-symbols-outlined text-xl"
+            style={{ fontVariationSettings: "'FILL' 1" }}
           >
-            {agent.status === "analyzing" && "ANALYZING"}
-            {agent.status === "queued" && "QUEUED"}
-            {agent.status === "completed" && "DONE"}
+            {config.icon}
           </span>
         </div>
+
+        {/* Status badge */}
+        {isQueued && (
+          <span className="px-3 py-1 bg-[#efeeeb] text-[10px] font-bold rounded-full text-[#777586]">
+            Queued
+          </span>
+        )}
+        {isActive && (
+          <span className="px-3 py-1 bg-[#eae8e5] text-[10px] font-bold rounded-full text-[#464554]">
+            {agent.status === "analyzing" ? "Analyzing" : "Scanning"}
+          </span>
+        )}
+        {isCompleted && (
+          <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">
+            Completed
+          </span>
+        )}
+        {false /* error state not in AgentStatus */ && (
+          <span className="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-[10px] font-bold rounded-full">
+            Error
+          </span>
+        )}
       </div>
 
-      {/* Tasks */}
-      <div className="space-y-2 font-mono text-[11px]">
-        {agent.tasks.map((task, index) => (
-          <div
-            key={task.id}
-            className={`flex gap-2 ${
-              task.status === "completed"
-                ? "opacity-30"
-                : task.status === "pending"
-                  ? "opacity-60"
-                  : ""
-            }`}
-          >
-            <span className={`${colors.text} opacity-50`}>
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <span
-              className={`${
-                task.status === "active"
-                  ? "text-white stream-text"
-                  : "text-[#adaaaa]"
-              }`}
-            >
-              {task.text}
-            </span>
+      {/* Title + description */}
+      <h3 className="text-xl font-headline mb-2 text-[#1b1c1a]">{agent.title}</h3>
+      <p className="text-sm text-[#464554] mb-6 leading-snug">{config.description}</p>
+
+      {/* Task stream */}
+      <div className="pt-4 border-t border-[#eae8e5]">
+        {isQueued && (
+          <div className="flex items-center gap-2 text-[11px] font-medium text-[#777586]">
+            <span>Waiting for prior agent...</span>
           </div>
-        ))}
+        )}
+        {isActive && lastTask && (
+          <div className="flex items-center gap-2 text-[11px] font-medium text-[#2a14b4]">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#2a14b4] animate-pulse shrink-0" />
+            <span className="truncate">{lastTask.text}</span>
+          </div>
+        )}
+        {isCompleted && (
+          <div className="flex items-center gap-2 text-[11px] font-medium text-[#464554]">
+            <span className="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+            <span>Analysis complete</span>
+          </div>
+        )}
+        {false /* error state not in AgentStatus */ && (
+          <div className="flex items-center gap-2 text-[11px] font-medium text-[#ba1a1a]">
+            <span className="material-symbols-outlined text-sm">error</span>
+            <span>Failed</span>
+          </div>
+        )}
       </div>
-
-      {/* Queued State */}
-      {agent.status === "queued" && agent.tasks.length > 0 && (
-        <div className="h-8 bg-[#0e0e0e]/50 rounded flex items-center justify-center mt-4">
-          <span className="text-[10px] font-mono text-gray-600 italic">
-            {agent.tasks[0]?.text || "Waiting..."}
-          </span>
-        </div>
-      )}
     </div>
   );
 }
