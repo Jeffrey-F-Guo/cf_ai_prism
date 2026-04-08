@@ -55,7 +55,7 @@ export function PRMetadataBar({ title, repoName, prNumber, filesChanged, contrib
     <div className="bg-white rounded-2xl p-6 shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center justify-between border border-[#c7c4d7]/15">
       <div className="flex items-center gap-4 min-w-0">
         <div className="w-10 h-10 bg-[#efeeeb] rounded-xl flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-[#2a14b4] text-lg">pull_request_closed</span>
+          <span className="material-symbols-outlined text-[#2a14b4] text-lg">merge</span>
         </div>
         <div className="min-w-0">
           <h2 className="text-sm font-bold tracking-tight text-[#1b1c1a] truncate max-w-[320px]">{title}</h2>

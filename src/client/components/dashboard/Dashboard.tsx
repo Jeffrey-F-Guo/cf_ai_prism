@@ -61,6 +61,7 @@ const AGENT_META: Record<string, { label: string; pct: number }> = {
 interface DashboardProps {
   reviewHistory: ReviewHistoryItem[];
   onSelectReview: (id: string) => void;
+  onViewAllReviews: () => void;
 }
 
 function scoreColor(score: number): string {
@@ -76,7 +77,7 @@ function scoreDotColor(score: number): string {
 }
 
 
-export function Dashboard({ reviewHistory, onSelectReview }: DashboardProps) {
+export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: DashboardProps) {
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
@@ -302,6 +303,15 @@ export function Dashboard({ reviewHistory, onSelectReview }: DashboardProps) {
               <h2 className="font-headline text-3xl text-[#1b1c1a]">Recent Review History</h2>
               <p className="text-[#777586] text-sm mt-1">Click any row to load the full review.</p>
             </div>
+            {reviewHistory.length > 5 && (
+              <button
+                onClick={onViewAllReviews}
+                className="flex items-center gap-1.5 text-[#2a14b4] font-semibold text-sm group"
+              >
+                <span className="hover:underline">View all reviews</span>
+                <span className="material-symbols-outlined text-base no-underline">arrow_forward</span>
+              </button>
+            )}
           </div>
 
           {reviewHistory.length === 0 ? (
@@ -323,7 +333,7 @@ export function Dashboard({ reviewHistory, onSelectReview }: DashboardProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {reviewHistory.map((item) => {
+                  {reviewHistory.slice(0, 5).map((item) => {
                     const score = item.score ?? 0;
                     return (
                       <tr

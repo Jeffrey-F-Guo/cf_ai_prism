@@ -1,9 +1,18 @@
+export type AppTab = "review" | "dashboard" | "history";
+
 interface NavProps {
-  activeTab: "review" | "dashboard";
-  onTabChange: (tab: "review" | "dashboard") => void;
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
+  onNewReview: () => void;
 }
 
-export function Nav({ activeTab, onTabChange }: NavProps) {
+const TAB_LABEL: Record<AppTab, string> = {
+  dashboard: "Dashboard",
+  history: "Review History",
+  review: "Active Analysis",
+};
+
+export function Nav({ activeTab, onTabChange, onNewReview }: NavProps) {
   return (
     <header className="fixed top-0 w-full z-50 h-20 flex items-center justify-between px-12 bg-[#fbf9f6]/70 backdrop-blur-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)]">
       <div className="flex items-center gap-12">
@@ -12,7 +21,7 @@ export function Nav({ activeTab, onTabChange }: NavProps) {
         </span>
 
         <nav className="hidden md:flex items-center gap-8">
-          {(["dashboard", "review"] as const).map((tab) => (
+          {(["review", "history", "dashboard"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => onTabChange(tab)}
@@ -22,7 +31,7 @@ export function Nav({ activeTab, onTabChange }: NavProps) {
                   : "text-[#464554] font-medium hover:text-[#4338ca]"
               }`}
             >
-              {tab === "review" ? "Active Analysis" : "Dashboard"}
+              {TAB_LABEL[tab]}
             </button>
           ))}
         </nav>
@@ -30,8 +39,9 @@ export function Nav({ activeTab, onTabChange }: NavProps) {
 
       <div className="flex items-center gap-6">
         <button
-          onClick={() => onTabChange("review")}
+          onClick={onNewReview}
           className="bg-gradient-to-br from-[#2a14b4] to-[#4338ca] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm"
+          type="button"
         >
           New Review
         </button>

@@ -90,11 +90,18 @@ const markdownComponents = {
       </pre>
     );
   },
-  code: ({ className, children }: { className?: string; children?: React.ReactNode }) => (
-    <code className={`${className ?? ""} font-mono text-[#2a14b4] bg-[#2a14b4]/8 px-1 py-px rounded text-xs`}>
-      {children}
-    </code>
-  ),
+  code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+    // Inside a fenced code block — inherit text-stone-300 from the <pre>, don't apply inline styling
+    if (className?.includes("language-")) {
+      return <code className={className}>{children}</code>;
+    }
+    // Inline code on a light background
+    return (
+      <code className="font-mono text-[#2a14b4] bg-[#2a14b4]/8 px-1 py-px rounded text-xs">
+        {children}
+      </code>
+    );
+  },
   p: ({ children }: { children?: React.ReactNode }) => (
     <p className="mb-2 last:mb-0 leading-relaxed text-[#1b1c1a]">{children}</p>
   ),
@@ -142,7 +149,7 @@ export function ChatSidebar({
   clearQuotedFinding
 }: ChatSidebarProps) {
   return (
-    <aside className="w-[400px] shrink-0 border-l border-[#efeeeb] bg-[#f5f3f0]/50 sticky top-20 h-[calc(100vh-5rem)] flex flex-col">
+    <aside className="w-[400px] shrink-0 border-l border-[#efeeeb] bg-[#f5f3f0]/50 h-full flex flex-col">
       {/* Header */}
       <div className="p-6 pb-4 flex items-center justify-between border-b border-[#efeeeb] shrink-0">
         <div>

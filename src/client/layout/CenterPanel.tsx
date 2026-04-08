@@ -275,14 +275,9 @@ export function CenterPanel({
         <section className="space-y-6">
           <h2 className="font-headline text-2xl font-semibold border-b border-[#e4e2df] pb-4 text-[#1b1c1a]">Detected Findings</h2>
           <div className="space-y-6">
-            {[...findings]
-              .sort((a, b) => {
-                const priority: Record<string, number> = { critical: 0, warning: 1, suggestion: 2, success: 3 };
-                return (priority[a.severity] ?? 4) - (priority[b.severity] ?? 4);
-              })
-              .map((finding) => (
-                <FindingCard key={finding.id} finding={finding} onReply={() => onReplyToFinding(finding)} />
-              ))}
+            {findings.map((finding) => (
+              <FindingCard key={finding.id} finding={finding} onReply={() => onReplyToFinding(finding)} />
+            ))}
           </div>
         </section>
       </div>
