@@ -120,9 +120,6 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       for (const agentId of agents) {
         this.broadcast(JSON.stringify({ type: "agent_update", agent: agentId, status: "queued" }));
       }
-      if (agents.length > 0) {
-        this.broadcast(JSON.stringify({ type: "agent_update", agent: agents[0], status: "analyzing" }));
-      }
 
       this.broadcast(JSON.stringify({ type: "stage_change", stage: "processing" }));
       this.broadcast(JSON.stringify({ type: "log_entry", message: `Deploying ${agents.length} agent${agents.length !== 1 ? "s" : ""} (${rigor} analysis)...` }));
@@ -154,6 +151,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
           model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
           system: `You are Prism. Tell the user there was an error fetching the PR.`,
           messages: [{ role: "user", content: `Failed to fetch PR from ${url}` }],
+          maxOutputTokens: 512,
           abortSignal: options?.abortSignal
         });
         return result.toUIMessageStreamResponse();
@@ -180,9 +178,68 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       return new Response(`PR loaded: "${prData.title}" (#${prData.prNumber}, ${prData.files.length} files). Configure your review below.`);
     }
 
+    // Route: Quoted finding — structured payload from "Ask" button, no tool calls needed
+    if (text.startsWith("PRISM_FIND:")) {
+      const nl = text.indexOf("\n");
+      let payload: {
+        id: string; title: string; severity: string; description: string;
+        fileLocation?: string; owner?: string; repo?: string;
+      } | null = null;
+      try {
+        payload = JSON.parse(text.slice("PRISM_FIND:".length, nl >= 0 ? nl : text.length));
+      } catch { /* malformed, fall through to default route */ }
+
+      if (payload) {
+        let fileContent: string | null = null;
+        if (payload.owner && payload.repo && payload.fileLocation) {
+          const filePath = payload.fileLocation.split(":")[0];
+          const apiUrl = `https://api.github.com/repos/${payload.owner}/${payload.repo}/contents/${filePath}`;
+          try {
+            const headers: Record<string, string> = {
+              Accept: "application/vnd.github.v3.raw",
+              "User-Agent": "cf-ai-prism"
+            };
+            if (this.env.GITHUB_TOKEN) headers["Authorization"] = `Bearer ${this.env.GITHUB_TOKEN}`;
+            const res = await fetch(apiUrl, { headers });
+            if (res.ok) fileContent = await res.text();
+          } catch { /* proceed without file content */ }
+        }
+
+        const context = [
+          `Finding #${payload.id} — ${payload.title}`,
+          `Severity: ${payload.severity}`,
+          payload.fileLocation ? `File: ${payload.fileLocation}` : null,
+          `Description: ${payload.description}`,
+          fileContent ? `\nCurrent file content:\n\`\`\`\n${fileContent.slice(0, 4000)}\n\`\`\`` : null
+        ].filter(Boolean).join("\n");
+
+        const result = streamText({
+          model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
+          system: `You are Prism, an AI code review assistant. The user is asking about a specific finding.
+
+${context}
+
+Provide a concrete, actionable fix. Be specific and minimal — only change what is needed to address the issue.
+
+Always format code changes as a unified diff code block (language: diff):
+- Lines to remove start with -
+- Lines to add start with +
+- Unchanged context lines start with a space
+Never use separate Before/After code blocks.`,
+          messages: pruneMessages({
+            messages: await convertToModelMessages(this.messages),
+            toolCalls: "before-last-2-messages"
+          }),
+          maxOutputTokens: 4096,
+          abortSignal: options?.abortSignal
+        });
+        return result.toUIMessageStreamResponse();
+      }
+    }
+
     // Route: Default — conversational chat with review context
     const findings = this.state?.findings ?? [];
-    const tools = makeOrchestratorTools(findings);
+    const tools = makeOrchestratorTools(findings, this.env.GITHUB_TOKEN, this.state?.prData ?? null);
 
     const result = streamText({
       model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
@@ -196,6 +253,7 @@ Be direct and specific. When suggesting fixes, show before/after code.`
         toolCalls: "before-last-2-messages"
       }),
       tools,
+      maxOutputTokens: 4096,
       abortSignal: options?.abortSignal
     });
     return result.toUIMessageStreamResponse();
@@ -236,8 +294,8 @@ Be direct and specific. When suggesting fixes, show before/after code.`
         }
       }
 
-      // Update DO state: clear pending context, store findings for chat tools
-      this.setState({ pendingContext: null, prData: null, findings: result.findings });
+      // Update DO state: clear pending context + diff, keep prData for contentsUrl lookup
+      this.setState({ pendingContext: null, prData: this.state?.prData ?? null, findings: result.findings });
 
       this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
       this.broadcast(JSON.stringify({
