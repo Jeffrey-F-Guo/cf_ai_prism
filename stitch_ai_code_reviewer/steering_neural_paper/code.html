@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prism | Steering &amp; Configuration</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Noto Serif & Public Sans -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Public+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e4e2df",
+                    "inverse-primary": "#c3c0ff",
+                    "on-primary-container": "#c1beff",
+                    "on-surface-variant": "#464554",
+                    "on-tertiary-fixed": "#360f00",
+                    "surface-container": "#efeeeb",
+                    "surface-container-highest": "#e4e2df",
+                    "inverse-on-surface": "#f2f0ed",
+                    "on-tertiary-container": "#ffb393",
+                    "secondary-fixed-dim": "#c3c0ff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#e3dfff",
+                    "outline": "#777586",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-surface": "#1b1c1a",
+                    "on-secondary-container": "#4c4a84",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#4338ca",
+                    "secondary": "#5a5893",
+                    "tertiary-container": "#8f3400",
+                    "inverse-surface": "#30312f",
+                    "tertiary-fixed-dim": "#ffb597",
+                    "surface-container-low": "#f5f3f0",
+                    "surface-bright": "#fbf9f6",
+                    "on-secondary-fixed": "#16124c",
+                    "on-secondary-fixed-variant": "#42407a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1b1c1a",
+                    "primary": "#2a14b4",
+                    "on-primary-fixed": "#100069",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#c0bdff",
+                    "surface-dim": "#dbdad7",
+                    "outline-variant": "#c7c4d7",
+                    "background": "#fbf9f6",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "on-primary-fixed-variant": "#372abf",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "surface": "#fbf9f6",
+                    "tertiary-fixed": "#ffdbcd",
+                    "tertiary": "#692400",
+                    "surface-container-high": "#eae8e5",
+                    "surface-tint": "#5148d7",
+                    "primary-fixed": "#e3dfff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif"],
+                    "body": ["Public Sans"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .serif-display { font-family: 'Noto Serif', serif; }
+        .sans-interface { font-family: 'Public Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface sans-interface selection:bg-primary-fixed antialiased">
+<!-- Top Navigation (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-[#fbf9f6]/70 backdrop-blur-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] font-['Noto_Serif'] antialiased">
+<div class="max-w-7xl mx-auto px-12 py-6 flex justify-between items-center">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-bold tracking-tight text-[#1b1c1a]">Prism</span>
+<div class="hidden md:flex gap-8">
+<a class="text-[#4338ca] border-b-2 border-[#4338ca] pb-1 cursor-pointer active:opacity-70 transition-colors duration-300" href="#">Dashboard</a>
+<a class="text-[#464554] font-medium hover:text-[#4338ca] transition-colors duration-300 cursor-pointer active:opacity-70" href="#">History</a>
+<a class="text-[#464554] font-medium hover:text-[#4338ca] transition-colors duration-300 cursor-pointer active:opacity-70" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-full font-semibold shadow-sm hover:opacity-90 transition-all">
+                    New Review
+                </button>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto">
+<!-- Header Section (Editorial Layout) -->
+<header class="mb-16">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<span class="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">Review Configuration</span>
+<h1 class="text-5xl md:text-6xl serif-display font-bold text-on-surface leading-tight">
+                        Configure <span class="italic text-primary">Intelligence</span> Steering
+                    </h1>
+<p class="mt-6 text-on-surface-variant text-lg leading-relaxed max-w-xl">
+                        Define the scope, depth, and specific focus of the PR analysis. Prism leverages specialized neural agents to curate feedback for your specific architecture.
+                    </p>
+</div>
+<div class="hidden md:block">
+<div class="bg-surface-container-low p-6 rounded-2xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">info</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-on-surface">System Status</p>
+<p class="text-xs text-on-surface-variant">Neural Paper Engines Active</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- PR Metadata Card (Asymmetric Left) -->
+<div class="lg:col-span-5 space-y-8">
+<section class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)]">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-xl font-bold serif-display">PR Metadata</h2>
+<span class="bg-primary/5 text-primary text-xs font-bold px-3 py-1 rounded-full">#PR-2409</span>
+</div>
+<div class="space-y-6">
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Pull Request Title</label>
+<p class="text-lg font-medium text-on-surface">Refactor: Implementing Unified Auth Strategy for Edge Handlers</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Files Modified</label>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">description</span>
+<span class="text-on-surface font-semibold">14 Files</span>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">Primary Author</label>
+<div class="flex items-center gap-2">
+<img alt="Author avatar" class="w-6 h-6 rounded-full" data-alt="close-up portrait of a developer in a soft lit modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9OOqP0Qc-2BTKz4lrxBmiP5XFkweZdROdq_5N6LYKsmf2GME2jFPyGP_6B5kSqCWcqkr1_hefs2Y1w4WBKvDr3I0MU0tBZnjWSr_wGsBds1m55PX7vmNtpSGOV42K_ssEHMt9DAIXSGGSk1brZRqIlAlYN5uin8vPyvgb4XTgKhwpYKrDxbch4yyFAblyEhtt3iG-GxfIPnX43GIvX0J3D9LPzEVX2IetcnkauudYaMBWau531z93b_yvgI4l5Aq70p8Wk3tDZ1lQ"/>
+<span class="text-on-surface font-semibold">Elena Vance</span>
+</div>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant/15">
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-4 block">Affected Ecosystems</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-medium">Security</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-medium">Middleware</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-medium">Auth</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Optional Focus Area -->
+<section class="bg-surface-container-low rounded-3xl p-8">
+<h2 class="text-xl font-bold serif-display mb-6">Optional Focus Area</h2>
+<textarea class="w-full h-32 bg-surface-container-lowest border-none rounded-2xl p-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-1 focus:ring-primary/40 transition-all outline-none" placeholder="e.g. 'Pay special attention to the JWT rotation logic in the middleware...'"></textarea>
+</section>
+</div>
+<!-- Configuration Section (Curated Right) -->
+<div class="lg:col-span-7 space-y-12">
+<!-- AI Agents Toggleable -->
+<section>
+<div class="flex items-end justify-between mb-8">
+<h2 class="text-2xl font-bold serif-display">AI Specialist Agents</h2>
+<span class="text-xs text-on-surface-variant italic">Select agents to steer the review</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Agent Card: Security -->
+<div class="group cursor-pointer bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-primary/20 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-[#e3dfff] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">shield</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<h3 class="text-lg font-bold">Security</h3>
+<p class="text-sm text-on-surface-variant mt-1">Vulnerability scanning, injection checks, and secret exposure analysis.</p>
+</div>
+<!-- Agent Card: Performance -->
+<div class="group cursor-pointer bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-primary/20 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-[#e3dfff] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">speed</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<h3 class="text-lg font-bold">Performance</h3>
+<p class="text-sm text-on-surface-variant mt-1">Efficiency scoring, memory leak detection, and latency optimization.</p>
+</div>
+<!-- Agent Card: Logic -->
+<div class="group cursor-pointer bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-primary/20 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-[#e3dfff] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">psychology</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<h3 class="text-lg font-bold">Logic</h3>
+<p class="text-sm text-on-surface-variant mt-1">Edge case analysis, business logic validation, and unit test coverage.</p>
+</div>
+<!-- Agent Card: Pattern -->
+<div class="group cursor-pointer bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-transparent hover:border-primary/20 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-[#e3dfff] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">grid_view</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<h3 class="text-lg font-bold">Pattern</h3>
+<p class="text-sm text-on-surface-variant mt-1">Codebase consistency, architectural alignment, and DRY adherence.</p>
+</div>
+</div>
+</section>
+<!-- Analysis Depth -->
+<section class="bg-surface-container rounded-3xl p-8">
+<h2 class="text-xl font-bold serif-display mb-8">Analysis Depth</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="depth" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-lowest border-2 border-transparent peer-checked:border-primary peer-checked:shadow-lg transition-all text-center">
+<span class="block text-sm font-bold mb-1">Quick</span>
+<span class="text-[10px] text-on-surface-variant">~30 Seconds</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input checked="" class="peer sr-only" name="depth" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-lowest border-2 border-transparent peer-checked:border-primary peer-checked:shadow-lg transition-all text-center">
+<span class="block text-sm font-bold mb-1">Standard</span>
+<span class="text-[10px] text-on-surface-variant">~2 Minutes</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="depth" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-lowest border-2 border-transparent peer-checked:border-primary peer-checked:shadow-lg transition-all text-center">
+<span class="block text-sm font-bold mb-1">Deep</span>
+<span class="text-[10px] text-on-surface-variant">~5 Minutes</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Final Action -->
+<div class="flex flex-col md:flex-row items-center gap-6 pt-4">
+<button class="w-full md:w-auto px-12 py-4 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold text-lg shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Start Review
+                    </button>
+<p class="text-sm text-on-surface-variant text-center md:text-left">
+                        Review credits: <strong>14</strong> remaining this month.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Decorative / Curator's Tray -->
+<footer class="mt-24 bg-surface-container-highest/30 py-12 px-12 border-t border-outline-variant/10">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="serif-display font-black text-xl tracking-tighter">Prism</span>
+<span class="text-xs text-on-surface-variant/60 font-medium tracking-widest uppercase">System v4.2</span>
+</div>
+<div class="flex gap-8 text-sm font-medium text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Security Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Neural Log</a>
+</div>
+<div class="text-[10px] text-on-surface-variant/40 tracking-widest uppercase text-center md:text-right">
+                All insights curated by Prism AI.<br/>Human oversight recommended.
+            </div>
+</div>
+</footer>
+</body></html>

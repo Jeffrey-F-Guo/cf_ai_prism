@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ReviewerAI - Results Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fbf9f6",
+                        "inverse-on-surface": "#f2f0ed",
+                        "on-secondary-fixed-variant": "#42407a",
+                        "surface-container": "#efeeeb",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf9f6",
+                        "on-surface": "#1b1c1a",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary": "#5a5893",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-variant": "#e4e2df",
+                        "surface-dim": "#dbdad7",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "surface-container-low": "#f5f3f0",
+                        "surface-tint": "#5148d7",
+                        "secondary-fixed": "#e3dfff",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1b1c1a",
+                        "surface": "#fbf9f6",
+                        "on-tertiary-container": "#ffb393",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c3c0ff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb597",
+                        "on-secondary-fixed": "#16124c",
+                        "tertiary-fixed": "#ffdbcd",
+                        "secondary-container": "#c0bdff",
+                        "inverse-surface": "#30312f",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#8f3400",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-surface-variant": "#464554",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "primary-container": "#4338ca",
+                        "tertiary": "#692400",
+                        "surface-container-high": "#eae8e5",
+                        "primary": "#2a14b4",
+                        "outline-variant": "#c7c4d7",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e4e2df",
+                        "on-secondary-container": "#4c4a84",
+                        "on-primary-fixed": "#100069",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#e3dfff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#372abf"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "xxl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e4e2df; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed-dim">
+<!-- TopNavBar Implementation -->
+<nav class="fixed top-0 w-full z-50 bg-[#fbf9f6]/70 dark:bg-stone-950/70 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center px-12 h-20 w-full">
+<div class="font-serif text-2xl font-semibold text-indigo-900 dark:text-stone-100">ReviewerAI</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-serif text-lg tracking-tight noto-serif text-stone-500 dark:text-stone-400 hover:text-indigo-600 transition-colors" href="#">Dashboard</a>
+<a class="font-serif text-lg tracking-tight noto-serif text-indigo-700 dark:text-indigo-400 font-semibold border-b-2 border-indigo-600 transition-colors" href="#">Active Analysis</a>
+<a class="font-serif text-lg tracking-tight noto-serif text-stone-500 dark:text-stone-400 hover:text-indigo-600 transition-colors" href="#">History</a>
+</div>
+<div class="flex items-center gap-6">
+<div class="bg-stone-200/20 dark:bg-stone-800/20 px-4 py-2 rounded-full flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-500 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-body" placeholder="Search report..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-stone-500 cursor-pointer hover:text-indigo-600 transition-colors">settings</span>
+<span class="material-symbols-outlined text-stone-500 cursor-pointer hover:text-indigo-600 transition-colors">help_outline</span>
+<img alt="Lead Developer Profile" class="w-10 h-10 rounded-full border-2 border-surface-container-high object-cover" data-alt="Professional portrait of a male software architect in a clean, minimalist studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADCqS0o3_mvezq5_2vhkK1H3wz75HaO6Kbc7iB1rnZW6IrvOQwroYkRiExzW0ayWVeRkN6TEuAPCxl86XxPGpGC607vqqRSuN4RqQJ55ok708qYTt-aa5C9TZ6e_sXqgOfR2pXGq7xhuEzJpzAT3bhNiX2mSpB4Vx7SMVMeBGMOU67fw2gttxM0zVI0EMJkUFzYfZkboBjLqmIUxs3zARK2vU-Z8rODa0-KaXjoJ4fxM_E5DzROgs4CO7mrk0agz51B8Wnw61bw2DO"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-20 flex min-h-screen">
+<!-- Center Column: Results -->
+<div class="flex-1 p-12 overflow-y-auto">
+<div class="max-w-5xl mx-auto">
+<!-- Header Section -->
+<header class="mb-16">
+<h1 class="font-serif text-5xl font-bold mb-6 tracking-tight text-on-surface">Analysis Results</h1>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<!-- Quality Score Bento Card -->
+<div class="md:col-span-1 bg-surface-container-lowest p-8 rounded-xxl border border-outline-variant/10 shadow-sm flex flex-col items-center justify-center">
+<span class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-2">Quality Score</span>
+<div class="text-6xl font-serif font-bold text-indigo-700">92</div>
+<div class="text-sm text-stone-400 mt-1">out of 100</div>
+</div>
+<!-- Metrics Group -->
+<div class="md:col-span-3 grid grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xxl flex flex-col justify-between">
+<span class="material-symbols-outlined text-error text-3xl" style="font-variation-settings: 'FILL' 1;">report</span>
+<div>
+<div class="text-3xl font-serif font-bold">2</div>
+<div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Critical</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xxl flex flex-col justify-between">
+<span class="material-symbols-outlined text-amber-600 text-3xl" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<div class="text-3xl font-serif font-bold">5</div>
+<div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Warnings</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xxl flex flex-col justify-between">
+<span class="material-symbols-outlined text-indigo-600 text-3xl" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div>
+<div class="text-3xl font-serif font-bold">12</div>
+<div class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Suggestions</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Findings Section -->
+<section class="space-y-12">
+<h2 class="font-serif text-2xl font-semibold border-b border-surface-variant pb-4">Detected Findings</h2>
+<!-- Finding Card: Critical -->
+<article class="bg-surface-container-lowest rounded-xxl shadow-sm overflow-hidden group">
+<div class="flex items-center gap-4 px-8 py-4 bg-error-container/10 border-l-4 border-error">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">report</span>
+<span class="text-xs font-bold uppercase tracking-widest text-error">Critical Severity</span>
+<span class="ml-auto font-mono text-xs text-stone-400">src/auth/session_manager.py:142</span>
+</div>
+<div class="p-8">
+<h3 class="font-serif text-xl font-bold mb-3">Broken Access Control in Session Renewal</h3>
+<p class="text-on-surface-variant mb-6 leading-relaxed">The session renewal endpoint does not properly validate the old session's authenticity before issuing a new token, potentially allowing session fixation attacks.</p>
+<div class="rounded-xl bg-stone-900 overflow-hidden">
+<div class="flex items-center gap-2 px-4 py-2 bg-stone-800 text-[10px] text-stone-400 uppercase tracking-widest">
+<span class="material-symbols-outlined text-xs">code</span> diff
+                            </div>
+<pre class="p-6 text-sm font-mono overflow-x-auto text-stone-300"><span class="text-error-container opacity-50">- def renew_token(session_id):</span>
+<span class="text-error-container opacity-50">-     return generate_new_token(session_id)</span>
+<span class="text-emerald-400">+ def renew_token(session_id, validation_signature):</span>
+<span class="text-emerald-400">+     if verify_signature(session_id, validation_signature):</span>
+<span class="text-emerald-400">+         return generate_new_token(session_id)</span></pre>
+</div>
+</div>
+</article>
+<!-- Finding Card: Warning -->
+<article class="bg-surface-container-lowest rounded-xxl shadow-sm overflow-hidden border-l-4 border-amber-500">
+<div class="flex items-center gap-4 px-8 py-4 bg-amber-50">
+<span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="text-xs font-bold uppercase tracking-widest text-amber-700">Warning</span>
+<span class="ml-auto font-mono text-xs text-stone-400">src/db/models.py:89</span>
+</div>
+<div class="p-8">
+<h3 class="font-serif text-xl font-bold mb-3">Inefficient Query Pattern</h3>
+<p class="text-on-surface-variant mb-6 leading-relaxed">N+1 query detected when fetching user permissions. Consider pre-fetching related data to improve performance during peak loads.</p>
+<div class="rounded-xl bg-stone-900 overflow-hidden">
+<div class="flex items-center gap-2 px-4 py-2 bg-stone-800 text-[10px] text-stone-400 uppercase tracking-widest">
+<span class="material-symbols-outlined text-xs">code</span> diff
+                            </div>
+<pre class="p-6 text-sm font-mono text-stone-300"><span class="text-error-container opacity-50">- users = db.session.query(User).all()</span>
+<span class="text-emerald-400">+ users = db.session.query(User).options(joinedload(User.permissions)).all()</span></pre>
+</div>
+</div>
+</article>
+<!-- Finding Card: Suggestion -->
+<article class="bg-surface-container-lowest rounded-xxl shadow-sm overflow-hidden border-l-4 border-indigo-400 opacity-80 hover:opacity-100 transition-opacity">
+<div class="flex items-center gap-4 px-8 py-4 bg-indigo-50">
+<span class="material-symbols-outlined text-indigo-600" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<span class="text-xs font-bold uppercase tracking-widest text-indigo-700">Suggestion</span>
+<span class="ml-auto font-mono text-xs text-stone-400">src/utils/helpers.py:12</span>
+</div>
+<div class="p-8">
+<h3 class="font-serif text-xl font-bold mb-3">Type Hint Optimization</h3>
+<p class="text-on-surface-variant mb-4 leading-relaxed">Using Generic List instead of typed Tuple could clarify intent in this utility function.</p>
+</div>
+</article>
+</section>
+</div>
+</div>
+<!-- Right Panel: Prism Assistant -->
+<aside class="w-[400px] border-l border-surface-container bg-surface-container-low/50 sticky top-20 h-[calc(100vh-5rem)] flex flex-col">
+<!-- Assistant Header -->
+<div class="p-8 pb-4 flex items-center justify-between">
+<div>
+<h3 class="font-serif text-xl font-bold text-on-surface">Prism Assistant</h3>
+<p class="text-[10px] uppercase tracking-widest text-indigo-600 font-bold">Neural Engine Active</p>
+</div>
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+</div>
+<!-- Chat History -->
+<div class="flex-1 overflow-y-auto px-8 space-y-8 custom-scrollbar">
+<!-- AI Message -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-indigo-600">bolt</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Assistant</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl rounded-tl-none shadow-sm text-sm leading-relaxed">
+                        I've analyzed the <span class="font-bold text-indigo-700">Broken Access Control</span> issue. The fix involves implementing HMAC-based signature verification to ensure the token being renewed was indeed issued by this server.
+                    </div>
+</div>
+<!-- AI Message with Code Suggestion -->
+<div class="flex flex-col gap-3">
+<div class="bg-surface-container-lowest p-4 rounded-xl rounded-tl-none shadow-sm text-sm">
+<p class="mb-4">Here is the recommended middleware implementation:</p>
+<div class="rounded-lg bg-stone-900 p-3 font-mono text-[11px] text-stone-300 leading-tight">
+<div class="text-stone-500 mb-2">// auth_utils.py</div>
+<span class="text-indigo-400">def</span> <span class="text-emerald-400">validate_session_hmac</span>(sid, sig):<br/>
+                              expected = hmac.new(KEY, sid, sha256).hex()<br/>
+                              <span class="text-indigo-400">return</span> constant_time_compare(sig, expected)
+                        </div>
+<button class="mt-4 w-full py-2 bg-surface-container-high rounded-lg text-xs font-bold hover:bg-surface-container-highest transition-colors">Apply to File</button>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col gap-3 items-end">
+<div class="flex items-center gap-2 flex-row-reverse">
+<span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">You</span>
+</div>
+<div class="bg-primary text-white p-4 rounded-xl rounded-tr-none shadow-sm text-sm">
+                        Does this support JWT-based sessions as well?
+                    </div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-8">
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-none rounded-xxl p-4 pr-12 text-sm focus:ring-1 focus:ring-primary shadow-sm resize-none" placeholder="Ask Prism about these results..." rows="2"></textarea>
+<button class="absolute right-3 bottom-3 p-2 text-primary hover:bg-primary/10 rounded-full transition-all">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<div class="mt-3 flex gap-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors">Explain severity</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-on-surface-variant cursor-pointer hover:bg-surface-container-highest transition-colors">Export PDF</span>
+</div>
+</div>
+</aside>
+</main>
+<!-- Floating Branding Accent (Curator's Tray) -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#fbf9f6]/80 backdrop-blur-md rounded-full border border-white/40 shadow-xl flex items-center gap-6 z-50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-900">ReviewerAI Intelligence System</span>
+</div>
+<div class="h-4 w-px bg-stone-300"></div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Model: Curated_v4</span>
+<span class="material-symbols-outlined text-xs text-stone-400">check_circle</span>
+</div>
+</div>
+</body></html>
