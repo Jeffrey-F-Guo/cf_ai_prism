@@ -1,96 +1,82 @@
 # cf_ai_prism
 
-> AI-native code review system powered by a swarm of parallel specialized agents
+AI-powered code review system that runs four specialized agents in parallel against a GitHub PR diff.
 
-**[Live Demo](https://cf-ai-prism.jeffrey-guo00703.workers.dev)**
+## Overview
 
-## What It Does
+Paste a GitHub PR URL into the chat. A steering panel lets you choose which agents run, how deep to analyze (quick / standard / deep), and optionally focus the review on a specific area. A Cloudflare Workflow then fans out to four Durable Object agents simultaneously — Security, Logic, Performance, and Patterns — each running its own tool-calling loop. Results stream back as each agent finishes. A SummaryAgent deduplicates findings across agents and runs a severity judge pass before presenting the final list. From there you can ask follow-up questions about any finding in a chat sidebar.
 
-Paste a GitHub PR URL into the chat. Four specialized Durable Object agents — Security, Performance, Logic, and Patterns — spin up in parallel inside a Cloudflare Workflow. Each runs its own ReAct loop: deterministic regex tools run first to ground the analysis, then conditional LLM sub-calls go deeper based on what the first pass found. Results stream back live as each agent finishes. Once complete, a SummaryAgent deduplicates findings across agents and runs a severity judge pass to eliminate false positives. Ask follow-up questions in the chat sidebar — the orchestrator fetches the relevant file from GitHub and suggests a concrete fix.
+## How It Works
 
-## Demo
+1. **URL detection** — `ReviewOrchestrator` (an `AIChatAgent` Durable Object) detects a GitHub PR URL in the chat and fetches PR metadata via the GitHub API
+2. **Steering** — the frontend sends a `PRISM_STEERING:` message with the selected agents, rigor level, and optional focus text
+3. **Workflow dispatch** — the orchestrator dispatches `ReviewWorkflow`, which calls all four agent DOs in parallel via `Promise.all`, each step retrying up to 2× with a 10s delay
+4. **Agent analysis** — each agent runs a ReAct loop (via `generateText` with `stopWhen: stepCountIs(N)`) calling its tools and producing findings as structured text
+5. **Summary** — `SummaryAgent` deduplicates findings (DeepSeek structured output with Zod schema), then runs a judge pass that can only lower severity, never raise it
+6. **Persistence** — completed review and findings are written to D1; the orchestrator embeds findings into Vectorize if the binding is present
+7. **Chat** — the `PRISM_FIND:` protocol lets the frontend embed a finding's full context into a follow-up message; the orchestrator fetches the relevant file from GitHub and streams a suggested fix
 
-Paste any of these directly into the chat:
+## Agents
 
-- `https://github.com/expressjs/express/pull/6100` — middleware refactor (logic + pattern findings)
-- `https://github.com/vercel/next.js/pull/77710` — dependency bump (security scan via OSV.dev)
-- Any public GitHub PR URL on a repo your GitHub token can read
+Each agent uses `deepseek-chat` via `@ai-sdk/deepseek` and calls tools in a loop before producing findings.
 
-## The Four Cloudflare Requirements
+| Agent | Domain | Tools | Notes |
+|---|---|---|---|
+| **SecurityAgent** | Vulnerabilities, secrets, auth | `securityScan` (regex, always), `checkAuthPatterns` (DeepSeek sub-call, if auth/crypto present), `analyzeDependencies` (OSV.dev CVE lookup, if dependency files changed), `fetchFileContent` | `analyzeDependencies` parses npm/PyPI/go.mod versions and queries OSV.dev |
+| **LogicAgent** | Null safety, async misuse, edge cases | `smartLogicEval` (regex, always), `traceDataFlow` (DeepSeek, if null risk flagged), `detectRaceConditions` (DeepSeek, if shared mutable state across async ops), `fetchFileContent` | `detectRaceConditions` only triggers on diffed shared state, not plain increments |
+| **PerformanceAgent** | Complexity, N+1s, memory leaks | `performanceAnalyze` (regex, always), `analyzeMemoryPatterns` (DeepSeek, if caches/listeners present), `findBlockingOperations` (DeepSeek, if sequential awaits), `fetchFileContent` | Bounded O(n) collections are at most `suggestion`, never `critical` |
+| **PatternAgent** | SOLID, code structure, duplication | `patternAnalyze` (regex, always), `checkArchitecturalPatterns` (DeepSeek, if complexity >10 or length >40 lines), `searchSimilarPatterns` (Vectorize embedding search, if bound), `fetchFileContent` | Pattern findings never escalate to `critical` |
 
-### 1. LLM
+**Rigor levels** control the step budget passed to each agent:
 
-Two LLMs in use:
+| Level | Steps | Behavior |
+|---|---|---|
+| quick | 2 | Tier 1 regex tools only |
+| standard | 3 | Tier 1 + conditional Tier 2 sub-calls |
+| deep | 5 | Tier 2 tools called aggressively |
 
-- **Workers AI — Mistral Small 3.1 24B** (`@cf/mistralai/mistral-small-3.1-24b-instruct`): powers the `ReviewOrchestrator` (`AIChatAgent`), which handles all user-facing streaming chat, PR URL detection, and finding-context responses via WebSocket
-- **DeepSeek Chat** (external API via `@ai-sdk/deepseek`): powers all four sub-agents (SecurityAgent, LogicAgent, PerformanceAgent, PatternAgent) and SummaryAgent — used for structured output extraction with Zod schemas
-
-### 2. Workflow / Coordination
-
-- **Cloudflare Workflows** (`ReviewWorkflow`) orchestrates the fan-out: all four sub-agents are dispatched via `Promise.all` in a single Workflow step with 2× retries and 10s delay per step
-- **Durable Objects** (6 total): `ReviewOrchestrator` (extends `AIChatAgent`) holds conversation history and routes all protocol messages; five sub-agent DOs (`SecurityAgent`, `LogicAgent`, `PerformanceAgent`, `PatternAgent`, `SummaryAgent`) each own their own analysis loop
-- DO naming is scoped per PR: `${owner}/${repo}/${prNumber}/security`, etc. — concurrent reviews on different PRs never share state
-
-### 3. User Input
-
-- WebSocket chat interface built with React (Vite, served via Workers Static Assets)
-- Input flows: PR URL detection → human-in-the-loop steering panel (select agents, set rigor, add focus) → live processing view with per-agent task stream → findings panel with inline "Ask" buttons
-- `PRISM_STEERING:` and `PRISM_FIND:` are typed protocol prefixes that route non-display messages server-side without polluting the LLM context
-
-### 4. Memory / State
-
-- **D1** (`prism-reviews`): persists all reviews and findings after completion; powers the dashboard (score history, per-agent finding distribution, severity trends)
-- **Durable Object SQLite**: `ReviewOrchestrator` stores up to 100 messages of conversation history per session via the Agents SDK (`maxPersistedMessages: 100`)
-- **Vectorize** (optional, bind to enable): PatternAgent embeds function bodies and stores them per-repo; `searchSimilarPatterns` queries for cross-PR recurrence. Gracefully skips if the binding is absent.
+**Severity scoring**: `max(100 - criticals×20 - warnings×5, 0)`. Suggestions don't affect the score.
 
 ## Architecture
 
 ```
-User (GitHub PR URL)
+User (GitHub PR URL pasted into chat)
         │  WebSocket
         ▼
-ReviewOrchestrator (AIChatAgent / Durable Object)
-  Workers AI — Mistral Small 3.1 24B
-  Holds conversation history (D1-backed SQLite)
-  Detects PR URLs → steering → dispatches Workflow
+ReviewOrchestrator  (AIChatAgent / Durable Object)
+  Mistral Small 3.1 24B via Workers AI
+  Holds conversation history (D1-backed SQLite, up to 100 messages)
+  Handles PRISM_STEERING: and PRISM_FIND: protocol prefixes
         │
         ▼
-ReviewWorkflow (Cloudflare Workflow)
-  Promise.all fan-out → 4 agent DOs
-  Per-step retry (2×, 10s delay)
+ReviewWorkflow  (Cloudflare Workflow)
+  Promise.all → 4 agents in parallel
+  Per-step retry: 2×, 10s delay
         │
-        ├──▶ SecurityAgent    — securityScan (regex) → checkAuthPatterns (DeepSeek) → OSV.dev CVE lookup
-        ├──▶ LogicAgent       — smartLogicEval (regex) → traceDataFlow → detectRaceConditions
-        ├──▶ PerformanceAgent — performanceAnalyze (regex) → analyzeMemoryPatterns → findBlockingOperations
-        └──▶ PatternAgent     — patternAnalyze (regex) → searchSimilarPatterns (Vectorize) → checkArchitecturalPatterns
+        ├──▶ SecurityAgent     deepseek-chat  securityScan → checkAuthPatterns → analyzeDependencies
+        ├──▶ LogicAgent        deepseek-chat  smartLogicEval → traceDataFlow → detectRaceConditions
+        ├──▶ PerformanceAgent  deepseek-chat  performanceAnalyze → analyzeMemoryPatterns → findBlockingOperations
+        └──▶ PatternAgent      deepseek-chat  patternAnalyze → checkArchitecturalPatterns → searchSimilarPatterns
                     │
                     ▼
-             SummaryAgent
-             Dedup pass (DeepSeek structured output)
-             → Severity judge pass (can only de-escalate)
-             → D1 persist + Vectorize embed
+             SummaryAgent  deepseek-chat
+             Dedup pass (structured output, Zod schema)
+             → Judge pass (severity can only decrease)
+             → D1 persist + Vectorize embed (if bound)
 ```
 
 | Service | Purpose |
 |---|---|
-| Workers AI | Mistral Small 3.1 24B — orchestrator streaming chat |
-| DeepSeek Chat | All 4 sub-agents + SummaryAgent (structured output) |
-| Durable Objects | ReviewOrchestrator + SecurityAgent + LogicAgent + PerformanceAgent + PatternAgent + SummaryAgent |
-| Workflows | Durable fan-out with per-step retries |
-| D1 | Findings + review history + dashboard analytics |
-| Vectorize | Cross-PR pattern memory per repo (optional — enable by binding) |
-
-## What Makes It Non-Trivial
-
-- **Genuine parallel execution** — four Durable Object instances dispatched via `Promise.all` inside a Cloudflare Workflow; each runs a full independent ReAct loop, not a prompt chain
-- **Tiered tool architecture** — Tier 1 (deterministic regex) always runs first to ground findings in real line numbers; Tier 2 (DeepSeek sub-calls) only fires conditionally based on Tier 1 results, reducing hallucinations and cost; Tier 3 (OSV.dev CVE API) for dependency scanning
-- **Typed structured output** — all findings extracted via `generateText` with `Output.object({ schema })` and Zod schemas; no prose parsing
-- **Severity calibration** — shared rubric constants (`prompts.ts`) across all agents; SummaryAgent runs a judge pass that can only lower severity, enforced in code via priority comparison before applying
-- **Rigor levels** — Quick (2 steps, Tier 1 only), Standard (3 steps, conditional Tier 2), Deep (5 steps, aggressive Tier 2) controlled from the steering UI and wired through the Workflow to each agent's `stepCountIs(N)` budget
+| Workers AI | Mistral Small 3.1 24B for the orchestrator (chat, PRISM_FIND responses) |
+| DeepSeek Chat | All four sub-agents and SummaryAgent (external API key) |
+| Durable Objects | ReviewOrchestrator, SecurityAgent, LogicAgent, PerformanceAgent, PatternAgent, SummaryAgent |
+| Cloudflare Workflows | Durable fan-out with per-step retries |
+| D1 | Review and findings persistence, dashboard aggregation |
+| Vectorize | Cross-PR pattern embeddings for PatternAgent (optional — no-ops if not bound) |
 
 ## Running Locally
 
-**Prerequisites:** Node 18+, Wrangler CLI (`npm i -g wrangler`), a GitHub personal access token, a DeepSeek API key
+**Prerequisites:** Node 18+, Wrangler CLI, a GitHub personal access token, a DeepSeek API key
 
 ```bash
 git clone https://github.com/Jeffrey-F-Guo/cf_ai_prism
@@ -98,14 +84,14 @@ cd cf_ai_prism
 npm install
 ```
 
-Create `.dev.vars` in the project root:
+Create `.dev.vars`:
 
 ```
-DEEPSEEK_API_KEY=your-deepseek-api-key
-GITHUB_TOKEN=your-github-pat
+DEEPSEEK_API_KEY=sk-...
+GITHUB_TOKEN=ghp_...
 ```
 
-Create the local D1 database:
+Initialize the local D1 database:
 
 ```bash
 npx wrangler d1 execute prism-reviews --local --file=schema.sql
@@ -117,26 +103,44 @@ Start the dev server:
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and paste a GitHub PR URL.
+Open [http://localhost:5173](http://localhost:5173).
 
-## Running Against the Deployed Link
+## Live Demo
 
-Open **[https://cf-ai-prism.jeffrey-guo00703.workers.dev](https://cf-ai-prism.jeffrey-guo00703.workers.dev)** and paste any public GitHub PR URL directly into the chat.
+[https://cf-ai-prism.jeffrey-guo00703.workers.dev](https://cf-ai-prism.jeffrey-guo00703.workers.dev)
 
-The steering panel lets you select which agents run, set rigor (Quick / Standard / Deep), and add a natural-language focus (e.g. "auth changes only"). Results stream back live.
+Paste any public GitHub PR URL. The steering panel appears after the PR is loaded — select agents, choose a rigor level, optionally add a focus description, then start the review.
+
+## API
+
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/reviews` | Recent reviews (`?limit=N`, default 20, max 100) |
+| GET | `/api/reviews/:id` | Review metadata and finding counts |
+| GET | `/api/reviews/:id/findings` | Full findings list for a review |
+| DELETE | `/api/reviews/:id` | Delete a review and its findings |
+| GET | `/api/dashboard` | Aggregated stats: totals, 7-day velocity, severity split, top recurring issues |
 
 ## Project Structure
 
 ```
 src/
   server/
-    agents/         # ReviewOrchestrator, SecurityAgent, LogicAgent,
-                    # PerformanceAgent, PatternAgent, SummaryAgent
-    workflows/      # ReviewWorkflow (Cloudflare Workflow fan-out)
-    tools/          # Per-agent tool implementations (Tier 1/2/3)
-                    # prompts.ts — shared severity rubric constants
+    agents/           # ReviewOrchestrator, SecurityAgent, LogicAgent,
+                      # PerformanceAgent, PatternAgent, SummaryAgent
+    workflows/        # ReviewWorkflow — Cloudflare Workflow fan-out
+    tools/            # Per-agent tool implementations
+      prompts.ts      # Shared severity rubric constants (single source of truth)
+      SecurityTools.ts
+      LogicTools.ts
+      PerformanceTools.ts
+      PatternTools.ts
+      orchestratorTools.ts  # getFinding, suggestFix
   client/
-    components/     # FindingCard, AgentCard, SteeringPanel, Dashboard
-    hooks/          # usePrism — WebSocket state + protocol routing
-    layout/         # ReviewPage, CenterPanel, ChatSidebar
+    hooks/
+      usePrism.ts     # WebSocket state, protocol routing, chat
+    layout/           # ReviewPage, CenterPanel, ChatSidebar, ReviewHistoryPage
+    components/
+      review/         # FindingCard, AgentCard, SteeringPanel
+      dashboard/      # Dashboard charts and review history table
 ```
