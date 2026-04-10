@@ -29,6 +29,7 @@ export function SteeringPanel({ prMetadata, onSubmit }: SteeringPanelProps) {
     new Set(["security", "performance", "logic", "pattern"])
   );
   const [rigor, setRigor] = useState<SteeringConfig["rigor"]>("standard");
+  const [model, setModel] = useState<"claude" | "deepseek">("claude");
   const [focus, setFocus] = useState("");
 
   const toggleAgent = (id: SteeringConfig["agents"][number]) => {
@@ -48,6 +49,7 @@ export function SteeringPanel({ prMetadata, onSubmit }: SteeringPanelProps) {
     onSubmit({
       agents: Array.from(selectedAgents),
       rigor,
+      model,
       ...(focus.trim() ? { focus: focus.trim() } : {})
     });
   };
@@ -197,6 +199,29 @@ export function SteeringPanel({ prMetadata, onSubmit }: SteeringPanelProps) {
                   >
                     <span className="block text-sm font-bold text-[#1b1c1a] mb-1">{opt.label}</span>
                     <span className="text-[10px] text-[#464554]">{opt.time}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Model */}
+            <section className="bg-[#efeeeb] rounded-3xl p-8">
+              <h2 className="text-xl font-bold font-headline mb-2 text-[#1b1c1a]">Model</h2>
+              <p className="text-sm text-[#464554] mb-6">Select the AI model used by all agents.</p>
+              <div className="grid grid-cols-2 gap-4">
+                {([
+                  { value: "claude" as const, label: "Claude", sub: "Anthropic" },
+                  { value: "deepseek" as const, label: "DeepSeek", sub: "DeepSeek AI" },
+                ]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setModel(opt.value)}
+                    className={`p-6 rounded-2xl bg-white text-center transition-all border-2 ${
+                      model === opt.value ? "border-[#2a14b4] shadow-lg" : "border-transparent"
+                    }`}
+                  >
+                    <span className="block text-sm font-bold text-[#1b1c1a] mb-1">{opt.label}</span>
+                    <span className="text-[10px] text-[#464554]">{opt.sub}</span>
                   </button>
                 ))}
               </div>
