@@ -12,20 +12,20 @@ Paste a GitHub PR URL into the chat. A steering panel lets you choose which agen
 2. **Steering** — the frontend sends a `PRISM_STEERING:` message with the selected agents, rigor level, and optional focus text
 3. **Workflow dispatch** — the orchestrator dispatches `ReviewWorkflow`, which calls all four agent DOs in parallel via `Promise.all`, each step retrying up to 2× with a 10s delay
 4. **Agent analysis** — each agent runs a ReAct loop (via `generateText` with `stopWhen: stepCountIs(N)`) calling its tools and producing findings as structured text
-5. **Summary** — `SummaryAgent` deduplicates findings (DeepSeek structured output with Zod schema), then runs a judge pass that can only lower severity, never raise it
+5. **Summary** — `SummaryAgent` deduplicates findings (structured output with Zod schema), then runs a judge pass that can only lower severity, never raise it
 6. **Persistence** — completed review and findings are written to D1; the orchestrator embeds findings into Vectorize if the binding is present
 7. **Chat** — the `PRISM_FIND:` protocol lets the frontend embed a finding's full context into a follow-up message; the orchestrator fetches the relevant file from GitHub and streams a suggested fix
 
 ## Agents
 
-Each agent uses `deepseek-chat` via `@ai-sdk/deepseek` and calls tools in a loop before producing findings.
+Each agent uses Claude Sonnet 4.6 (default) or DeepSeek Chat (selectable via the steering panel) and calls tools in a loop before producing findings.
 
 | Agent | Domain | Tools | Notes |
 |---|---|---|---|
-| **SecurityAgent** | Vulnerabilities, secrets, auth | `securityScan` (regex, always), `checkAuthPatterns` (DeepSeek sub-call, if auth/crypto present), `analyzeDependencies` (OSV.dev CVE lookup, if dependency files changed), `fetchFileContent` | `analyzeDependencies` parses npm/PyPI/go.mod versions and queries OSV.dev |
-| **LogicAgent** | Null safety, async misuse, edge cases | `smartLogicEval` (regex, always), `traceDataFlow` (DeepSeek, if null risk flagged), `detectRaceConditions` (DeepSeek, if shared mutable state across async ops), `fetchFileContent` | `detectRaceConditions` only triggers on diffed shared state, not plain increments |
-| **PerformanceAgent** | Complexity, N+1s, memory leaks | `performanceAnalyze` (regex, always), `analyzeMemoryPatterns` (DeepSeek, if caches/listeners present), `findBlockingOperations` (DeepSeek, if sequential awaits), `fetchFileContent` | Bounded O(n) collections are at most `suggestion`, never `critical` |
-| **PatternAgent** | SOLID, code structure, duplication | `patternAnalyze` (regex, always), `checkArchitecturalPatterns` (DeepSeek, if complexity >10 or length >40 lines), `searchSimilarPatterns` (Vectorize embedding search, if bound), `fetchFileContent` | Pattern findings never escalate to `critical` |
+| **SecurityAgent** | Vulnerabilities, secrets, auth | `securityScan` (regex, always), `checkAuthPatterns` (LLM sub-call, if auth/crypto present), `analyzeDependencies` (OSV.dev CVE lookup, if dependency files changed), `fetchFileContent` | `analyzeDependencies` parses npm/PyPI/go.mod versions and queries OSV.dev |
+| **LogicAgent** | Null safety, async misuse, edge cases | `smartLogicEval` (regex, always), `traceDataFlow` (LLM sub-call, if null risk flagged), `detectRaceConditions` (LLM sub-call, if shared mutable state across async ops), `fetchFileContent` | `detectRaceConditions` only triggers on diffed shared state, not plain increments |
+| **PerformanceAgent** | Complexity, N+1s, memory leaks | `performanceAnalyze` (regex, always), `analyzeMemoryPatterns` (LLM sub-call, if caches/listeners present), `findBlockingOperations` (LLM sub-call, if sequential awaits), `fetchFileContent` | Bounded O(n) collections are at most `suggestion`, never `critical` |
+| **PatternAgent** | SOLID, code structure, duplication | `patternAnalyze` (regex, always), `checkArchitecturalPatterns` (LLM sub-call, if complexity >10 or length >40 lines), `searchSimilarPatterns` (Vectorize embedding search, if bound), `fetchFileContent` | Pattern findings never escalate to `critical` |
 
 **Rigor levels** control the step budget passed to each agent:
 
@@ -53,13 +53,13 @@ ReviewWorkflow  (Cloudflare Workflow)
   Promise.all → 4 agents in parallel
   Per-step retry: 2×, 10s delay
         │
-        ├──▶ SecurityAgent     deepseek-chat  securityScan → checkAuthPatterns → analyzeDependencies
-        ├──▶ LogicAgent        deepseek-chat  smartLogicEval → traceDataFlow → detectRaceConditions
-        ├──▶ PerformanceAgent  deepseek-chat  performanceAnalyze → analyzeMemoryPatterns → findBlockingOperations
-        └──▶ PatternAgent      deepseek-chat  patternAnalyze → checkArchitecturalPatterns → searchSimilarPatterns
+        ├──▶ SecurityAgent     Claude Sonnet 4.6 / DeepSeek  securityScan → checkAuthPatterns → analyzeDependencies
+        ├──▶ LogicAgent        Claude Sonnet 4.6 / DeepSeek  smartLogicEval → traceDataFlow → detectRaceConditions
+        ├──▶ PerformanceAgent  Claude Sonnet 4.6 / DeepSeek  performanceAnalyze → analyzeMemoryPatterns → findBlockingOperations
+        └──▶ PatternAgent      Claude Sonnet 4.6 / DeepSeek  patternAnalyze → checkArchitecturalPatterns → searchSimilarPatterns
                     │
                     ▼
-             SummaryAgent  deepseek-chat
+             SummaryAgent  Claude Haiku 4.5 / DeepSeek
              Dedup pass (structured output, Zod schema)
              → Judge pass (severity can only decrease)
              → D1 persist + Vectorize embed (if bound)
@@ -68,15 +68,16 @@ ReviewWorkflow  (Cloudflare Workflow)
 | Service | Purpose |
 |---|---|
 | Workers AI | Mistral Small 3.1 24B for the orchestrator (chat, PRISM_FIND responses) |
-| DeepSeek Chat | All four sub-agents and SummaryAgent (external API key) |
+| Claude API (Anthropic) | All four sub-agents and SummaryAgent — default model (`CLAUDE_API_KEY`) |
+| DeepSeek Chat | Alternative model for all agents — selectable per review (`DEEPSEEK_API_KEY`) |
 | Durable Objects | ReviewOrchestrator, SecurityAgent, LogicAgent, PerformanceAgent, PatternAgent, SummaryAgent |
 | Cloudflare Workflows | Durable fan-out with per-step retries |
 | D1 | Review and findings persistence, dashboard aggregation |
-| Vectorize | Cross-PR pattern embeddings for PatternAgent (optional — no-ops if not bound) |
+| Vectorize | Cross-PR pattern embeddings for PatternAgent (optional — no-ops if not configured) |
 
 ## Running Locally
 
-**Prerequisites:** Node 18+, Wrangler CLI, a GitHub personal access token, a DeepSeek API key
+**Prerequisites:** Node 18+, Wrangler CLI, a GitHub personal access token, a Claude API key (Anthropic)
 
 ```bash
 git clone https://github.com/Jeffrey-F-Guo/cf_ai_prism
@@ -87,15 +88,26 @@ npm install
 Create `.dev.vars`:
 
 ```
+CLAUDE_API_KEY=sk-ant-...
 DEEPSEEK_API_KEY=sk-...
 GITHUB_TOKEN=ghp_...
 ```
+
+`CLAUDE_API_KEY` is required (default model). `DEEPSEEK_API_KEY` is optional — only needed if you select DeepSeek on the steering panel.
 
 Initialize the local D1 database:
 
 ```bash
 npx wrangler d1 execute prism-reviews --local --file=schema.sql
 ```
+
+**(Optional) Set up Vectorize for cross-PR pattern memory:**
+
+```bash
+npx wrangler vectorize create prism-patterns --dimensions=768 --metric=cosine
+```
+
+Then add the binding to `wrangler.jsonc` (see `vectorize` section — it's already defined, just needs the index to exist).
 
 Start the dev server:
 
