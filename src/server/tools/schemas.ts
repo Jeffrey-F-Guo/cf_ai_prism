@@ -24,10 +24,7 @@ export const summarySchema = z.object({
       description: z.string(),
       agent: z.string().optional(),
       fileLocation: z.string().optional(),
+      reasoning: z.string().optional(),
     })
   ),
-  score: z.number().min(0).max(100),
-  critical: z.number(),
-  warnings: z.number(),
-  suggestions: z.number(),
 });
