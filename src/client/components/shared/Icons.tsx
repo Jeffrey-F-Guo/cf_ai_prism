@@ -159,8 +159,8 @@ export function BugIcon({ size = 16 }: { size?: number }) {
 
 export function ReplyIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M1 5L5 1V4C10 4 12 7 12 12C10.5 9.5 8 8.5 5 8.5V11.5L1 8" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6L7 2V5C12 5 14 8 14 13C12.5 10.5 10 9.5 7 9.5V12.5L3 9" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }

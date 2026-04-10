@@ -47,7 +47,7 @@ export function FindingCard({ finding, onReply }: { finding: Finding; onReply: (
   const config = severityConfig[finding.severity];
 
   return (
-    <article className="bg-white rounded-[24px] shadow-sm overflow-hidden group relative">
+    <article className="bg-white rounded-[24px] shadow-sm group relative">
       {/* Header strip */}
       <div className={`flex items-center gap-4 px-8 py-4 border-l-4 ${config.border} ${config.headerBg}`}>
         <span
@@ -76,7 +76,7 @@ export function FindingCard({ finding, onReply }: { finding: Finding; onReply: (
         <h3 className="font-headline text-xl font-bold mb-3 text-[#1b1c1a]">{finding.title}</h3>
         <p className="text-[#464554] mb-6 leading-relaxed">{finding.description}</p>
 
-        {/* Code diff */}
+        {/* Code diff
         {finding.codeDiff && finding.codeDiff.length > 0 && (
           <div className="rounded-xl bg-stone-900 overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2 bg-stone-800">
@@ -101,13 +101,13 @@ export function FindingCard({ finding, onReply }: { finding: Finding; onReply: (
               ))}
             </pre>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Reply button */}
       <button
         onClick={onReply}
-        className="absolute bottom-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-[#464554] hover:text-[#2a14b4] border border-transparent hover:border-[#2a14b4]/30 opacity-0 group-hover:opacity-100 transition-all duration-200"
+        className="absolute bottom-4 right-4 flex items-center gap-1.5 pl-3 pr-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-[#464554] hover:text-[#2a14b4] border border-transparent hover:border-[#2a14b4]/30 opacity-0 group-hover:opacity-100 transition-all duration-200"
       >
         <ReplyIcon size={12} />
         Ask
