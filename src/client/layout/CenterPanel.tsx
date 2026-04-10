@@ -331,7 +331,7 @@ function ActivityLogPanel({ logs }: { logs: LogEntry[] }) {
               return (
                 <div key={entry.id} className="flex gap-4">
                   <span className="text-stone-600 shrink-0 tabular-nums">[{formatTime(entry.ts)}]</span>
-                  <span className={`shrink-0 w-14 ${getSourceColor(source)}`}>{source}</span>
+                  <span className={`shrink-0 w-24 ${getSourceColor(source)}`}>{source}</span>
                   <span className="text-stone-400 break-all">{entry.message}</span>
                 </div>
               );
