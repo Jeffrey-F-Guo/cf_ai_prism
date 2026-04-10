@@ -1,293 +1,508 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ReviewerAI - System Analysis</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "surface-bright": "#fbf9f6",
-                        "inverse-on-surface": "#f2f0ed",
-                        "on-secondary-fixed-variant": "#42407a",
-                        "surface-container": "#efeeeb",
-                        "on-primary": "#ffffff",
-                        "background": "#fbf9f6",
-                        "on-surface": "#1b1c1a",
-                        "inverse-primary": "#c3c0ff",
-                        "secondary": "#5a5893",
-                        "on-tertiary-fixed-variant": "#7d2d00",
-                        "surface-variant": "#e4e2df",
-                        "surface-dim": "#dbdad7",
-                        "outline": "#777586",
-                        "on-primary-container": "#c1beff",
-                        "surface-container-low": "#f5f3f0",
-                        "surface-tint": "#5148d7",
-                        "secondary-fixed": "#e3dfff",
-                        "on-error-container": "#93000a",
-                        "on-background": "#1b1c1a",
-                        "surface": "#fbf9f6",
-                        "on-tertiary-container": "#ffb393",
-                        "on-tertiary": "#ffffff",
-                        "secondary-fixed-dim": "#c3c0ff",
-                        "on-secondary": "#ffffff",
-                        "tertiary-fixed-dim": "#ffb597",
-                        "on-secondary-fixed": "#16124c",
-                        "tertiary-fixed": "#ffdbcd",
-                        "secondary-container": "#c0bdff",
-                        "inverse-surface": "#30312f",
-                        "on-error": "#ffffff",
-                        "tertiary-container": "#8f3400",
-                        "on-tertiary-fixed": "#360f00",
-                        "on-surface-variant": "#464554",
-                        "primary-fixed-dim": "#c3c0ff",
-                        "primary-container": "#4338ca",
-                        "tertiary": "#692400",
-                        "surface-container-high": "#eae8e5",
-                        "primary": "#2a14b4",
-                        "outline-variant": "#c7c4d7",
-                        "surface-container-lowest": "#ffffff",
-                        "surface-container-highest": "#e4e2df",
-                        "on-secondary-container": "#4c4a84",
-                        "on-primary-fixed": "#100069",
-                        "error": "#ba1a1a",
-                        "primary-fixed": "#e3dfff",
-                        "error-container": "#ffdad6",
-                        "on-primary-fixed-variant": "#372abf"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Noto Serif"],
-                        "body": ["Public Sans"],
-                        "label": ["Public Sans"]
-                    }
-                },
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ReviewerAI - System Analysis</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#fbf9f6",
+              "inverse-on-surface": "#f2f0ed",
+              "on-secondary-fixed-variant": "#42407a",
+              "surface-container": "#efeeeb",
+              "on-primary": "#ffffff",
+              background: "#fbf9f6",
+              "on-surface": "#1b1c1a",
+              "inverse-primary": "#c3c0ff",
+              secondary: "#5a5893",
+              "on-tertiary-fixed-variant": "#7d2d00",
+              "surface-variant": "#e4e2df",
+              "surface-dim": "#dbdad7",
+              outline: "#777586",
+              "on-primary-container": "#c1beff",
+              "surface-container-low": "#f5f3f0",
+              "surface-tint": "#5148d7",
+              "secondary-fixed": "#e3dfff",
+              "on-error-container": "#93000a",
+              "on-background": "#1b1c1a",
+              surface: "#fbf9f6",
+              "on-tertiary-container": "#ffb393",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#c3c0ff",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed-dim": "#ffb597",
+              "on-secondary-fixed": "#16124c",
+              "tertiary-fixed": "#ffdbcd",
+              "secondary-container": "#c0bdff",
+              "inverse-surface": "#30312f",
+              "on-error": "#ffffff",
+              "tertiary-container": "#8f3400",
+              "on-tertiary-fixed": "#360f00",
+              "on-surface-variant": "#464554",
+              "primary-fixed-dim": "#c3c0ff",
+              "primary-container": "#4338ca",
+              tertiary: "#692400",
+              "surface-container-high": "#eae8e5",
+              primary: "#2a14b4",
+              "outline-variant": "#c7c4d7",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-highest": "#e4e2df",
+              "on-secondary-container": "#4c4a84",
+              "on-primary-fixed": "#100069",
+              error: "#ba1a1a",
+              "primary-fixed": "#e3dfff",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#372abf"
             },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
+            },
+            fontFamily: {
+              headline: ["Noto Serif"],
+              body: ["Public Sans"],
+              label: ["Public Sans"]
+            }
+          }
         }
+      };
     </script>
-<style>
-        body { font-family: 'Public Sans', sans-serif; }
-        h1, h2, h3, .noto-serif { font-family: 'Noto Serif', serif; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e4e2df; border-radius: 10px; }
+    <style>
+      body {
+        font-family: "Public Sans", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      .noto-serif {
+        font-family: "Noto Serif", serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #e4e2df;
+        border-radius: 10px;
+      }
     </style>
-</head>
-<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-white">
-<!-- TopNavBar Shell -->
-<header class="fixed top-0 right-0 left-0 h-20 bg-surface/70 backdrop-blur-xl z-40 flex justify-between items-center px-12 shadow-sm border-b border-surface-container">
-<div class="flex items-center gap-12">
-<div class="flex items-center gap-3">
-<h1 class="font-serif text-xl text-indigo-900 leading-tight">ReviewerAI</h1>
-</div>
-<nav class="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight">
-<a class="text-stone-500 hover:text-indigo-600 transition-colors" href="#">Dashboard</a>
-<a class="text-indigo-700 font-semibold border-b-2 border-indigo-600 pb-1" href="#">Active Analysis</a>
-<a class="text-stone-500 hover:text-indigo-600 transition-colors" href="#">History</a>
-</nav>
-</div>
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full">
-<span class="material-symbols-outlined text-outline text-lg" data-icon="search">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-48" placeholder="Search parameters..." type="text"/>
-</div>
-<button class="text-stone-500 hover:text-indigo-600 transition-colors">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-</button>
-<button class="text-stone-500 hover:text-indigo-600 transition-colors">
-<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
-</button>
-<div class="h-10 w-10 rounded-full border-2 border-surface-container-highest overflow-hidden">
-<img alt="Lead Developer Profile" data-alt="Professional headshot of a developer in a minimalist studio setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDATQf53N6ONLii4iosTNPUSuc4oQo6R-oPDv2lYBbuBtW2WWX9piyBqHX8CDPlPrKWE_Lv4B5TXsvST5xJttmtYpC4K7azriPguz6NMD0X4yl1SxT-rp_JpEDEGhinKVW_wUL5JnxodsAqNDLVCIOPue1BiE3nj4lCyUxxIW7ccv_4aTErmiW1TfkPlqkZU-gkRLmAqILu2x_pY4Lrw3ubyJaNZ3D7UQrwz99XwVjuqELITKpDFBfjHb1ogdqKKxDDZO8LDGnejOfp"/>
-</div>
-</div>
-</header>
-<!-- Main Content Canvas -->
-<main class="pt-32 pb-12 px-12 min-h-screen">
-<!-- Editorial Header Section -->
-<section class="max-w-6xl mx-auto mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
-<div class="max-w-2xl">
-<span class="text-[12px] uppercase tracking-[0.3em] text-primary font-bold mb-4 block">System Diagnostic</span>
-<h2 class="text-5xl font-serif text-on-surface leading-[1.1] mb-6">System Analysis in Progress</h2>
-<p class="text-on-surface-variant text-lg leading-relaxed font-light">
-                ReviewerAI is currently cross-referencing heuristic patterns with neural baseline signatures. 
-                Expect high-fidelity results within the next three minutes.
-            </p>
-</div>
-<!-- Circular Progress Indicator -->
-<div class="relative flex items-center justify-center">
-<svg class="w-40 h-40 transform -rotate-90">
-<circle class="text-surface-container-highest" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="6"></circle>
-<circle class="text-primary transition-all duration-1000 ease-in-out" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="140.8" stroke-width="6"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center">
-<span class="text-3xl font-serif text-on-surface">68%</span>
-<span class="text-[10px] uppercase tracking-widest text-outline font-bold">Aggregated</span>
-</div>
-</div>
-</section>
-<!-- Agent Grid -->
-<section class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-<!-- Security Agent -->
-<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start mb-8">
-<div class="p-3 bg-error-container/20 rounded-xl text-error">
-<span class="material-symbols-outlined" data-icon="verified_user" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-</div>
-<span class="px-3 py-1 bg-surface-container-high text-[10px] font-bold rounded-full text-on-surface-variant">Scanning</span>
-</div>
-<h3 class="text-xl font-serif mb-2">Security Agent</h3>
-<p class="text-sm text-on-surface-variant mb-6 leading-snug">Reviewing encryption protocols and dependency vulnerabilities.</p>
-<div class="pt-4 border-t border-surface-container-high">
-<div class="flex items-center gap-2 text-[11px] font-medium text-primary">
-<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-<span>Verifying SSL integrity...</span>
-</div>
-</div>
-</div>
-<!-- Performance Agent -->
-<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start mb-8">
-<div class="p-3 bg-secondary-container/20 rounded-xl text-secondary">
-<span class="material-symbols-outlined" data-icon="speed" style="font-variation-settings: 'FILL' 1;">speed</span>
-</div>
-<span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">Completed</span>
-</div>
-<h3 class="text-xl font-serif mb-2">Performance Agent</h3>
-<p class="text-sm text-on-surface-variant mb-6 leading-snug">Benchmarking execution speed and resource allocation curves.</p>
-<div class="pt-4 border-t border-surface-container-high">
-<div class="flex items-center gap-2 text-[11px] font-medium text-on-surface-variant">
-<span class="material-symbols-outlined text-[14px] text-green-600" data-icon="check_circle">check_circle</span>
-<span>Optimization index: 0.94</span>
-</div>
-</div>
-</div>
-<!-- Logic Agent -->
-<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start mb-8">
-<div class="p-3 bg-primary-container/10 rounded-xl text-primary">
-<span class="material-symbols-outlined" data-icon="account_tree" style="font-variation-settings: 'FILL' 1;">account_tree</span>
-</div>
-<span class="px-3 py-1 bg-surface-container-high text-[10px] font-bold rounded-full text-on-surface-variant">Analyzing</span>
-</div>
-<h3 class="text-xl font-serif mb-2">Logic Agent</h3>
-<p class="text-sm text-on-surface-variant mb-6 leading-snug">Mapping branch complexity and redundant condition states.</p>
-<div class="pt-4 border-t border-surface-container-high">
-<div class="flex items-center gap-2 text-[11px] font-medium text-primary">
-<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-<span>Tracing recursion depth...</span>
-</div>
-</div>
-</div>
-<!-- Pattern Agent -->
-<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow opacity-60">
-<div class="flex justify-between items-start mb-8">
-<div class="p-3 bg-surface-container-high rounded-xl text-outline">
-<span class="material-symbols-outlined" data-icon="grain">grain</span>
-</div>
-<span class="px-3 py-1 bg-surface-container text-[10px] font-bold rounded-full text-outline">Queued</span>
-</div>
-<h3 class="text-xl font-serif mb-2">Pattern Agent</h3>
-<p class="text-sm text-on-surface-variant mb-6 leading-snug">Semantic similarity check and architectural alignment.</p>
-<div class="pt-4 border-t border-surface-container-high">
-<div class="flex items-center gap-2 text-[11px] font-medium text-outline">
-<span>Waiting for Logic completion...</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Global System Log (Terminal Style) -->
-<section class="max-w-6xl mx-auto">
-<div class="flex items-center justify-between mb-6">
-<h3 class="text-sm uppercase tracking-widest font-bold text-on-surface-variant">Global System Log</h3>
-<div class="flex gap-4">
-<button class="text-[11px] text-primary font-semibold hover:underline">Download Report</button>
-<button class="text-[11px] text-outline font-semibold">Clear Log</button>
-</div>
-</div>
-<div class="bg-on-surface rounded-[24px] p-8 overflow-hidden relative group">
-<div class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
-<div class="font-mono text-xs leading-relaxed h-64 overflow-y-auto space-y-3 custom-scrollbar">
-<div class="flex gap-4">
-<span class="text-stone-600">[14:02:45]</span>
-<span class="text-stone-300">CORE</span>
-<span class="text-stone-500">Initializing Prism AI Engine...</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:02:48]</span>
-<span class="text-primary-fixed-dim">SYSTEM</span>
-<span class="text-stone-100">Handshake established with project_alpha_main.</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:03:02]</span>
-<span class="text-stone-300">SECURITY</span>
-<span class="text-stone-500">Starting deep scan on 1,402 dependency nodes.</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:03:15]</span>
-<span class="text-stone-300">PERFORMANCE</span>
-<span class="text-green-400">Baseline latency within acceptable range (12ms).</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:03:45]</span>
-<span class="text-indigo-400">LOGIC</span>
-<span class="text-stone-100">Found potential circular reference in 'auth_service.py' line 112.</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:04:12]</span>
-<span class="text-indigo-400">LOGIC</span>
-<span class="text-stone-500">Recursion depth confirmed: 4 levels. Analysis ongoing.</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:05:01]</span>
-<span class="text-stone-300">CORE</span>
-<span class="text-indigo-300 animate-pulse">Aggregating intermediate results to local buffer...</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:05:22]</span>
-<span class="text-stone-300">SYSTEM</span>
-<span class="text-stone-500">Memory usage: 452MB / 2.0GB (22.6%).</span>
-</div>
-<div class="flex gap-4">
-<span class="text-stone-600">[14:05:30]</span>
-<span class="text-primary-fixed-dim">SECURITY</span>
-<span class="text-stone-100">SSL Certificate validated. No immediate vulnerabilities detected.</span>
-</div>
-</div>
-<div class="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-on-surface to-transparent pointer-events-none"></div>
-</div>
-</section>
-</main>
-<!-- Curator's Tray -->
-<div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto min-w-[320px] bg-surface/70 backdrop-blur-xl border border-outline-variant/20 rounded-full px-6 py-3 shadow-2xl flex items-center justify-between gap-12 z-50">
-<div class="flex items-center gap-3">
-<div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
-<span class="text-xs font-bold text-on-surface uppercase tracking-widest">Active Scan</span>
-</div>
-<div class="h-4 w-[1px] bg-outline-variant/30"></div>
-<div class="flex gap-6">
-<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors group">
-<span class="material-symbols-outlined text-xl" data-icon="pause_circle">pause_circle</span>
-<span class="text-xs font-medium">Pause</span>
-</button>
-<button class="flex items-center gap-2 text-on-surface-variant hover:text-error transition-colors group">
-<span class="material-symbols-outlined text-xl" data-icon="cancel">cancel</span>
-<span class="text-xs font-medium">Abort</span>
-</button>
-</div>
-</div>
-</body></html>
+  </head>
+  <body
+    class="bg-surface text-on-surface selection:bg-primary-container selection:text-white"
+  >
+    <!-- TopNavBar Shell -->
+    <header
+      class="fixed top-0 right-0 left-0 h-20 bg-surface/70 backdrop-blur-xl z-40 flex justify-between items-center px-12 shadow-sm border-b border-surface-container"
+    >
+      <div class="flex items-center gap-12">
+        <div class="flex items-center gap-3">
+          <h1 class="font-serif text-xl text-indigo-900 leading-tight">
+            ReviewerAI
+          </h1>
+        </div>
+        <nav
+          class="hidden md:flex items-center gap-8 font-serif text-lg tracking-tight"
+        >
+          <a
+            class="text-stone-500 hover:text-indigo-600 transition-colors"
+            href="#"
+            >Dashboard</a
+          >
+          <a
+            class="text-indigo-700 font-semibold border-b-2 border-indigo-600 pb-1"
+            href="#"
+            >Active Analysis</a
+          >
+          <a
+            class="text-stone-500 hover:text-indigo-600 transition-colors"
+            href="#"
+            >History</a
+          >
+        </nav>
+      </div>
+      <div class="flex items-center gap-6">
+        <div
+          class="flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full"
+        >
+          <span
+            class="material-symbols-outlined text-outline text-lg"
+            data-icon="search"
+            >search</span
+          >
+          <input
+            class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-48"
+            placeholder="Search parameters..."
+            type="text"
+          />
+        </div>
+        <button class="text-stone-500 hover:text-indigo-600 transition-colors">
+          <span class="material-symbols-outlined" data-icon="settings"
+            >settings</span
+          >
+        </button>
+        <button class="text-stone-500 hover:text-indigo-600 transition-colors">
+          <span class="material-symbols-outlined" data-icon="help_outline"
+            >help_outline</span
+          >
+        </button>
+        <div
+          class="h-10 w-10 rounded-full border-2 border-surface-container-highest overflow-hidden"
+        >
+          <img
+            alt="Lead Developer Profile"
+            data-alt="Professional headshot of a developer in a minimalist studio setting with soft natural light"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDATQf53N6ONLii4iosTNPUSuc4oQo6R-oPDv2lYBbuBtW2WWX9piyBqHX8CDPlPrKWE_Lv4B5TXsvST5xJttmtYpC4K7azriPguz6NMD0X4yl1SxT-rp_JpEDEGhinKVW_wUL5JnxodsAqNDLVCIOPue1BiE3nj4lCyUxxIW7ccv_4aTErmiW1TfkPlqkZU-gkRLmAqILu2x_pY4Lrw3ubyJaNZ3D7UQrwz99XwVjuqELITKpDFBfjHb1ogdqKKxDDZO8LDGnejOfp"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="pt-32 pb-12 px-12 min-h-screen">
+      <!-- Editorial Header Section -->
+      <section
+        class="max-w-6xl mx-auto mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8"
+      >
+        <div class="max-w-2xl">
+          <span
+            class="text-[12px] uppercase tracking-[0.3em] text-primary font-bold mb-4 block"
+            >System Diagnostic</span
+          >
+          <h2 class="text-5xl font-serif text-on-surface leading-[1.1] mb-6">
+            System Analysis in Progress
+          </h2>
+          <p class="text-on-surface-variant text-lg leading-relaxed font-light">
+            ReviewerAI is currently cross-referencing heuristic patterns with
+            neural baseline signatures. Expect high-fidelity results within the
+            next three minutes.
+          </p>
+        </div>
+        <!-- Circular Progress Indicator -->
+        <div class="relative flex items-center justify-center">
+          <svg class="w-40 h-40 transform -rotate-90">
+            <circle
+              class="text-surface-container-highest"
+              cx="80"
+              cy="80"
+              fill="transparent"
+              r="70"
+              stroke="currentColor"
+              stroke-width="6"
+            ></circle>
+            <circle
+              class="text-primary transition-all duration-1000 ease-in-out"
+              cx="80"
+              cy="80"
+              fill="transparent"
+              r="70"
+              stroke="currentColor"
+              stroke-dasharray="440"
+              stroke-dashoffset="140.8"
+              stroke-width="6"
+            ></circle>
+          </svg>
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center"
+          >
+            <span class="text-3xl font-serif text-on-surface">68%</span>
+            <span
+              class="text-[10px] uppercase tracking-widest text-outline font-bold"
+              >Aggregated</span
+            >
+          </div>
+        </div>
+      </section>
+      <!-- Agent Grid -->
+      <section
+        class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+      >
+        <!-- Security Agent -->
+        <div
+          class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start mb-8">
+            <div class="p-3 bg-error-container/20 rounded-xl text-error">
+              <span
+                class="material-symbols-outlined"
+                data-icon="verified_user"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >verified_user</span
+              >
+            </div>
+            <span
+              class="px-3 py-1 bg-surface-container-high text-[10px] font-bold rounded-full text-on-surface-variant"
+              >Scanning</span
+            >
+          </div>
+          <h3 class="text-xl font-serif mb-2">Security Agent</h3>
+          <p class="text-sm text-on-surface-variant mb-6 leading-snug">
+            Reviewing encryption protocols and dependency vulnerabilities.
+          </p>
+          <div class="pt-4 border-t border-surface-container-high">
+            <div
+              class="flex items-center gap-2 text-[11px] font-medium text-primary"
+            >
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
+              ></div>
+              <span>Verifying SSL integrity...</span>
+            </div>
+          </div>
+        </div>
+        <!-- Performance Agent -->
+        <div
+          class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start mb-8">
+            <div
+              class="p-3 bg-secondary-container/20 rounded-xl text-secondary"
+            >
+              <span
+                class="material-symbols-outlined"
+                data-icon="speed"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >speed</span
+              >
+            </div>
+            <span
+              class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full"
+              >Completed</span
+            >
+          </div>
+          <h3 class="text-xl font-serif mb-2">Performance Agent</h3>
+          <p class="text-sm text-on-surface-variant mb-6 leading-snug">
+            Benchmarking execution speed and resource allocation curves.
+          </p>
+          <div class="pt-4 border-t border-surface-container-high">
+            <div
+              class="flex items-center gap-2 text-[11px] font-medium text-on-surface-variant"
+            >
+              <span
+                class="material-symbols-outlined text-[14px] text-green-600"
+                data-icon="check_circle"
+                >check_circle</span
+              >
+              <span>Optimization index: 0.94</span>
+            </div>
+          </div>
+        </div>
+        <!-- Logic Agent -->
+        <div
+          class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start mb-8">
+            <div class="p-3 bg-primary-container/10 rounded-xl text-primary">
+              <span
+                class="material-symbols-outlined"
+                data-icon="account_tree"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >account_tree</span
+              >
+            </div>
+            <span
+              class="px-3 py-1 bg-surface-container-high text-[10px] font-bold rounded-full text-on-surface-variant"
+              >Analyzing</span
+            >
+          </div>
+          <h3 class="text-xl font-serif mb-2">Logic Agent</h3>
+          <p class="text-sm text-on-surface-variant mb-6 leading-snug">
+            Mapping branch complexity and redundant condition states.
+          </p>
+          <div class="pt-4 border-t border-surface-container-high">
+            <div
+              class="flex items-center gap-2 text-[11px] font-medium text-primary"
+            >
+              <div
+                class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
+              ></div>
+              <span>Tracing recursion depth...</span>
+            </div>
+          </div>
+        </div>
+        <!-- Pattern Agent -->
+        <div
+          class="bg-surface-container-lowest rounded-[24px] p-6 shadow-sm border border-outline-variant/10 group hover:shadow-md transition-shadow opacity-60"
+        >
+          <div class="flex justify-between items-start mb-8">
+            <div class="p-3 bg-surface-container-high rounded-xl text-outline">
+              <span class="material-symbols-outlined" data-icon="grain"
+                >grain</span
+              >
+            </div>
+            <span
+              class="px-3 py-1 bg-surface-container text-[10px] font-bold rounded-full text-outline"
+              >Queued</span
+            >
+          </div>
+          <h3 class="text-xl font-serif mb-2">Pattern Agent</h3>
+          <p class="text-sm text-on-surface-variant mb-6 leading-snug">
+            Semantic similarity check and architectural alignment.
+          </p>
+          <div class="pt-4 border-t border-surface-container-high">
+            <div
+              class="flex items-center gap-2 text-[11px] font-medium text-outline"
+            >
+              <span>Waiting for Logic completion...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Global System Log (Terminal Style) -->
+      <section class="max-w-6xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+          <h3
+            class="text-sm uppercase tracking-widest font-bold text-on-surface-variant"
+          >
+            Global System Log
+          </h3>
+          <div class="flex gap-4">
+            <button
+              class="text-[11px] text-primary font-semibold hover:underline"
+            >
+              Download Report
+            </button>
+            <button class="text-[11px] text-outline font-semibold">
+              Clear Log
+            </button>
+          </div>
+        </div>
+        <div
+          class="bg-on-surface rounded-[24px] p-8 overflow-hidden relative group"
+        >
+          <div
+            class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"
+          ></div>
+          <div
+            class="font-mono text-xs leading-relaxed h-64 overflow-y-auto space-y-3 custom-scrollbar"
+          >
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:02:45]</span>
+              <span class="text-stone-300">CORE</span>
+              <span class="text-stone-500"
+                >Initializing Prism AI Engine...</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:02:48]</span>
+              <span class="text-primary-fixed-dim">SYSTEM</span>
+              <span class="text-stone-100"
+                >Handshake established with project_alpha_main.</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:03:02]</span>
+              <span class="text-stone-300">SECURITY</span>
+              <span class="text-stone-500"
+                >Starting deep scan on 1,402 dependency nodes.</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:03:15]</span>
+              <span class="text-stone-300">PERFORMANCE</span>
+              <span class="text-green-400"
+                >Baseline latency within acceptable range (12ms).</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:03:45]</span>
+              <span class="text-indigo-400">LOGIC</span>
+              <span class="text-stone-100"
+                >Found potential circular reference in 'auth_service.py' line
+                112.</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:04:12]</span>
+              <span class="text-indigo-400">LOGIC</span>
+              <span class="text-stone-500"
+                >Recursion depth confirmed: 4 levels. Analysis ongoing.</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:05:01]</span>
+              <span class="text-stone-300">CORE</span>
+              <span class="text-indigo-300 animate-pulse"
+                >Aggregating intermediate results to local buffer...</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:05:22]</span>
+              <span class="text-stone-300">SYSTEM</span>
+              <span class="text-stone-500"
+                >Memory usage: 452MB / 2.0GB (22.6%).</span
+              >
+            </div>
+            <div class="flex gap-4">
+              <span class="text-stone-600">[14:05:30]</span>
+              <span class="text-primary-fixed-dim">SECURITY</span>
+              <span class="text-stone-100"
+                >SSL Certificate validated. No immediate vulnerabilities
+                detected.</span
+              >
+            </div>
+          </div>
+          <div
+            class="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-on-surface to-transparent pointer-events-none"
+          ></div>
+        </div>
+      </section>
+    </main>
+    <!-- Curator's Tray -->
+    <div
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 w-auto min-w-[320px] bg-surface/70 backdrop-blur-xl border border-outline-variant/20 rounded-full px-6 py-3 shadow-2xl flex items-center justify-between gap-12 z-50"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+        <span
+          class="text-xs font-bold text-on-surface uppercase tracking-widest"
+          >Active Scan</span
+        >
+      </div>
+      <div class="h-4 w-[1px] bg-outline-variant/30"></div>
+      <div class="flex gap-6">
+        <button
+          class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors group"
+        >
+          <span
+            class="material-symbols-outlined text-xl"
+            data-icon="pause_circle"
+            >pause_circle</span
+          >
+          <span class="text-xs font-medium">Pause</span>
+        </button>
+        <button
+          class="flex items-center gap-2 text-on-surface-variant hover:text-error transition-colors group"
+        >
+          <span class="material-symbols-outlined text-xl" data-icon="cancel"
+            >cancel</span
+          >
+          <span class="text-xs font-medium">Abort</span>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -3,7 +3,11 @@ import { z } from "zod";
 import type { Finding } from "../../types/review";
 import type { PRData } from "./github";
 
-export function makeOrchestratorTools(findings: Finding[], token?: string, prData?: PRData | null) {
+export function makeOrchestratorTools(
+  findings: Finding[],
+  token?: string,
+  prData?: PRData | null
+) {
   const getFinding = tool({
     description: "Retrieve a specific finding by ID from the completed review",
     inputSchema: z.object({
@@ -12,17 +16,25 @@ export function makeOrchestratorTools(findings: Finding[], token?: string, prDat
     execute: async ({ id }) => {
       const finding = findings.find((f) => f.id === id);
       if (!finding) {
-        return { error: `Finding #${id} not found. Available IDs: ${findings.map((f) => f.id).join(", ")}` };
+        return {
+          error: `Finding #${id} not found. Available IDs: ${findings.map((f) => f.id).join(", ")}`
+        };
       }
       return finding;
     }
   });
 
   const suggestFix = tool({
-    description: "Fetch the affected file content and return context needed to suggest a concrete fix for a finding",
+    description:
+      "Fetch the affected file content and return context needed to suggest a concrete fix for a finding",
     inputSchema: z.object({
       findingId: z.string().describe("The finding ID to generate a fix for"),
-      contentsUrl: z.string().optional().describe("GitHub contents URL for the affected file (found in the diff). Provide this if available.")
+      contentsUrl: z
+        .string()
+        .optional()
+        .describe(
+          "GitHub contents URL for the affected file (found in the diff). Provide this if available."
+        )
     }),
     execute: async ({ findingId, contentsUrl }) => {
       const finding = findings.find((f) => f.id === findingId);

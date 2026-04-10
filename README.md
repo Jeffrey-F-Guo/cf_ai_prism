@@ -20,20 +20,20 @@ Paste a GitHub PR URL into the chat. A steering panel lets you choose which agen
 
 Each agent uses Claude Sonnet 4.6 (default) or DeepSeek Chat (selectable via the steering panel) and calls tools in a loop before producing findings.
 
-| Agent | Domain | Tools | Notes |
-|---|---|---|---|
-| **SecurityAgent** | Vulnerabilities, secrets, auth | `securityScan` (regex, always), `checkAuthPatterns` (LLM sub-call, if auth/crypto present), `analyzeDependencies` (OSV.dev CVE lookup, if dependency files changed), `fetchFileContent` | `analyzeDependencies` parses npm/PyPI/go.mod versions and queries OSV.dev |
-| **LogicAgent** | Null safety, async misuse, edge cases | `smartLogicEval` (regex, always), `traceDataFlow` (LLM sub-call, if null risk flagged), `detectRaceConditions` (LLM sub-call, if shared mutable state across async ops), `fetchFileContent` | `detectRaceConditions` only triggers on diffed shared state, not plain increments |
-| **PerformanceAgent** | Complexity, N+1s, memory leaks | `performanceAnalyze` (regex, always), `analyzeMemoryPatterns` (LLM sub-call, if caches/listeners present), `findBlockingOperations` (LLM sub-call, if sequential awaits), `fetchFileContent` | Bounded O(n) collections are at most `suggestion`, never `critical` |
-| **PatternAgent** | SOLID, code structure, duplication | `patternAnalyze` (regex, always), `checkArchitecturalPatterns` (LLM sub-call, if complexity >10 or length >40 lines), `searchSimilarPatterns` (Vectorize embedding search, if bound), `fetchFileContent` | Pattern findings never escalate to `critical` |
+| Agent                | Domain                                | Tools                                                                                                                                                                                                    | Notes                                                                             |
+| -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **SecurityAgent**    | Vulnerabilities, secrets, auth        | `securityScan` (regex, always), `checkAuthPatterns` (LLM sub-call, if auth/crypto present), `analyzeDependencies` (OSV.dev CVE lookup, if dependency files changed), `fetchFileContent`                  | `analyzeDependencies` parses npm/PyPI/go.mod versions and queries OSV.dev         |
+| **LogicAgent**       | Null safety, async misuse, edge cases | `smartLogicEval` (regex, always), `traceDataFlow` (LLM sub-call, if null risk flagged), `detectRaceConditions` (LLM sub-call, if shared mutable state across async ops), `fetchFileContent`              | `detectRaceConditions` only triggers on diffed shared state, not plain increments |
+| **PerformanceAgent** | Complexity, N+1s, memory leaks        | `performanceAnalyze` (regex, always), `analyzeMemoryPatterns` (LLM sub-call, if caches/listeners present), `findBlockingOperations` (LLM sub-call, if sequential awaits), `fetchFileContent`             | Bounded O(n) collections are at most `suggestion`, never `critical`               |
+| **PatternAgent**     | SOLID, code structure, duplication    | `patternAnalyze` (regex, always), `checkArchitecturalPatterns` (LLM sub-call, if complexity >10 or length >40 lines), `searchSimilarPatterns` (Vectorize embedding search, if bound), `fetchFileContent` | Pattern findings never escalate to `critical`                                     |
 
 **Rigor levels** control the step budget passed to each agent:
 
-| Level | Steps | Behavior |
-|---|---|---|
-| quick | 2 | Tier 1 regex tools only |
-| standard | 3 | Tier 1 + conditional Tier 2 sub-calls |
-| deep | 5 | Tier 2 tools called aggressively |
+| Level    | Steps | Behavior                              |
+| -------- | ----- | ------------------------------------- |
+| quick    | 2     | Tier 1 regex tools only               |
+| standard | 3     | Tier 1 + conditional Tier 2 sub-calls |
+| deep     | 5     | Tier 2 tools called aggressively      |
 
 **Severity scoring**: `max(100 - criticals×20 - warnings×5, 0)`. Suggestions don't affect the score.
 
@@ -65,15 +65,15 @@ ReviewWorkflow  (Cloudflare Workflow)
              → D1 persist + Vectorize embed (if bound)
 ```
 
-| Service | Purpose |
-|---|---|
-| Workers AI | Mistral Small 3.1 24B for the orchestrator (chat, PRISM_FIND responses) |
-| Claude API (Anthropic) | All four sub-agents and SummaryAgent — default model (`CLAUDE_API_KEY`) |
-| DeepSeek Chat | Alternative model for all agents — selectable per review (`DEEPSEEK_API_KEY`) |
-| Durable Objects | ReviewOrchestrator, SecurityAgent, LogicAgent, PerformanceAgent, PatternAgent, SummaryAgent |
-| Cloudflare Workflows | Durable fan-out with per-step retries |
-| D1 | Review and findings persistence, dashboard aggregation |
-| Vectorize | Cross-PR pattern embeddings for PatternAgent (optional — no-ops if not configured) |
+| Service                | Purpose                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| Workers AI             | Mistral Small 3.1 24B for the orchestrator (chat, PRISM_FIND responses)                     |
+| Claude API (Anthropic) | All four sub-agents and SummaryAgent — default model (`CLAUDE_API_KEY`)                     |
+| DeepSeek Chat          | Alternative model for all agents — selectable per review (`DEEPSEEK_API_KEY`)               |
+| Durable Objects        | ReviewOrchestrator, SecurityAgent, LogicAgent, PerformanceAgent, PatternAgent, SummaryAgent |
+| Cloudflare Workflows   | Durable fan-out with per-step retries                                                       |
+| D1                     | Review and findings persistence, dashboard aggregation                                      |
+| Vectorize              | Cross-PR pattern embeddings for PatternAgent (optional — no-ops if not configured)          |
 
 ## Running Locally
 
@@ -125,13 +125,13 @@ Paste any public GitHub PR URL. The steering panel appears after the PR is loade
 
 ## API
 
-| Method | Route | Description |
-|---|---|---|
-| GET | `/api/reviews` | Recent reviews (`?limit=N`, default 20, max 100) |
-| GET | `/api/reviews/:id` | Review metadata and finding counts |
-| GET | `/api/reviews/:id/findings` | Full findings list for a review |
-| DELETE | `/api/reviews/:id` | Delete a review and its findings |
-| GET | `/api/dashboard` | Aggregated stats: totals, 7-day velocity, severity split, top recurring issues |
+| Method | Route                       | Description                                                                    |
+| ------ | --------------------------- | ------------------------------------------------------------------------------ |
+| GET    | `/api/reviews`              | Recent reviews (`?limit=N`, default 20, max 100)                               |
+| GET    | `/api/reviews/:id`          | Review metadata and finding counts                                             |
+| GET    | `/api/reviews/:id/findings` | Full findings list for a review                                                |
+| DELETE | `/api/reviews/:id`          | Delete a review and its findings                                               |
+| GET    | `/api/dashboard`            | Aggregated stats: totals, 7-day velocity, severity split, top recurring issues |
 
 ## Project Structure
 

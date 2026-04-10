@@ -92,7 +92,9 @@ export function usePrism(): PrismState {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItem[]>([]);
-  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(
+    null
+  );
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [quotedFinding, setQuotedFinding] = useState<Finding | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
@@ -100,23 +102,27 @@ export function usePrism(): PrismState {
   const fetchHistory = useCallback(() => {
     fetch("/api/reviews?limit=20")
       .then((r) => r.json())
-      .then((rows: unknown) => (rows as HistoryRow[]))
+      .then((rows: unknown) => rows as HistoryRow[])
       .then((rows) => {
-        setReviewHistory(rows.map((row) => ({
-          id: row.id,
-          prNumber: row.pr_number,
-          prTitle: row.pr_title,
-          score: row.score,
-          timeAgo: formatTimeAgo(row.created_at),
-          owner: row.owner,
-          repo: row.repo,
-        })));
+        setReviewHistory(
+          rows.map((row) => ({
+            id: row.id,
+            prNumber: row.pr_number,
+            prTitle: row.pr_title,
+            score: row.score,
+            timeAgo: formatTimeAgo(row.created_at),
+            owner: row.owner,
+            repo: row.repo
+          }))
+        );
       })
       .catch(() => {});
   }, []);
 
   // Load history on mount
-  useEffect(() => { fetchHistory(); }, [fetchHistory]);
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const agent = useAgent<ReviewOrchestrator>({
     agent: "ReviewOrchestrator",
@@ -126,93 +132,117 @@ export function usePrism(): PrismState {
       (error: Event) => console.error("WebSocket error:", error),
       []
     ),
-    onMessage: useCallback((event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log("Broadcast event:", data);
+    onMessage: useCallback(
+      (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Broadcast event:", data);
 
-        if (data.type === "log_entry") {
-          setLogs((prev) => [
-            ...prev,
-            { id: crypto.randomUUID(), message: data.message, ts: Date.now() }
-          ]);
-        } else if (data.type === "stage_change") {
-          setStage(data.stage);
-        } else if (data.type === "agent_task") {
-          setAgents((prev) => prev.map((a) => {
-            if (a.id !== data.agent) return a;
-            // Mark previous active task as completed, append new active one
-            const updatedTasks = (a.tasks ?? []).map((t) =>
-              t.status === "active" ? { ...t, status: "completed" as const } : t
+          if (data.type === "log_entry") {
+            setLogs((prev) => [
+              ...prev,
+              { id: crypto.randomUUID(), message: data.message, ts: Date.now() }
+            ]);
+          } else if (data.type === "stage_change") {
+            setStage(data.stage);
+          } else if (data.type === "agent_task") {
+            setAgents((prev) =>
+              prev.map((a) => {
+                if (a.id !== data.agent) return a;
+                // Mark previous active task as completed, append new active one
+                const updatedTasks = (a.tasks ?? []).map((t) =>
+                  t.status === "active"
+                    ? { ...t, status: "completed" as const }
+                    : t
+                );
+                const newTask: import("../../types/review").AgentTask = {
+                  id: crypto.randomUUID(),
+                  text: data.text,
+                  status: "active"
+                };
+                return { ...a, tasks: [...updatedTasks, newTask] };
+              })
             );
-            const newTask: import("../../types/review").AgentTask = {
-              id: crypto.randomUUID(),
-              text: data.text,
-              status: "active"
-            };
-            return { ...a, tasks: [...updatedTasks, newTask] };
-          }));
-        } else if (data.type === "agent_update") {
-          setAgents((prev) => {
-            const existing = prev.find((a) => a.id === data.agent);
-            if (existing) {
-              // On completion, mark all tasks as completed
-              const updatedTasks = data.status === "completed"
-                ? existing.tasks.map((t) => ({ ...t, status: "completed" as const }))
-                : existing.tasks;
-              return prev.map((a) =>
-                a.id === data.agent ? { ...a, status: data.status, tasks: updatedTasks } : a
-              );
-            } else {
-              const iconMap: Record<string, string> = {
-                logic: "psychology",
-                security: "security",
-                performance: "speed",
-                pattern: "account_tree"
-              };
-              const colorMap: Record<string, "error" | "primary" | "secondary"> = {
-                logic: "primary",
-                security: "error",
-                performance: "secondary",
-                pattern: "primary"
-              };
-              const titleMap: Record<string, string> = {
-                logic: "Logic & Edge Cases",
-                security: "Security Agent",
-                performance: "Performance Profiler",
-                pattern: "Pattern Recognition"
-              };
-              return [
-                ...prev,
-                {
-                  id: data.agent,
-                  icon: iconMap[data.agent] || "help",
-                  iconColor: colorMap[data.agent] || "primary",
-                  title: titleMap[data.agent] || `${data.agent} Agent`,
-                  subtitle: "",
-                  status: data.status,
-                  tasks: []
-                }
-              ];
-            }
-          });
-        } else if (data.type === "pr_loaded") {
-          setPRMetadata(data.prMetadata);
-        } else if (data.type === "review_complete") {
-          setFindings(data.findings || []);
-          setReviewSummary(data.summary || null);
-          // Refresh history list after a short delay to let D1 write settle
-          setTimeout(fetchHistory, 500);
-        } else if (data.type === "api_error") {
-          setNotification(data.message ?? "Review failed — check your API configuration");
+          } else if (data.type === "agent_update") {
+            setAgents((prev) => {
+              const existing = prev.find((a) => a.id === data.agent);
+              if (existing) {
+                // On completion, mark all tasks as completed
+                const updatedTasks =
+                  data.status === "completed"
+                    ? existing.tasks.map((t) => ({
+                        ...t,
+                        status: "completed" as const
+                      }))
+                    : existing.tasks;
+                return prev.map((a) =>
+                  a.id === data.agent
+                    ? { ...a, status: data.status, tasks: updatedTasks }
+                    : a
+                );
+              } else {
+                const iconMap: Record<string, string> = {
+                  logic: "psychology",
+                  security: "security",
+                  performance: "speed",
+                  pattern: "account_tree"
+                };
+                const colorMap: Record<
+                  string,
+                  "error" | "primary" | "secondary"
+                > = {
+                  logic: "primary",
+                  security: "error",
+                  performance: "secondary",
+                  pattern: "primary"
+                };
+                const titleMap: Record<string, string> = {
+                  logic: "Logic & Edge Cases",
+                  security: "Security Agent",
+                  performance: "Performance Profiler",
+                  pattern: "Pattern Recognition"
+                };
+                return [
+                  ...prev,
+                  {
+                    id: data.agent,
+                    icon: iconMap[data.agent] || "help",
+                    iconColor: colorMap[data.agent] || "primary",
+                    title: titleMap[data.agent] || `${data.agent} Agent`,
+                    subtitle: "",
+                    status: data.status,
+                    tasks: []
+                  }
+                ];
+              }
+            });
+          } else if (data.type === "pr_loaded") {
+            setPRMetadata(data.prMetadata);
+          } else if (data.type === "review_complete") {
+            setFindings(data.findings || []);
+            setReviewSummary(data.summary || null);
+            // Refresh history list after a short delay to let D1 write settle
+            setTimeout(fetchHistory, 500);
+          } else if (data.type === "api_error") {
+            setNotification(
+              data.message ?? "Review failed — check your API configuration"
+            );
+          }
+        } catch {
+          // Not JSON, ignore
         }
-      } catch {
-        // Not JSON, ignore
-      }
-    }, [fetchHistory])
+      },
+      [fetchHistory]
+    )
   });
 
-  const { messages: rawMessages, sendMessage, clearHistory, stop, status } = useAgentChat({
+  const {
+    messages: rawMessages,
+    sendMessage,
+    clearHistory,
+    stop,
+    status
+  } = useAgentChat({
     agent
   });
 
@@ -222,22 +252,41 @@ export function usePrism(): PrismState {
   const messages = rawMessages
     .filter((m) => {
       if (m.role !== "user") return true;
-      const text = m.parts?.find((p) => p.type === "text") as { text?: string } | undefined;
+      const text = m.parts?.find((p) => p.type === "text") as
+        | { text?: string }
+        | undefined;
       return !text?.text?.startsWith("PRISM_STEERING:");
     }) // filter out steering config messages from chat display
     .map((m) => {
       if (m.role !== "user") return m;
-      const textPart = m.parts?.find((p) => p.type === "text") as { type: "text"; text?: string } | undefined;
+      const textPart = m.parts?.find((p) => p.type === "text") as
+        | { type: "text"; text?: string }
+        | undefined;
       if (!textPart?.text?.startsWith("PRISM_FIND:")) return m;
       // Replace structured prefix with human-readable label
       const nl = textPart.text.indexOf("\n");
       const userQuestion = nl >= 0 ? textPart.text.slice(nl + 1) : ""; // flag to check if user provided a question
       try {
-        const payload = JSON.parse(textPart.text.slice("PRISM_FIND:".length, nl >= 0 ? nl : textPart.text.length)) as { id: string; title: string };
+        const payload = JSON.parse(
+          textPart.text.slice(
+            "PRISM_FIND:".length,
+            nl >= 0 ? nl : textPart.text.length
+          )
+        ) as { id: string; title: string };
         const label = `Regarding finding #${payload.id} "${payload.title}": ${userQuestion ? `\n${userQuestion}` : ""}`;
-        return { ...m, parts: m.parts.map((p) => p.type === "text" ? { ...p, text: label } : p) };
+        return {
+          ...m,
+          parts: m.parts.map((p) =>
+            p.type === "text" ? { ...p, text: label } : p
+          )
+        };
       } catch {
-        return { ...m, parts: m.parts.map((p) => p.type === "text" ? { ...p, text: userQuestion } : p) };
+        return {
+          ...m,
+          parts: m.parts.map((p) =>
+            p.type === "text" ? { ...p, text: userQuestion } : p
+          )
+        };
       }
     });
 
@@ -287,7 +336,9 @@ export function usePrism(): PrismState {
         title: quotedFinding.title,
         severity: quotedFinding.severity,
         description: quotedFinding.description,
-        ...(quotedFinding.fileLocation ? { fileLocation: quotedFinding.fileLocation } : {}),
+        ...(quotedFinding.fileLocation
+          ? { fileLocation: quotedFinding.fileLocation }
+          : {}),
         ...(owner && repo ? { owner, repo } : {})
       };
       messageText = `PRISM_FIND:${JSON.stringify(payload)}\n${text}`;
@@ -296,59 +347,84 @@ export function usePrism(): PrismState {
     sendMessage({ role: "user", parts: [{ type: "text", text: messageText }] });
   }, [input, isStreaming, sendMessage, quotedFinding, prMetadata]);
 
-  const submitSteering = useCallback((config: SteeringConfig) => {
-    sendMessage({ role: "user", parts: [{ type: "text", text: `PRISM_STEERING:${JSON.stringify(config)}` }] });
-  }, [sendMessage]);
+  const submitSteering = useCallback(
+    (config: SteeringConfig) => {
+      sendMessage({
+        role: "user",
+        parts: [
+          { type: "text", text: `PRISM_STEERING:${JSON.stringify(config)}` }
+        ]
+      });
+    },
+    [sendMessage]
+  );
 
-  const deleteReview = useCallback((id: string) => {
-    // Optimistic removal
-    setReviewHistory((prev) => prev.filter((r) => r.id !== id));
-    fetch(`/api/reviews/${id}`, { method: "DELETE" }).catch(() => {
-      // Restore on failure
-      fetchHistory();
-    });
-  }, [fetchHistory]);
+  const deleteReview = useCallback(
+    (id: string) => {
+      // Optimistic removal
+      setReviewHistory((prev) => prev.filter((r) => r.id !== id));
+      fetch(`/api/reviews/${id}`, { method: "DELETE" }).catch(() => {
+        // Restore on failure
+        fetchHistory();
+      });
+    },
+    [fetchHistory]
+  );
 
   const loadHistoryReview = useCallback((id: string) => {
     Promise.all([
       fetch(`/api/reviews/${id}`).then((r) => r.json()),
       fetch(`/api/reviews/${id}/findings`).then((r) => r.json())
-    ]).then(([reviewRaw, findingsRaw]) => {
-      const review = reviewRaw as {
-        pr_number: number; pr_title: string; score: number;
-        critical: number; warnings: number; suggestions: number;
-        files_changed: number; owner: string; repo: string;
-        contributors: Array<{ login: string; avatarUrl: string }>;
-      };
-      const dbFindings = findingsRaw as Array<{
-        id: string; agent: string | null; severity: string; title: string;
-        description: string; file_location: string | null;
-      }>;
+    ])
+      .then(([reviewRaw, findingsRaw]) => {
+        const review = reviewRaw as {
+          pr_number: number;
+          pr_title: string;
+          score: number;
+          critical: number;
+          warnings: number;
+          suggestions: number;
+          files_changed: number;
+          owner: string;
+          repo: string;
+          contributors: Array<{ login: string; avatarUrl: string }>;
+        };
+        const dbFindings = findingsRaw as Array<{
+          id: string;
+          agent: string | null;
+          severity: string;
+          title: string;
+          description: string;
+          file_location: string | null;
+        }>;
 
-      setPRMetadata({
-        title: review.pr_title,
-        repoName: `${review.owner}/${review.repo}`,
-        prNumber: review.pr_number,
-        filesChanged: review.files_changed,
-        contributors: review.contributors ?? []
-      });
-      setReviewSummary({
-        score: review.score,
-        critical: review.critical,
-        warnings: review.warnings,
-        suggestions: review.suggestions
-      });
-      setFindings(dbFindings.map((f) => ({
-        id: f.id,
-        severity: f.severity as Finding["severity"],
-        title: f.title,
-        description: f.description,
-        agent: f.agent ?? undefined,
-        fileLocation: f.file_location ?? undefined
-      })));
-      setAgents([]);
-      setStage("completed");
-    }).catch(() => {});
+        setPRMetadata({
+          title: review.pr_title,
+          repoName: `${review.owner}/${review.repo}`,
+          prNumber: review.pr_number,
+          filesChanged: review.files_changed,
+          contributors: review.contributors ?? []
+        });
+        setReviewSummary({
+          score: review.score,
+          critical: review.critical,
+          warnings: review.warnings,
+          suggestions: review.suggestions
+        });
+        setFindings(
+          dbFindings.map((f) => ({
+            id: f.id,
+            severity: f.severity as Finding["severity"],
+            title: f.title,
+            description: f.description,
+            agent: f.agent ?? undefined,
+            fileLocation: f.file_location ?? undefined
+          }))
+        );
+        setAgents([]);
+        setStage("completed");
+      })
+      .catch(() => {});
   }, []);
 
   return {
@@ -382,6 +458,6 @@ export function usePrism(): PrismState {
     reviewSummary,
     logs,
     notification,
-    clearNotification: () => setNotification(null),
+    clearNotification: () => setNotification(null)
   };
 }

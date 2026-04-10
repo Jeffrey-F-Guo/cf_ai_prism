@@ -8,7 +8,12 @@ import type {
 import { ReviewHistory } from "../components/review/ReviewHistory";
 import { SummaryCard } from "../components/review/SummaryCard";
 import { ActivityLog } from "../components/review/ActivityLog";
-import { ChevronLeft, ChevronRight, HourglassIcon, SyncIcon } from "../components/shared/Icons";
+import {
+  ChevronLeft,
+  ChevronRight,
+  HourglassIcon,
+  SyncIcon
+} from "../components/shared/Icons";
 
 interface RepositoryPanelProps {
   rightCollapsed: boolean;

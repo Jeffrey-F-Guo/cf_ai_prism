@@ -1,14 +1,17 @@
 import type { Finding, FindingSeverity } from "../../../types/review";
 import { ReplyIcon } from "../shared/Icons";
 
-const severityConfig: Record<FindingSeverity, {
-  headerBg: string;
-  border: string;
-  badgeText: string;
-  icon: string;
-  iconColor: string;
-  label: string;
-}> = {
+const severityConfig: Record<
+  FindingSeverity,
+  {
+    headerBg: string;
+    border: string;
+    badgeText: string;
+    icon: string;
+    iconColor: string;
+    label: string;
+  }
+> = {
   critical: {
     headerBg: "bg-[#ffdad6]/15",
     border: "border-[#ba1a1a]",
@@ -43,20 +46,30 @@ const severityConfig: Record<FindingSeverity, {
   }
 };
 
-export function FindingCard({ finding, onReply }: { finding: Finding; onReply: () => void }) {
+export function FindingCard({
+  finding,
+  onReply
+}: {
+  finding: Finding;
+  onReply: () => void;
+}) {
   const config = severityConfig[finding.severity];
 
   return (
     <article className="bg-white rounded-[24px] shadow-sm group relative">
       {/* Header strip */}
-      <div className={`flex items-center gap-4 px-8 py-4 border-l-4 ${config.border} ${config.headerBg}`}>
+      <div
+        className={`flex items-center gap-4 px-8 py-4 border-l-4 ${config.border} ${config.headerBg}`}
+      >
         <span
           className={`material-symbols-outlined ${config.iconColor}`}
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
           {config.icon}
         </span>
-        <span className={`text-xs font-bold uppercase tracking-widest ${config.badgeText}`}>
+        <span
+          className={`text-xs font-bold uppercase tracking-widest ${config.badgeText}`}
+        >
           {config.label}
         </span>
         {finding.agent && (
@@ -73,8 +86,12 @@ export function FindingCard({ finding, onReply }: { finding: Finding; onReply: (
 
       {/* Body */}
       <div className="p-8">
-        <h3 className="font-headline text-xl font-bold mb-3 text-[#1b1c1a]">{finding.title}</h3>
-        <p className="text-[#464554] mb-6 leading-relaxed">{finding.description}</p>
+        <h3 className="font-headline text-xl font-bold mb-3 text-[#1b1c1a]">
+          {finding.title}
+        </h3>
+        <p className="text-[#464554] mb-6 leading-relaxed">
+          {finding.description}
+        </p>
 
         {/* Code diff
         {finding.codeDiff && finding.codeDiff.length > 0 && (

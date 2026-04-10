@@ -121,14 +121,20 @@ export class RateLimiter {
 
   constructor(config: RateLimiterConfig) {
     if (!Number.isInteger(config.limit) || config.limit < 1) {
-      throw new RangeError(`RateLimiter: limit must be a positive integer, got ${config.limit}`);
+      throw new RangeError(
+        `RateLimiter: limit must be a positive integer, got ${config.limit}`
+      );
     }
     if (!Number.isFinite(config.windowMs) || config.windowMs < 1) {
-      throw new RangeError(`RateLimiter: windowMs must be a positive finite number, got ${config.windowMs}`);
+      throw new RangeError(
+        `RateLimiter: windowMs must be a positive finite number, got ${config.windowMs}`
+      );
     }
     const maxKeys = config.maxKeys ?? 10_000;
     if (!Number.isInteger(maxKeys) || maxKeys < 1) {
-      throw new RangeError(`RateLimiter: maxKeys must be a positive integer, got ${maxKeys}`);
+      throw new RangeError(
+        `RateLimiter: maxKeys must be a positive integer, got ${maxKeys}`
+      );
     }
     this.config = { limit: config.limit, windowMs: config.windowMs, maxKeys };
   }
@@ -154,7 +160,12 @@ export class RateLimiter {
     if (counter === undefined) {
       if (this.counters.size >= this.config.maxKeys) {
         this.totalRejected++;
-        return { allowed: false, remaining: 0, retryAfterMs: this.config.windowMs, current: 0 };
+        return {
+          allowed: false,
+          remaining: 0,
+          retryAfterMs: this.config.windowMs,
+          current: 0
+        };
       }
       counter = new SlidingWindowCounter();
       this.counters.set(key, counter);
@@ -167,9 +178,10 @@ export class RateLimiter {
     let retryAfterMs = 0;
     if (!allowed) {
       const oldest = counter.oldestTimestamp();
-      retryAfterMs = oldest !== undefined
-        ? Math.max(0, oldest + this.config.windowMs - now)
-        : this.config.windowMs;
+      retryAfterMs =
+        oldest !== undefined
+          ? Math.max(0, oldest + this.config.windowMs - now)
+          : this.config.windowMs;
     }
 
     if (allowed) {
@@ -219,7 +231,7 @@ export class RateLimiter {
     return {
       trackedKeys: this.counters.size,
       totalRequestsAllowed: this.totalAllowed,
-      totalRequestsRejected: this.totalRejected,
+      totalRequestsRejected: this.totalRejected
     };
   }
 }

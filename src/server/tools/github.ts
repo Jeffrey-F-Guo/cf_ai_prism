@@ -11,8 +11,6 @@ export interface GitHubFile {
   contents_url: string;
 }
 
-
-
 export interface PRData {
   owner: string;
   repo: string;
@@ -99,7 +97,10 @@ export async function fetchPR(
     for (const commit of commits) {
       if (commit.author && !seen.has(commit.author.login)) {
         seen.add(commit.author.login);
-        contributors.push({ login: commit.author.login, avatarUrl: commit.author.avatar_url });
+        contributors.push({
+          login: commit.author.login,
+          avatarUrl: commit.author.avatar_url
+        });
       }
     }
   }

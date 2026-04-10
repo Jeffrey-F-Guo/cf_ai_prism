@@ -24,7 +24,15 @@ export class ReviewWorkflow extends AgentWorkflow<
   { agent: string; status: string }
 > {
   async run(event: AgentWorkflowEvent<ReviewParams>, step: AgentWorkflowStep) {
-    const { diff, agents: enabledAgents, focus, orchestratorId, rigor, repoContext, model } = event.payload;
+    const {
+      diff,
+      agents: enabledAgents,
+      focus,
+      orchestratorId,
+      rigor,
+      repoContext,
+      model
+    } = event.payload;
 
     // Fan out enabled agents in parallel — skipped agents return [] immediately
     const [logicResult, securityResult, performanceResult, patternResult] =
@@ -34,16 +42,35 @@ export class ReviewWorkflow extends AgentWorkflow<
               "logic-agent",
               { retries: { limit: 2, delay: "10 seconds" } },
               async () => {
-                await this.reportProgress({ agent: "logic", status: "running" });
-                this.broadcastToClients({ type: "log_entry", message: "Logic agent: analyzing edge cases and null handling..." });
+                await this.reportProgress({
+                  agent: "logic",
+                  status: "running"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message:
+                    "Logic agent: analyzing edge cases and null handling..."
+                });
                 const env = this.env as Env & {
                   LogicAgent: DurableObjectNamespace<LogicAgent>;
                 };
                 const id = env.LogicAgent.newUniqueId();
                 const agent = env.LogicAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus, orchestratorId, rigor, model);
-                await this.reportProgress({ agent: "logic", status: "complete" });
-                this.broadcastToClients({ type: "log_entry", message: `Logic agent: complete (${result.length} findings)` });
+                const result = await agent.analyzeCode(
+                  diff,
+                  focus,
+                  orchestratorId,
+                  rigor,
+                  model
+                );
+                await this.reportProgress({
+                  agent: "logic",
+                  status: "complete"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message: `Logic agent: complete (${result.length} findings)`
+                });
                 return [...result] as Finding[];
               }
             )
@@ -54,16 +81,34 @@ export class ReviewWorkflow extends AgentWorkflow<
               "security-agent",
               { retries: { limit: 2, delay: "10 seconds" } },
               async () => {
-                await this.reportProgress({ agent: "security", status: "running" });
-                this.broadcastToClients({ type: "log_entry", message: "Security agent: scanning for vulnerabilities..." });
+                await this.reportProgress({
+                  agent: "security",
+                  status: "running"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message: "Security agent: scanning for vulnerabilities..."
+                });
                 const env = this.env as Env & {
                   SecurityAgent: DurableObjectNamespace<SecurityAgent>;
                 };
                 const id = env.SecurityAgent.newUniqueId();
                 const agent = env.SecurityAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus, orchestratorId, rigor, model);
-                await this.reportProgress({ agent: "security", status: "complete" });
-                this.broadcastToClients({ type: "log_entry", message: `Security agent: complete (${result.length} findings)` });
+                const result = await agent.analyzeCode(
+                  diff,
+                  focus,
+                  orchestratorId,
+                  rigor,
+                  model
+                );
+                await this.reportProgress({
+                  agent: "security",
+                  status: "complete"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message: `Security agent: complete (${result.length} findings)`
+                });
                 return [...result] as Finding[];
               }
             )
@@ -74,16 +119,35 @@ export class ReviewWorkflow extends AgentWorkflow<
               "performance-agent",
               { retries: { limit: 2, delay: "10 seconds" } },
               async () => {
-                await this.reportProgress({ agent: "performance", status: "running" });
-                this.broadcastToClients({ type: "log_entry", message: "Performance agent: profiling complexity and memory..." });
+                await this.reportProgress({
+                  agent: "performance",
+                  status: "running"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message:
+                    "Performance agent: profiling complexity and memory..."
+                });
                 const env = this.env as Env & {
                   PerformanceAgent: DurableObjectNamespace<PerformanceAgent>;
                 };
                 const id = env.PerformanceAgent.newUniqueId();
                 const agent = env.PerformanceAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus, orchestratorId, rigor, model);
-                await this.reportProgress({ agent: "performance", status: "complete" });
-                this.broadcastToClients({ type: "log_entry", message: `Performance agent: complete (${result.length} findings)` });
+                const result = await agent.analyzeCode(
+                  diff,
+                  focus,
+                  orchestratorId,
+                  rigor,
+                  model
+                );
+                await this.reportProgress({
+                  agent: "performance",
+                  status: "complete"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message: `Performance agent: complete (${result.length} findings)`
+                });
                 return [...result] as Finding[];
               }
             )
@@ -94,16 +158,36 @@ export class ReviewWorkflow extends AgentWorkflow<
               "pattern-agent",
               { retries: { limit: 2, delay: "10 seconds" } },
               async () => {
-                await this.reportProgress({ agent: "pattern", status: "running" });
-                this.broadcastToClients({ type: "log_entry", message: "Pattern agent: checking SOLID principles and anti-patterns..." });
+                await this.reportProgress({
+                  agent: "pattern",
+                  status: "running"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message:
+                    "Pattern agent: checking SOLID principles and anti-patterns..."
+                });
                 const env = this.env as Env & {
                   PatternAgent: DurableObjectNamespace<PatternAgent>;
                 };
                 const id = env.PatternAgent.newUniqueId();
                 const agent = env.PatternAgent.get(id);
-                const result = await agent.analyzeCode(diff, focus, orchestratorId, rigor, repoContext, model);
-                await this.reportProgress({ agent: "pattern", status: "complete" });
-                this.broadcastToClients({ type: "log_entry", message: `Pattern agent: complete (${result.length} findings)` });
+                const result = await agent.analyzeCode(
+                  diff,
+                  focus,
+                  orchestratorId,
+                  rigor,
+                  repoContext,
+                  model
+                );
+                await this.reportProgress({
+                  agent: "pattern",
+                  status: "complete"
+                });
+                this.broadcastToClients({
+                  type: "log_entry",
+                  message: `Pattern agent: complete (${result.length} findings)`
+                });
                 return [...result] as Finding[];
               }
             )
@@ -111,12 +195,15 @@ export class ReviewWorkflow extends AgentWorkflow<
       ]);
 
     // SummaryAgent compiles, deduplicates, and scores all results
-    const summaryResult = await step.do(
+    const summaryResult = (await step.do(
       "summary-agent",
       { retries: { limit: 2, delay: "10 seconds" } },
       async () => {
         await this.reportProgress({ agent: "summary", status: "running" });
-        this.broadcastToClients({ type: "log_entry", message: "Summary agent: compiling and deduplicating findings..." });
+        this.broadcastToClients({
+          type: "log_entry",
+          message: "Summary agent: compiling and deduplicating findings..."
+        });
         const env = this.env as Env & {
           SummaryAgent: DurableObjectNamespace<SummaryAgent>;
         };
@@ -127,13 +214,16 @@ export class ReviewWorkflow extends AgentWorkflow<
           security: securityResult,
           performance: performanceResult,
           pattern: patternResult,
-          model,
+          model
         });
         await this.reportProgress({ agent: "summary", status: "complete" });
-        this.broadcastToClients({ type: "log_entry", message: `Review complete — ${result.findings.length} findings, score ${result.summary.score}/100` });
+        this.broadcastToClients({
+          type: "log_entry",
+          message: `Review complete — ${result.findings.length} findings, score ${result.summary.score}/100`
+        });
         return { findings: result.findings, summary: result.summary };
       }
-    ) as unknown as SummaryResult;
+    )) as unknown as SummaryResult;
 
     const { findings, summary } = summaryResult;
 

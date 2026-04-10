@@ -8,15 +8,43 @@ interface ReviewHistoryProps {
   onDelete: (id: string) => void;
 }
 
-export function ReviewHistory({ hasRecords, reviews, onSelect, onDelete }: ReviewHistoryProps) {
+export function ReviewHistory({
+  hasRecords,
+  reviews,
+  onSelect,
+  onDelete
+}: ReviewHistoryProps) {
   if (!hasRecords) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="w-12 h-12 bg-[#201f1f] rounded-xl flex items-center justify-center opacity-30">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11 4V11L15 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M3.5 8A8 8 0 1 1 4.5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M3.5 4V8H7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 22 22"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 4V11L15 13"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M3.5 8A8 8 0 1 1 4.5 15"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <path
+              d="M3.5 4V8H7.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
         <div className="space-y-1">
@@ -46,24 +74,40 @@ export function ReviewHistory({ hasRecords, reviews, onSelect, onDelete }: Revie
       {reviews.map((review) => (
         <div
           key={review.id}
-          onClick={() => onSelect(review.id)}
-          className="group relative p-4 rounded-lg bg-[#131313] border border-white/5 hover:bg-[#201f1f] transition-all cursor-pointer"
+          className="group relative p-4 rounded-lg bg-[#131313] border border-white/5 hover:bg-[#201f1f] transition-all"
         >
+          {/* Full-card select button (behind delete button) */}
+          <button
+            onClick={() => onSelect(review.id)}
+            aria-label={`Open review #${review.prNumber}`}
+            className="absolute inset-0 rounded-lg cursor-pointer"
+          />
           {/* Delete button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(review.id);
             }}
-            className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-[#494847] hover:text-[#ff6e84] hover:bg-[#ff6e84]/10 transition-all"
+            className="absolute top-2 right-2 z-10 w-5 h-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-[#494847] hover:text-[#ff6e84] hover:bg-[#ff6e84]/10 transition-all"
             title="Delete review"
           >
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L7 7M7 1L1 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 8 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L7 7M7 1L1 7"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
 
-          <div className="flex justify-between items-start mb-2 pr-4">
+          <div className="relative flex justify-between items-start mb-2 pr-4">
             <span className="text-xs font-bold leading-snug">
               #{review.prNumber} {review.prTitle}
             </span>
@@ -73,7 +117,7 @@ export function ReviewHistory({ hasRecords, reviews, onSelect, onDelete }: Revie
               {review.score}/100
             </div>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="relative flex items-center justify-between">
             <span className="text-[10px] text-gray-500 font-mono">
               {review.timeAgo}
             </span>

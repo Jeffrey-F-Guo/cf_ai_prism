@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-function ConfirmNewReviewModal({ isProcessing, onConfirm, onCancel }: {
+function ConfirmNewReviewModal({
+  isProcessing,
+  onConfirm,
+  onCancel
+}: {
   isProcessing: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -8,7 +12,9 @@ function ConfirmNewReviewModal({ isProcessing, onConfirm, onCancel }: {
   return (
     <div className="fixed inset-0 bg-[#1b1c1a]/20 backdrop-blur-sm z-[100] flex items-center justify-center">
       <div className="bg-white rounded-[24px] p-8 max-w-sm w-full mx-4 shadow-[0_16px_32px_-4px_rgba(27,28,26,0.12)]">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-6 ${isProcessing ? "bg-[#ffdad6]/40" : "bg-[#e3dfff]/40"}`}>
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center mb-6 ${isProcessing ? "bg-[#ffdad6]/40" : "bg-[#e3dfff]/40"}`}
+        >
           <span
             className={`material-symbols-outlined ${isProcessing ? "text-[#ba1a1a]" : "text-[#2a14b4]"}`}
             style={{ fontVariationSettings: "'FILL' 1" }}
@@ -49,7 +55,11 @@ import { ReviewHistoryPage } from "./layout/ReviewHistoryPage";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { usePrism } from "./hooks/usePrism";
 
-function CuratorsTray({ stage, activeTab, onNewReview }: {
+function CuratorsTray({
+  stage,
+  activeTab,
+  onNewReview
+}: {
   stage: string;
   activeTab: AppTab;
   onNewReview: () => void;
@@ -58,7 +68,9 @@ function CuratorsTray({ stage, activeTab, onNewReview }: {
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#fbf9f6]/70 backdrop-blur-xl rounded-full px-6 py-3 shadow-2xl flex items-center gap-8 border border-[#c7c4d7]/20">
       <div className="flex items-center gap-3 border-r border-[#c7c4d7]/30 pr-8">
-        <div className={`w-2 h-2 rounded-full ${isProcessing ? "bg-emerald-500 animate-ping" : "bg-emerald-500"}`} />
+        <div
+          className={`w-2 h-2 rounded-full ${isProcessing ? "bg-emerald-500 animate-ping" : "bg-emerald-500"}`}
+        />
         <span className="text-[10px] font-bold uppercase tracking-widest text-[#464554]">
           {isProcessing ? "Active Scan" : "System Optimal"}
         </span>
@@ -84,7 +96,9 @@ function CuratorsTray({ stage, activeTab, onNewReview }: {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>("review");
-  const [confirmModal, setConfirmModal] = useState<{ isProcessing: boolean } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isProcessing: boolean;
+  } | null>(null);
   const prism = usePrism();
 
   const handleSelectReview = (id: string) => {
@@ -109,7 +123,11 @@ export default function App() {
 
   return (
     <>
-      <Nav activeTab={activeTab} onTabChange={setActiveTab} onNewReview={handleNewReview} />
+      <Nav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onNewReview={handleNewReview}
+      />
       {activeTab === "history" ? (
         <ReviewHistoryPage
           reviewHistory={prism.reviewHistory}
@@ -140,9 +158,19 @@ export default function App() {
       )}
       {prism.notification && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#1b1c1a] text-white text-sm px-5 py-3 rounded-2xl shadow-xl">
-          <span className="material-symbols-outlined text-amber-400 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+          <span
+            className="material-symbols-outlined text-amber-400 text-base"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            warning
+          </span>
           <span>{prism.notification}</span>
-          <button onClick={prism.clearNotification} className="text-white/50 hover:text-white ml-1 leading-none">✕</button>
+          <button
+            onClick={prism.clearNotification}
+            className="text-white/50 hover:text-white ml-1 leading-none"
+          >
+            ✕
+          </button>
         </div>
       )}
     </>

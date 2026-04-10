@@ -1,85 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Prism | Refract your Codebase</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Prism | Refract your Codebase</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&amp;family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "surface-variant": "#e4e2df",
-                    "inverse-primary": "#c3c0ff",
-                    "on-primary-container": "#c1beff",
-                    "on-surface-variant": "#464554",
-                    "on-tertiary-fixed": "#360f00",
-                    "surface-container": "#efeeeb",
-                    "surface-container-highest": "#e4e2df",
-                    "inverse-on-surface": "#f2f0ed",
-                    "on-tertiary-container": "#ffb393",
-                    "secondary-fixed-dim": "#c3c0ff",
-                    "on-error-container": "#93000a",
-                    "secondary-fixed": "#e3dfff",
-                    "outline": "#777586",
-                    "primary-fixed-dim": "#c3c0ff",
-                    "on-surface": "#1b1c1a",
-                    "on-secondary-container": "#4c4a84",
-                    "on-primary": "#ffffff",
-                    "on-tertiary": "#ffffff",
-                    "primary-container": "#4338ca",
-                    "secondary": "#5a5893",
-                    "tertiary-container": "#8f3400",
-                    "inverse-surface": "#30312f",
-                    "tertiary-fixed-dim": "#ffb597",
-                    "surface-container-low": "#f5f3f0",
-                    "surface-bright": "#fbf9f6",
-                    "on-secondary-fixed": "#16124c",
-                    "on-secondary-fixed-variant": "#42407a",
-                    "surface-container-lowest": "#ffffff",
-                    "on-secondary": "#ffffff",
-                    "on-background": "#1b1c1a",
-                    "primary": "#2a14b4",
-                    "on-primary-fixed": "#100069",
-                    "on-error": "#ffffff",
-                    "secondary-container": "#c0bdff",
-                    "surface-dim": "#dbdad7",
-                    "outline-variant": "#c7c4d7",
-                    "background": "#fbf9f6",
-                    "on-tertiary-fixed-variant": "#7d2d00",
-                    "on-primary-fixed-variant": "#372abf",
-                    "error": "#ba1a1a",
-                    "error-container": "#ffdad6",
-                    "surface": "#fbf9f6",
-                    "tertiary-fixed": "#ffdbcd",
-                    "tertiary": "#692400",
-                    "surface-container-high": "#eae8e5",
-                    "surface-tint": "#5148d7",
-                    "primary-fixed": "#e3dfff"
+            colors: {
+              "surface-variant": "#e4e2df",
+              "inverse-primary": "#c3c0ff",
+              "on-primary-container": "#c1beff",
+              "on-surface-variant": "#464554",
+              "on-tertiary-fixed": "#360f00",
+              "surface-container": "#efeeeb",
+              "surface-container-highest": "#e4e2df",
+              "inverse-on-surface": "#f2f0ed",
+              "on-tertiary-container": "#ffb393",
+              "secondary-fixed-dim": "#c3c0ff",
+              "on-error-container": "#93000a",
+              "secondary-fixed": "#e3dfff",
+              outline: "#777586",
+              "primary-fixed-dim": "#c3c0ff",
+              "on-surface": "#1b1c1a",
+              "on-secondary-container": "#4c4a84",
+              "on-primary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "primary-container": "#4338ca",
+              secondary: "#5a5893",
+              "tertiary-container": "#8f3400",
+              "inverse-surface": "#30312f",
+              "tertiary-fixed-dim": "#ffb597",
+              "surface-container-low": "#f5f3f0",
+              "surface-bright": "#fbf9f6",
+              "on-secondary-fixed": "#16124c",
+              "on-secondary-fixed-variant": "#42407a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary": "#ffffff",
+              "on-background": "#1b1c1a",
+              primary: "#2a14b4",
+              "on-primary-fixed": "#100069",
+              "on-error": "#ffffff",
+              "secondary-container": "#c0bdff",
+              "surface-dim": "#dbdad7",
+              "outline-variant": "#c7c4d7",
+              background: "#fbf9f6",
+              "on-tertiary-fixed-variant": "#7d2d00",
+              "on-primary-fixed-variant": "#372abf",
+              error: "#ba1a1a",
+              "error-container": "#ffdad6",
+              surface: "#fbf9f6",
+              "tertiary-fixed": "#ffdbcd",
+              tertiary: "#692400",
+              "surface-container-high": "#eae8e5",
+              "surface-tint": "#5148d7",
+              "primary-fixed": "#e3dfff"
             },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
             },
-            "fontFamily": {
-                    "headline": ["Noto Serif"],
-                    "body": ["Public Sans"],
-                    "label": ["Public Sans"]
+            fontFamily: {
+              headline: ["Noto Serif"],
+              body: ["Public Sans"],
+              label: ["Public Sans"]
             }
-          },
-        },
-      }
+          }
+        }
+      };
     </script>
-<style>
+    <style>
       .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
         vertical-align: middle;
       }
       .academic-gradient {
@@ -89,197 +103,399 @@
         box-shadow: 0 16px 32px -4px rgba(27, 28, 26, 0.04);
       }
     </style>
-</head>
-<body class="bg-surface font-body text-on-surface antialiased">
-<!-- TopNavBar -->
-<nav class="fixed top-0 w-full z-50 bg-[#fbf9f6]/70 dark:bg-stone-950/70 backdrop-blur-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)]">
-<div class="max-w-7xl mx-auto px-12 py-6 flex justify-between items-center">
-<div class="flex items-center gap-8">
-<span class="text-2xl font-bold tracking-tight text-[#1b1c1a] dark:text-[#fbf9f6] font-headline">Prism</span>
-<div class="hidden md:flex gap-8">
-<a class="text-[#4338ca] dark:text-[#6366f1] border-b-2 border-[#4338ca] pb-1 font-['Noto_Serif'] antialiased" href="#">Dashboard</a>
-<a class="text-[#464554] dark:text-stone-400 font-medium hover:text-[#4338ca] dark:hover:text-[#6366f1] transition-colors duration-300 font-['Noto_Serif'] antialiased" href="#">History</a>
-<a class="text-[#464554] dark:text-stone-400 font-medium hover:text-[#4338ca] dark:hover:text-[#6366f1] transition-colors duration-300 font-['Noto_Serif'] antialiased" href="#">Settings</a>
-</div>
-</div>
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-4 text-on-surface-variant">
-<span class="material-symbols-outlined cursor-pointer active:opacity-70 hover:text-[#4338ca] transition-colors">notifications</span>
-<span class="material-symbols-outlined cursor-pointer active:opacity-70 hover:text-[#4338ca] transition-colors">account_circle</span>
-</div>
-<button class="bg-primary-container text-on-primary px-6 py-2 rounded-xl academic-gradient font-semibold cursor-pointer active:opacity-70 transition-all">
-                    New Review
-                </button>
-</div>
-</div>
-</nav>
-<main class="pt-32 pb-24 overflow-hidden">
-<!-- Hero Section -->
-<section class="max-w-7xl mx-auto px-12 text-center">
-<div class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container rounded-full mb-8">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">psychology</span>
-<span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase font-label">Autonomous PR intelligence</span>
-</div>
-<h1 class="text-7xl md:text-8xl font-headline font-black text-on-surface mb-12 tracking-tight leading-tight">
-                Refract your <br/><span class="text-primary italic">Codebase.</span>
-</h1>
-<!-- Central Curator Input -->
-<div class="max-w-3xl mx-auto mb-20">
-<div class="p-2 bg-surface-container-low rounded-[2rem] neural-paper-shadow group transition-all duration-500 focus-within:ring-1 focus-within:ring-primary/20">
-<div class="flex items-center bg-surface-container-lowest rounded-[1.75rem] px-6 py-4">
-<span class="material-symbols-outlined text-on-surface-variant mr-4">link</span>
-<input class="w-full bg-transparent border-none focus:ring-0 text-lg placeholder:text-on-surface-variant/40 font-body" placeholder="https://github.com/organization/repo/pull/123" type="text"/>
-<button class="academic-gradient text-on-primary px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
-                            Analyze
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
-</div>
-</div>
-<p class="mt-6 text-on-surface-variant text-sm font-label">Enter any GitHub Pull Request URL to initiate a deep logic scan.</p>
-</div>
-</section>
-<!-- Bento Layout: The Intelligence Suite -->
-<section class="max-w-7xl mx-auto px-12 grid grid-cols-1 md:grid-cols-12 gap-8">
-<!-- Large Asymmetric Content Block -->
-<div class="md:col-span-8 bg-surface-container-low rounded-[2.5rem] p-12 relative overflow-hidden group">
-<div class="relative z-10">
-<span class="font-label font-bold text-primary tracking-widest uppercase text-[10px] mb-4 block">Engine 01</span>
-<h2 class="text-4xl font-headline font-bold text-on-surface mb-6 max-w-md">Cognitive Structural Analysis</h2>
-<p class="text-on-surface-variant text-lg leading-relaxed max-w-lg mb-8">
-                        Prism doesn't just check for syntax. It maps the neural pathways of your changes, identifying architectural shifts and logic drift before they enter your main branch.
-                    </p>
-<div class="flex gap-4">
-<div class="bg-surface-container-lowest px-4 py-3 rounded-xl neural-paper-shadow flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">shield</span>
-<span class="text-sm font-semibold">Risk Mapping</span>
-</div>
-<div class="bg-surface-container-lowest px-4 py-3 rounded-xl neural-paper-shadow flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">speed</span>
-<span class="text-sm font-semibold">Latency Prediction</span>
-</div>
-</div>
-</div>
-<div class="absolute right-0 bottom-0 w-2/3 h-full translate-x-1/4 translate-y-1/4 opacity-40 group-hover:translate-y-1/8 transition-transform duration-700">
-<img class="w-full h-full object-cover rounded-tl-[4rem]" data-alt="abstract 3D glass refraction spheres with sharp focus and soft neural paper background textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD18zWO6dMcDdJpQfM2-WyLyytktCTfkMFuAFsaGlpOpXYVpEzErYfbwjm5ncQYIO3-mtBakF-gfK6OYrrDbURuciojtspqWXDWLMEzOcK4lEUHZSc1A-Zrgr3TH4yd_z3f7zh40Dqu_D6sGwaWhrEOLrH_IuulY88DD0i726UaMYU01bg4PxD3ueB9C_OPeoVBIUEZBlKYad9oeD8aK27WLmUSMIsc7AUjrDPEHV5DqERPTXTPG8YRenVxAGuHvo8fUJ0sh71lZTl9"/>
-</div>
-</div>
-<!-- Side Curator Tray -->
-<div class="md:col-span-4 flex flex-col gap-8">
-<div class="bg-primary-container p-8 rounded-[2.5rem] text-on-primary academic-gradient h-full flex flex-col justify-between">
-<div>
-<span class="material-symbols-outlined text-4xl mb-6">bolt</span>
-<h3 class="text-2xl font-headline font-bold mb-4">Instant Refactoring Proposals</h3>
-<p class="text-on-primary-container/80 text-sm leading-relaxed">
-                            Receive autonomous code suggestions that align with your project's specific design patterns and performance goals.
-                        </p>
-</div>
-<button class="mt-8 bg-surface-container-lowest text-primary py-3 rounded-xl font-bold w-full">View Samples</button>
-</div>
-</div>
-<!-- Lower Detail Grid -->
-<div class="md:col-span-4 bg-surface-container-high rounded-[2.5rem] p-10">
-<span class="material-symbols-outlined text-primary mb-4">grid_view</span>
-<h4 class="text-xl font-headline font-bold mb-3">Pattern Matching</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">
-                    Automatically detects deviations from established repository patterns and suggests alignment.
-                </p>
-</div>
-<div class="md:col-span-4 bg-surface-container-lowest border border-outline-variant/15 rounded-[2.5rem] p-10 neural-paper-shadow">
-<span class="material-symbols-outlined text-primary mb-4">psychology</span>
-<h4 class="text-xl font-headline font-bold mb-3">Intent Verification</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">
-                    Compares code changes against PR descriptions to ensure the implementation matches the stated intent.
-                </p>
-</div>
-<div class="md:col-span-4 bg-surface-container-low rounded-[2.5rem] p-10">
-<span class="material-symbols-outlined text-primary mb-4">history</span>
-<h4 class="text-xl font-headline font-bold mb-3">Regression DNA</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">
-                    Traces the history of logic changes to prevent the re-introduction of previously fixed bugs.
-                </p>
-</div>
-</section>
-<!-- Academic Editorial Section -->
-<section class="max-w-7xl mx-auto px-12 mt-32">
-<div class="grid md:grid-cols-2 items-center gap-20">
-<div class="relative">
-<img class="rounded-[3rem] grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl" data-alt="monochrome top-down shot of a minimalist workstation with a black laptop and a single glass prism reflecting light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBec7HW8p_GvNWXN8tHdv3fmrcaR31C6DSJLjS8kYVIccig9pjjJD_KtEdc9V1wJ572z8RpN68DQeL-LBSK8ipj9_0_nr5h-H0wa-0KtMFuIPeP0s2mdFn-JUBCU93FDrQYjjuLOQ89g8joFBNZ5uljMwOzs9YOTAJ5vPR36W4bPTgvmtlbnLryFgj4W4pNfENmMNBJdp_-CEJbHKFGZnihewGmMRv8no3EPa5BV4Axeh6VsGRObEQcA9-U0Bt1-BmuKJDt3cJAmMy2"/>
-<div class="absolute -bottom-10 -right-10 bg-surface p-8 rounded-[2rem] neural-paper-shadow max-w-[240px]">
-<p class="text-xs font-label uppercase tracking-widest text-primary font-bold mb-2">The Prism Standard</p>
-<p class="text-sm font-headline italic">"Code is the literature of the machine; it deserves a curator's eye."</p>
-</div>
-</div>
-<div class="pl-0 md:pl-12">
-<h2 class="text-5xl font-headline font-black mb-8 leading-tight">A more civilized approach to <span class="italic underline decoration-primary/30 underline-offset-8">Review</span>.</h2>
-<div class="space-y-8">
-<div class="flex gap-6">
-<div class="text-primary font-headline text-3xl font-bold">01</div>
-<div>
-<h5 class="text-lg font-bold mb-2">Deep Context Synthesis</h5>
-<p class="text-on-surface-variant text-sm leading-relaxed">Prism reads your entire dependency graph to understand how a single change ripples across the ecosystem.</p>
-</div>
-</div>
-<div class="flex gap-6">
-<div class="text-primary font-headline text-3xl font-bold">02</div>
-<div>
-<h5 class="text-lg font-bold mb-2">Semantic Diffing</h5>
-<p class="text-on-surface-variant text-sm leading-relaxed">Move beyond red and green lines. See the evolution of logic and intent in plain English summaries.</p>
-</div>
-</div>
-<div class="flex gap-6">
-<div class="text-primary font-headline text-3xl font-bold">03</div>
-<div>
-<h5 class="text-lg font-bold mb-2">Proactive Guardrails</h5>
-<p class="text-on-surface-variant text-sm leading-relaxed">Identify security vulnerabilities and performance bottlenecks before the CI pipeline even starts.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-</main>
-<!-- Footer: The Curator's Tray -->
-<footer class="bg-surface-container-low py-16">
-<div class="max-w-7xl mx-auto px-12 grid grid-cols-1 md:grid-cols-4 gap-12">
-<div class="md:col-span-2">
-<span class="text-3xl font-bold font-headline text-on-surface mb-6 block">Prism</span>
-<p class="text-on-surface-variant max-w-sm mb-8 font-body leading-relaxed">
-                    Elevating the craft of software engineering through academic rigor and autonomous intelligence. Built for teams who treat code as an asset, not a liability.
-                </p>
-<div class="flex gap-4">
-<a class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined text-lg">terminal</span>
-</a>
-<a class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined text-lg">code</span>
-</a>
-</div>
-</div>
-<div>
-<h6 class="font-bold uppercase tracking-widest text-[10px] text-on-surface mb-6">Platform</h6>
-<ul class="space-y-4 text-sm text-on-surface-variant font-medium">
-<li><a class="hover:text-primary transition-colors" href="#">Analyzer Engine</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Integration Hub</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Pricing Tiers</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Security Model</a></li>
-</ul>
-</div>
-<div>
-<h6 class="font-bold uppercase tracking-widest text-[10px] text-on-surface mb-6">Academy</h6>
-<ul class="space-y-4 text-sm text-on-surface-variant font-medium">
-<li><a class="hover:text-primary transition-colors" href="#">Research Papers</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Documentation</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Engineering Blog</a></li>
-<li><a class="hover:text-primary transition-colors" href="#">Logic Patterns</a></li>
-</ul>
-</div>
-</div>
-<div class="max-w-7xl mx-auto px-12 mt-16 pt-8 border-t border-outline-variant/10 flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-on-surface-variant/60">
-<span>© 2024 Prism Intelligence. All rights reserved.</span>
-<div class="flex gap-6">
-<a class="hover:text-on-surface" href="#">Privacy Protocol</a>
-<a class="hover:text-on-surface" href="#">Terms of Service</a>
-</div>
-</div>
-</footer>
-</body></html>
+  </head>
+  <body class="bg-surface font-body text-on-surface antialiased">
+    <!-- TopNavBar -->
+    <nav
+      class="fixed top-0 w-full z-50 bg-[#fbf9f6]/70 dark:bg-stone-950/70 backdrop-blur-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)]"
+    >
+      <div
+        class="max-w-7xl mx-auto px-12 py-6 flex justify-between items-center"
+      >
+        <div class="flex items-center gap-8">
+          <span
+            class="text-2xl font-bold tracking-tight text-[#1b1c1a] dark:text-[#fbf9f6] font-headline"
+            >Prism</span
+          >
+          <div class="hidden md:flex gap-8">
+            <a
+              class="text-[#4338ca] dark:text-[#6366f1] border-b-2 border-[#4338ca] pb-1 font-['Noto_Serif'] antialiased"
+              href="#"
+              >Dashboard</a
+            >
+            <a
+              class="text-[#464554] dark:text-stone-400 font-medium hover:text-[#4338ca] dark:hover:text-[#6366f1] transition-colors duration-300 font-['Noto_Serif'] antialiased"
+              href="#"
+              >History</a
+            >
+            <a
+              class="text-[#464554] dark:text-stone-400 font-medium hover:text-[#4338ca] dark:hover:text-[#6366f1] transition-colors duration-300 font-['Noto_Serif'] antialiased"
+              href="#"
+              >Settings</a
+            >
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 text-on-surface-variant">
+            <span
+              class="material-symbols-outlined cursor-pointer active:opacity-70 hover:text-[#4338ca] transition-colors"
+              >notifications</span
+            >
+            <span
+              class="material-symbols-outlined cursor-pointer active:opacity-70 hover:text-[#4338ca] transition-colors"
+              >account_circle</span
+            >
+          </div>
+          <button
+            class="bg-primary-container text-on-primary px-6 py-2 rounded-xl academic-gradient font-semibold cursor-pointer active:opacity-70 transition-all"
+          >
+            New Review
+          </button>
+        </div>
+      </div>
+    </nav>
+    <main class="pt-32 pb-24 overflow-hidden">
+      <!-- Hero Section -->
+      <section class="max-w-7xl mx-auto px-12 text-center">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container rounded-full mb-8"
+        >
+          <span
+            class="material-symbols-outlined text-primary text-sm"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >psychology</span
+          >
+          <span
+            class="text-xs font-bold tracking-widest text-on-surface-variant uppercase font-label"
+            >Autonomous PR intelligence</span
+          >
+        </div>
+        <h1
+          class="text-7xl md:text-8xl font-headline font-black text-on-surface mb-12 tracking-tight leading-tight"
+        >
+          Refract your <br /><span class="text-primary italic">Codebase.</span>
+        </h1>
+        <!-- Central Curator Input -->
+        <div class="max-w-3xl mx-auto mb-20">
+          <div
+            class="p-2 bg-surface-container-low rounded-[2rem] neural-paper-shadow group transition-all duration-500 focus-within:ring-1 focus-within:ring-primary/20"
+          >
+            <div
+              class="flex items-center bg-surface-container-lowest rounded-[1.75rem] px-6 py-4"
+            >
+              <span
+                class="material-symbols-outlined text-on-surface-variant mr-4"
+                >link</span
+              >
+              <input
+                class="w-full bg-transparent border-none focus:ring-0 text-lg placeholder:text-on-surface-variant/40 font-body"
+                placeholder="https://github.com/organization/repo/pull/123"
+                type="text"
+              />
+              <button
+                class="academic-gradient text-on-primary px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
+              >
+                Analyze
+                <span class="material-symbols-outlined text-sm"
+                  >arrow_forward</span
+                >
+              </button>
+            </div>
+          </div>
+          <p class="mt-6 text-on-surface-variant text-sm font-label">
+            Enter any GitHub Pull Request URL to initiate a deep logic scan.
+          </p>
+        </div>
+      </section>
+      <!-- Bento Layout: The Intelligence Suite -->
+      <section
+        class="max-w-7xl mx-auto px-12 grid grid-cols-1 md:grid-cols-12 gap-8"
+      >
+        <!-- Large Asymmetric Content Block -->
+        <div
+          class="md:col-span-8 bg-surface-container-low rounded-[2.5rem] p-12 relative overflow-hidden group"
+        >
+          <div class="relative z-10">
+            <span
+              class="font-label font-bold text-primary tracking-widest uppercase text-[10px] mb-4 block"
+              >Engine 01</span
+            >
+            <h2
+              class="text-4xl font-headline font-bold text-on-surface mb-6 max-w-md"
+            >
+              Cognitive Structural Analysis
+            </h2>
+            <p
+              class="text-on-surface-variant text-lg leading-relaxed max-w-lg mb-8"
+            >
+              Prism doesn't just check for syntax. It maps the neural pathways
+              of your changes, identifying architectural shifts and logic drift
+              before they enter your main branch.
+            </p>
+            <div class="flex gap-4">
+              <div
+                class="bg-surface-container-lowest px-4 py-3 rounded-xl neural-paper-shadow flex items-center gap-3"
+              >
+                <span class="material-symbols-outlined text-primary"
+                  >shield</span
+                >
+                <span class="text-sm font-semibold">Risk Mapping</span>
+              </div>
+              <div
+                class="bg-surface-container-lowest px-4 py-3 rounded-xl neural-paper-shadow flex items-center gap-3"
+              >
+                <span class="material-symbols-outlined text-primary"
+                  >speed</span
+                >
+                <span class="text-sm font-semibold">Latency Prediction</span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="absolute right-0 bottom-0 w-2/3 h-full translate-x-1/4 translate-y-1/4 opacity-40 group-hover:translate-y-1/8 transition-transform duration-700"
+          >
+            <img
+              class="w-full h-full object-cover rounded-tl-[4rem]"
+              data-alt="abstract 3D glass refraction spheres with sharp focus and soft neural paper background textures"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD18zWO6dMcDdJpQfM2-WyLyytktCTfkMFuAFsaGlpOpXYVpEzErYfbwjm5ncQYIO3-mtBakF-gfK6OYrrDbURuciojtspqWXDWLMEzOcK4lEUHZSc1A-Zrgr3TH4yd_z3f7zh40Dqu_D6sGwaWhrEOLrH_IuulY88DD0i726UaMYU01bg4PxD3ueB9C_OPeoVBIUEZBlKYad9oeD8aK27WLmUSMIsc7AUjrDPEHV5DqERPTXTPG8YRenVxAGuHvo8fUJ0sh71lZTl9"
+            />
+          </div>
+        </div>
+        <!-- Side Curator Tray -->
+        <div class="md:col-span-4 flex flex-col gap-8">
+          <div
+            class="bg-primary-container p-8 rounded-[2.5rem] text-on-primary academic-gradient h-full flex flex-col justify-between"
+          >
+            <div>
+              <span class="material-symbols-outlined text-4xl mb-6">bolt</span>
+              <h3 class="text-2xl font-headline font-bold mb-4">
+                Instant Refactoring Proposals
+              </h3>
+              <p class="text-on-primary-container/80 text-sm leading-relaxed">
+                Receive autonomous code suggestions that align with your
+                project's specific design patterns and performance goals.
+              </p>
+            </div>
+            <button
+              class="mt-8 bg-surface-container-lowest text-primary py-3 rounded-xl font-bold w-full"
+            >
+              View Samples
+            </button>
+          </div>
+        </div>
+        <!-- Lower Detail Grid -->
+        <div
+          class="md:col-span-4 bg-surface-container-high rounded-[2.5rem] p-10"
+        >
+          <span class="material-symbols-outlined text-primary mb-4"
+            >grid_view</span
+          >
+          <h4 class="text-xl font-headline font-bold mb-3">Pattern Matching</h4>
+          <p class="text-on-surface-variant text-sm leading-relaxed">
+            Automatically detects deviations from established repository
+            patterns and suggests alignment.
+          </p>
+        </div>
+        <div
+          class="md:col-span-4 bg-surface-container-lowest border border-outline-variant/15 rounded-[2.5rem] p-10 neural-paper-shadow"
+        >
+          <span class="material-symbols-outlined text-primary mb-4"
+            >psychology</span
+          >
+          <h4 class="text-xl font-headline font-bold mb-3">
+            Intent Verification
+          </h4>
+          <p class="text-on-surface-variant text-sm leading-relaxed">
+            Compares code changes against PR descriptions to ensure the
+            implementation matches the stated intent.
+          </p>
+        </div>
+        <div
+          class="md:col-span-4 bg-surface-container-low rounded-[2.5rem] p-10"
+        >
+          <span class="material-symbols-outlined text-primary mb-4"
+            >history</span
+          >
+          <h4 class="text-xl font-headline font-bold mb-3">Regression DNA</h4>
+          <p class="text-on-surface-variant text-sm leading-relaxed">
+            Traces the history of logic changes to prevent the re-introduction
+            of previously fixed bugs.
+          </p>
+        </div>
+      </section>
+      <!-- Academic Editorial Section -->
+      <section class="max-w-7xl mx-auto px-12 mt-32">
+        <div class="grid md:grid-cols-2 items-center gap-20">
+          <div class="relative">
+            <img
+              class="rounded-[3rem] grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl"
+              data-alt="monochrome top-down shot of a minimalist workstation with a black laptop and a single glass prism reflecting light"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBec7HW8p_GvNWXN8tHdv3fmrcaR31C6DSJLjS8kYVIccig9pjjJD_KtEdc9V1wJ572z8RpN68DQeL-LBSK8ipj9_0_nr5h-H0wa-0KtMFuIPeP0s2mdFn-JUBCU93FDrQYjjuLOQ89g8joFBNZ5uljMwOzs9YOTAJ5vPR36W4bPTgvmtlbnLryFgj4W4pNfENmMNBJdp_-CEJbHKFGZnihewGmMRv8no3EPa5BV4Axeh6VsGRObEQcA9-U0Bt1-BmuKJDt3cJAmMy2"
+            />
+            <div
+              class="absolute -bottom-10 -right-10 bg-surface p-8 rounded-[2rem] neural-paper-shadow max-w-[240px]"
+            >
+              <p
+                class="text-xs font-label uppercase tracking-widest text-primary font-bold mb-2"
+              >
+                The Prism Standard
+              </p>
+              <p class="text-sm font-headline italic">
+                "Code is the literature of the machine; it deserves a curator's
+                eye."
+              </p>
+            </div>
+          </div>
+          <div class="pl-0 md:pl-12">
+            <h2 class="text-5xl font-headline font-black mb-8 leading-tight">
+              A more civilized approach to
+              <span
+                class="italic underline decoration-primary/30 underline-offset-8"
+                >Review</span
+              >.
+            </h2>
+            <div class="space-y-8">
+              <div class="flex gap-6">
+                <div class="text-primary font-headline text-3xl font-bold">
+                  01
+                </div>
+                <div>
+                  <h5 class="text-lg font-bold mb-2">Deep Context Synthesis</h5>
+                  <p class="text-on-surface-variant text-sm leading-relaxed">
+                    Prism reads your entire dependency graph to understand how a
+                    single change ripples across the ecosystem.
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-6">
+                <div class="text-primary font-headline text-3xl font-bold">
+                  02
+                </div>
+                <div>
+                  <h5 class="text-lg font-bold mb-2">Semantic Diffing</h5>
+                  <p class="text-on-surface-variant text-sm leading-relaxed">
+                    Move beyond red and green lines. See the evolution of logic
+                    and intent in plain English summaries.
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-6">
+                <div class="text-primary font-headline text-3xl font-bold">
+                  03
+                </div>
+                <div>
+                  <h5 class="text-lg font-bold mb-2">Proactive Guardrails</h5>
+                  <p class="text-on-surface-variant text-sm leading-relaxed">
+                    Identify security vulnerabilities and performance
+                    bottlenecks before the CI pipeline even starts.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Footer: The Curator's Tray -->
+    <footer class="bg-surface-container-low py-16">
+      <div
+        class="max-w-7xl mx-auto px-12 grid grid-cols-1 md:grid-cols-4 gap-12"
+      >
+        <div class="md:col-span-2">
+          <span
+            class="text-3xl font-bold font-headline text-on-surface mb-6 block"
+            >Prism</span
+          >
+          <p
+            class="text-on-surface-variant max-w-sm mb-8 font-body leading-relaxed"
+          >
+            Elevating the craft of software engineering through academic rigor
+            and autonomous intelligence. Built for teams who treat code as an
+            asset, not a liability.
+          </p>
+          <div class="flex gap-4">
+            <a
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:text-primary transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined text-lg">terminal</span>
+            </a>
+            <a
+              class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:text-primary transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined text-lg">code</span>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h6
+            class="font-bold uppercase tracking-widest text-[10px] text-on-surface mb-6"
+          >
+            Platform
+          </h6>
+          <ul class="space-y-4 text-sm text-on-surface-variant font-medium">
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Analyzer Engine</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Integration Hub</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Pricing Tiers</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Security Model</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h6
+            class="font-bold uppercase tracking-widest text-[10px] text-on-surface mb-6"
+          >
+            Academy
+          </h6>
+          <ul class="space-y-4 text-sm text-on-surface-variant font-medium">
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Research Papers</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Documentation</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Engineering Blog</a
+              >
+            </li>
+            <li>
+              <a class="hover:text-primary transition-colors" href="#"
+                >Logic Patterns</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="max-w-7xl mx-auto px-12 mt-16 pt-8 border-t border-outline-variant/10 flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-on-surface-variant/60"
+      >
+        <span>© 2024 Prism Intelligence. All rights reserved.</span>
+        <div class="flex gap-6">
+          <a class="hover:text-on-surface" href="#">Privacy Protocol</a>
+          <a class="hover:text-on-surface" href="#">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

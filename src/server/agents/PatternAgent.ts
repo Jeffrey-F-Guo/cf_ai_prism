@@ -3,33 +3,62 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText, Output, stepCountIs } from "ai";
 import { makeFetchFileContentTool } from "../tools/github";
-import { patternAnalyze, makeSearchSimilarPatternsTool, makeCheckArchitecturalPatternsTool } from "../tools/PatternTools";
+import {
+  patternAnalyze,
+  makeSearchSimilarPatternsTool,
+  makeCheckArchitecturalPatternsTool
+} from "../tools/PatternTools";
 import { agentFindingSchema } from "../tools/schemas";
-import { PATTERN_SEVERITY_RUBRIC, PATTERN_EXTRACTION_REMINDER } from "../tools/prompts";
+import {
+  PATTERN_SEVERITY_RUBRIC,
+  PATTERN_EXTRACTION_REMINDER
+} from "../tools/prompts";
 import type { Finding } from "../../types/review";
 
 export class PatternAgent extends Agent<Env> {
-  async analyzeCode(diff: string, focus?: string, orchestratorId?: string, rigor?: "quick" | "standard" | "deep", repoContext?: string, model?: "claude" | "deepseek"): Promise<Finding[]> {
+  async analyzeCode(
+    diff: string,
+    focus?: string,
+    orchestratorId?: string,
+    rigor?: "quick" | "standard" | "deep",
+    repoContext?: string,
+    model?: "claude" | "deepseek"
+  ): Promise<Finding[]> {
     const modelPref = model ?? "claude";
-    const llm = modelPref === "claude"
-      ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })("claude-sonnet-4-6")
-      : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })("deepseek-chat");
-    const extractLlm = modelPref === "claude"
-      ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })("claude-haiku-4-5-20251001")
-      : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })("deepseek-chat");
+    const llm =
+      modelPref === "claude"
+        ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })(
+            "claude-sonnet-4-6"
+          )
+        : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })(
+            "deepseek-chat"
+          );
+    const extractLlm =
+      modelPref === "claude"
+        ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })(
+            "claude-haiku-4-5-20251001"
+          )
+        : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })(
+            "deepseek-chat"
+          );
 
     const searchSimilarPatterns = makeSearchSimilarPatternsTool(
       this.env.AI,
       (this.env as Env & { VECTORIZE?: VectorizeIndex }).VECTORIZE
     );
-    const checkArchitecturalPatterns = makeCheckArchitecturalPatternsTool(this.env.DEEPSEEK_API_KEY, this.env.CLAUDE_API_KEY, modelPref);
+    const checkArchitecturalPatterns = makeCheckArchitecturalPatternsTool(
+      this.env.DEEPSEEK_API_KEY,
+      this.env.CLAUDE_API_KEY,
+      modelPref
+    );
 
     const steps = rigor === "quick" ? 2 : rigor === "deep" ? 5 : 3;
-    const rigorClause = rigor === "quick"
-      ? "\n\nRigor: QUICK — call only patternAnalyze, then generate immediately. Do not call searchSimilarPatterns or checkArchitecturalPatterns."
-      : rigor === "deep"
-      ? "\n\nRigor: DEEP — call patternAnalyze first, then call searchSimilarPatterns on any non-trivial changed function, and checkArchitecturalPatterns if complexity > 10 or length > 40 lines. Be thorough."
-      : "";
+    const rigorClause =
+      rigor === "quick"
+        ? "\n\nRigor: QUICK — call only patternAnalyze, then generate immediately. Do not call searchSimilarPatterns or checkArchitecturalPatterns."
+        : rigor === "deep"
+          ? "\n\nRigor: DEEP — call patternAnalyze first, then call searchSimilarPatterns on any non-trivial changed function, and checkArchitecturalPatterns if complexity > 10 or length > 40 lines. Be thorough."
+          : "";
     const focusClause = focus
       ? `\n\nThe user specifically wants to focus on: ${focus}. Prioritize findings related to this area.`
       : "";
@@ -41,11 +70,13 @@ export class PatternAgent extends Agent<Env> {
       if (!orchestratorId) return;
       this.env.ReviewOrchestrator.get(
         this.env.ReviewOrchestrator.idFromName(orchestratorId)
-      ).fetch("http://do/internal/agent-task", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: "pattern", text })
-      }).catch(() => {});
+      )
+        .fetch("http://do/internal/agent-task", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent: "pattern", text })
+        })
+        .catch(() => {});
     };
 
     // Step 1: Analyze with tools
@@ -65,7 +96,12 @@ Rules for reporting findings:
 
       ${PATTERN_SEVERITY_RUBRIC}${focusClause}${repoContextClause}`,
       prompt: `Analyze this code diff for pattern issues:\n\n${diff}`,
-      tools: { fetchFileContent: makeFetchFileContentTool(this.env.GITHUB_TOKEN), patternAnalyze, searchSimilarPatterns, checkArchitecturalPatterns },
+      tools: {
+        fetchFileContent: makeFetchFileContentTool(this.env.GITHUB_TOKEN),
+        patternAnalyze,
+        searchSimilarPatterns,
+        checkArchitecturalPatterns
+      },
       stopWhen: stepCountIs(steps),
       onStepFinish: ({ toolCalls }) => {
         const tool = toolCalls?.[0];

@@ -11,7 +11,10 @@ function GithubDiff({ lines }: { lines: string[] }) {
   const firstHunk = lines.find((l) => l.startsWith("@@"));
   if (firstHunk) {
     const m = firstHunk.match(/@@ -(\d+).*\+(\d+)/);
-    if (m) { oldLine = parseInt(m[1]); newLine = parseInt(m[2]); }
+    if (m) {
+      oldLine = parseInt(m[1]);
+      newLine = parseInt(m[2]);
+    }
   }
 
   return (
@@ -19,11 +22,21 @@ function GithubDiff({ lines }: { lines: string[] }) {
       {lines.map((line, i) => {
         if (line.startsWith("@@")) {
           const m = line.match(/@@ -(\d+).*\+(\d+)/);
-          if (m) { oldLine = parseInt(m[1]); newLine = parseInt(m[2]); }
+          if (m) {
+            oldLine = parseInt(m[1]);
+            newLine = parseInt(m[2]);
+          }
           return (
-            <div key={i} className="flex bg-[#1a1919] text-[#494847] px-3 py-px">
-              <span className="w-8 shrink-0 text-right pr-4 select-none"> </span>
-              <span className="w-8 shrink-0 text-right pr-4 select-none"> </span>
+            <div
+              key={i}
+              className="flex bg-[#1a1919] text-[#494847] px-3 py-px"
+            >
+              <span className="w-8 shrink-0 text-right pr-4 select-none">
+                {" "}
+              </span>
+              <span className="w-8 shrink-0 text-right pr-4 select-none">
+                {" "}
+              </span>
               <span className="text-[#494847]">{line}</span>
             </div>
           );
@@ -31,32 +44,60 @@ function GithubDiff({ lines }: { lines: string[] }) {
         if (line.startsWith("-")) {
           const n = oldLine++;
           return (
-            <div key={i} className="flex bg-[#ff6e84]/10 border-l-2 border-[#ff6e84]/50">
-              <span className="w-8 shrink-0 text-right pr-3 text-[#ff6e84]/50 select-none">{n}</span>
-              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none"> </span>
+            <div
+              key={i}
+              className="flex bg-[#ff6e84]/10 border-l-2 border-[#ff6e84]/50"
+            >
+              <span className="w-8 shrink-0 text-right pr-3 text-[#ff6e84]/50 select-none">
+                {n}
+              </span>
+              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none">
+                {" "}
+              </span>
               <span className="w-4 shrink-0 text-[#ff6e84] select-none">-</span>
-              <span className="text-[#ff6e84] flex-1 pr-3">{line.slice(1)}</span>
+              <span className="text-[#ff6e84] flex-1 pr-3">
+                {line.slice(1)}
+              </span>
             </div>
           );
         }
         if (line.startsWith("+")) {
           const n = newLine++;
           return (
-            <div key={i} className="flex bg-[#4cc9a0]/10 border-l-2 border-[#4cc9a0]/50">
-              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none"> </span>
-              <span className="w-8 shrink-0 text-right pr-3 text-[#4cc9a0]/50 select-none">{n}</span>
+            <div
+              key={i}
+              className="flex bg-[#4cc9a0]/10 border-l-2 border-[#4cc9a0]/50"
+            >
+              <span className="w-8 shrink-0 text-right pr-3 text-[#494847] select-none">
+                {" "}
+              </span>
+              <span className="w-8 shrink-0 text-right pr-3 text-[#4cc9a0]/50 select-none">
+                {n}
+              </span>
               <span className="w-4 shrink-0 text-[#4cc9a0] select-none">+</span>
-              <span className="text-[#4cc9a0] flex-1 pr-3">{line.slice(1)}</span>
+              <span className="text-[#4cc9a0] flex-1 pr-3">
+                {line.slice(1)}
+              </span>
             </div>
           );
         }
-        const o = oldLine++; const n = newLine++;
+        const o = oldLine++;
+        const n = newLine++;
         return (
-          <div key={i} className="flex bg-stone-900 border-l-2 border-transparent">
-            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">{o}</span>
-            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">{n}</span>
+          <div
+            key={i}
+            className="flex bg-stone-900 border-l-2 border-transparent"
+          >
+            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">
+              {o}
+            </span>
+            <span className="w-8 shrink-0 text-right pr-3 text-[#494847]/60 select-none">
+              {n}
+            </span>
             <span className="w-4 shrink-0 select-none"> </span>
-            <span className="text-stone-400 flex-1 pr-3">{line.startsWith(" ") ? line.slice(1) : line}</span>
+            <span className="text-stone-400 flex-1 pr-3">
+              {line.startsWith(" ") ? line.slice(1) : line}
+            </span>
           </div>
         );
       })}
@@ -67,20 +108,28 @@ function GithubDiff({ lines }: { lines: string[] }) {
 const markdownComponents = {
   pre: ({ children }: { children?: React.ReactNode }) => {
     const codeEl = React.Children.toArray(children).find(
-      (c): c is React.ReactElement<{ className?: string; children?: React.ReactNode }> =>
-        React.isValidElement(c)
+      (
+        c
+      ): c is React.ReactElement<{
+        className?: string;
+        children?: React.ReactNode;
+      }> => React.isValidElement(c)
     );
     const raw = codeEl?.props?.children;
-    const text = typeof raw === "string"
-      ? raw
-      : Array.isArray(raw)
-        ? raw.map((c) => (typeof c === "string" ? c : "")).join("")
-        : "";
+    const text =
+      typeof raw === "string"
+        ? raw
+        : Array.isArray(raw)
+          ? raw.map((c) => (typeof c === "string" ? c : "")).join("")
+          : "";
     const lang = (codeEl?.props?.className ?? "").replace("language-", "");
-    const lines = text.split("\n").filter((l, i, arr) => !(i === arr.length - 1 && l === ""));
+    const lines = text
+      .split("\n")
+      .filter((l, i, arr) => !(i === arr.length - 1 && l === ""));
     const isDiff =
       lang === "diff" ||
-      (lines.length > 1 && lines.some((l) => l.startsWith("+") || l.startsWith("-")));
+      (lines.length > 1 &&
+        lines.some((l) => l.startsWith("+") || l.startsWith("-")));
 
     if (isDiff) return <GithubDiff lines={lines} />;
 
@@ -90,7 +139,13 @@ const markdownComponents = {
       </pre>
     );
   },
-  code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+  code: ({
+    className,
+    children
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+  }) => {
     // Inside a fenced code block — inherit text-stone-300 from the <pre>, don't apply inline styling
     if (className?.includes("language-")) {
       return <code className={className}>{children}</code>;
@@ -116,7 +171,7 @@ const markdownComponents = {
   ),
   strong: ({ children }: { children?: React.ReactNode }) => (
     <strong className="font-semibold text-[#1b1c1a]">{children}</strong>
-  ),
+  )
 };
 
 interface ChatSidebarProps {
@@ -153,8 +208,12 @@ export function ChatSidebar({
       {/* Header */}
       <div className="p-6 pb-4 flex items-center justify-between border-b border-[#efeeeb] shrink-0">
         <div>
-          <h3 className="font-headline text-lg font-bold text-[#1b1c1a]">Prism Assistant</h3>
-          <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${connected ? "text-[#2a14b4]" : "text-[#777586]"}`}>
+          <h3 className="font-headline text-lg font-bold text-[#1b1c1a]">
+            Prism Assistant
+          </h3>
+          <p
+            className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${connected ? "text-[#2a14b4]" : "text-[#777586]"}`}
+          >
             {connected ? "Neural Engine Active" : "Connecting..."}
           </p>
         </div>
@@ -166,7 +225,9 @@ export function ChatSidebar({
             Clear
           </button>
           <div className="p-2 bg-[#2a14b4]/10 rounded-lg">
-            <span className="material-symbols-outlined text-[#2a14b4] text-xl">auto_awesome</span>
+            <span className="material-symbols-outlined text-[#2a14b4] text-xl">
+              auto_awesome
+            </span>
           </div>
         </div>
       </div>
@@ -176,11 +237,17 @@ export function ChatSidebar({
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
             <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-              <span className="material-symbols-outlined text-indigo-600 text-xl">bolt</span>
+              <span className="material-symbols-outlined text-indigo-600 text-xl">
+                bolt
+              </span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#1b1c1a]">Prism Assistant</p>
-              <p className="text-xs text-[#777586] mt-1">Ask a follow-up question about any finding</p>
+              <p className="text-sm font-semibold text-[#1b1c1a]">
+                Prism Assistant
+              </p>
+              <p className="text-xs text-[#777586] mt-1">
+                Ask a follow-up question about any finding
+              </p>
             </div>
           </div>
         ) : (
@@ -199,7 +266,9 @@ export function ChatSidebar({
               if (text.startsWith("PRISM_FIND:")) {
                 const nl = text.indexOf("\n");
                 try {
-                  const payload = JSON.parse(text.slice("PRISM_FIND:".length, nl >= 0 ? nl : text.length));
+                  const payload = JSON.parse(
+                    text.slice("PRISM_FIND:".length, nl >= 0 ? nl : text.length)
+                  );
                   const question = nl >= 0 ? text.slice(nl + 1).trim() : "";
                   return `Regarding finding #${payload.id} "${payload.title}":\n${question}`;
                 } catch {
@@ -213,7 +282,9 @@ export function ChatSidebar({
 
             return isUser ? (
               <div key={message.id} className="flex flex-col gap-1 items-end">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#777586]">You</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#777586]">
+                  You
+                </span>
                 <div className="max-w-[90%] bg-[#2a14b4] text-white p-4 rounded-xl rounded-tr-none shadow-sm text-sm leading-relaxed">
                   {displayText}
                 </div>
@@ -222,12 +293,19 @@ export function ChatSidebar({
               <div key={message.id} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-indigo-600 text-sm">bolt</span>
+                    <span className="material-symbols-outlined text-indigo-600 text-sm">
+                      bolt
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#777586]">Assistant</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#777586]">
+                    Assistant
+                  </span>
                 </div>
                 <div className="max-w-[90%] bg-white p-4 rounded-xl rounded-tl-none shadow-sm text-sm leading-relaxed border border-[#c7c4d7]/20">
-                  <Streamdown components={markdownComponents} isAnimating={isStreaming}>
+                  <Streamdown
+                    components={markdownComponents}
+                    isAnimating={isStreaming}
+                  >
                     {displayText}
                   </Streamdown>
                 </div>
@@ -245,9 +323,13 @@ export function ChatSidebar({
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#2a14b4] mb-0.5">
               Replying to finding #{quotedFinding.id}
             </p>
-            <p className="text-xs text-[#464554] truncate">{quotedFinding.title}</p>
+            <p className="text-xs text-[#464554] truncate">
+              {quotedFinding.title}
+            </p>
             {quotedFinding.fileLocation && (
-              <p className="font-mono text-[10px] text-[#777586] truncate mt-0.5">{quotedFinding.fileLocation}</p>
+              <p className="font-mono text-[10px] text-[#777586] truncate mt-0.5">
+                {quotedFinding.fileLocation}
+              </p>
             )}
           </div>
           <button

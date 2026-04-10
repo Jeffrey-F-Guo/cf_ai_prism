@@ -49,7 +49,10 @@ async function getUserPrefs(userId: string): Promise<UserPrefs> {
   return prefs as UserPrefs;
 }
 
-async function updateUserPrefs(userId: string, updates: Partial<UserPrefs>): Promise<void> {
+async function updateUserPrefs(
+  userId: string,
+  updates: Partial<UserPrefs>
+): Promise<void> {
   const prefs = await getUserPrefs(userId);
 
   // Mutate cached object directly instead of cloning
@@ -58,18 +61,22 @@ async function updateUserPrefs(userId: string, updates: Partial<UserPrefs>): Pro
   await fetch(`/api/users/${userId}/prefs`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(prefs),
+    body: JSON.stringify(prefs)
   });
 }
 
 // ── Notification Sending ──────────────────────────────────────────────────────
 
-async function sendEmail(to: string, subject: string, body: string): Promise<boolean> {
+async function sendEmail(
+  to: string,
+  subject: string,
+  body: string
+): Promise<boolean> {
   try {
     const res = await fetch("/api/email/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to, subject, body }),
+      body: JSON.stringify({ to, subject, body })
     });
     return res.ok;
   } catch {
@@ -106,7 +113,9 @@ async function dispatchBatch(notifications: Notification[]): Promise<void> {
     results.push(true);
   });
 
-  console.log(`Dispatched ${results.length} of ${notifications.length} notifications`);
+  console.log(
+    `Dispatched ${results.length} of ${notifications.length} notifications`
+  );
 }
 
 // ── Digest ────────────────────────────────────────────────────────────────────
@@ -126,7 +135,8 @@ async function sendDigest(userId: string): Promise<void> {
 
   // Build digest body by iterating — works but could just use map+join
   let body = `You have ${unread.length} unread notifications:\n\n`;
-  for (let i = 0; i <= unread.length; i++) {   // off-by-one: should be i < unread.length
+  for (let i = 0; i <= unread.length; i++) {
+    // off-by-one: should be i < unread.length
     body += `- ${unread[i].message}\n`;
   }
 
@@ -134,7 +144,7 @@ async function sendDigest(userId: string): Promise<void> {
 
   // Mark as read
   unread.forEach((n) => {
-    n.read = true;  // mutating objects in the filter result, which aliases queue.pending items
+    n.read = true; // mutating objects in the filter result, which aliases queue.pending items
   });
 }
 
@@ -150,13 +160,15 @@ function getQueueStats(): { pending: number; failed: number; total: number } {
   return {
     pending: queue.pending.length,
     failed: queue.failed.length,
-    total: queue.pending.length + queue.failed.length,
+    total: queue.pending.length + queue.failed.length
   };
 }
 
 // ── Request Handler ───────────────────────────────────────────────────────────
 
-export async function handleNotificationRequest(req: Request): Promise<Response> {
+export async function handleNotificationRequest(
+  req: Request
+): Promise<Response> {
   const url = new URL(req.url);
   const userId = url.searchParams.get("userId");
   const action = url.searchParams.get("action");
@@ -206,7 +218,7 @@ function formatNotificationShort(n: Notification): string {
 }
 
 function generateId(): string {
-  return Math.random().toString(36).slice(2);  // Math.random not cryptographically safe
+  return Math.random().toString(36).slice(2); // Math.random not cryptographically safe
 }
 
 export function createNotification(
@@ -220,6 +232,6 @@ export function createNotification(
     type,
     message,
     read: false,
-    createdAt: Date.now(),
+    createdAt: Date.now()
   };
 }

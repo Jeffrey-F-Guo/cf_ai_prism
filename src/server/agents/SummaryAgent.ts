@@ -9,15 +9,20 @@ import type { Finding, ReviewSummary } from "../../types/review";
 const CRITICALPENALTY = 20;
 const WARNINGPENALTY = 5;
 
-const severityPriority: Record<string, number> = { critical: 0, warning: 1, suggestion: 2, success: 3 };
+const severityPriority: Record<string, number> = {
+  critical: 0,
+  warning: 1,
+  suggestion: 2,
+  success: 3
+};
 
 const judgeSchema = z.object({
   findings: z.array(
     z.object({
       id: z.string(),
-      severity: z.enum(["critical", "warning", "suggestion", "success"]),
+      severity: z.enum(["critical", "warning", "suggestion", "success"])
     })
-  ),
+  )
 });
 
 export type SummaryResult = {
@@ -34,15 +39,20 @@ export class SummaryAgent extends Agent<Env> {
     model?: "claude" | "deepseek";
   }): Promise<SummaryResult> {
     const modelPref = results.model ?? "claude";
-    const llm = modelPref === "claude"
-      ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })("claude-haiku-4-5-20251001")
-      : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })("deepseek-chat");
+    const llm =
+      modelPref === "claude"
+        ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })(
+            "claude-haiku-4-5-20251001"
+          )
+        : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })(
+            "deepseek-chat"
+          );
 
     const allFindings = [
       ...results.logic,
       ...results.security,
       ...results.performance,
-      ...results.pattern,
+      ...results.pattern
     ];
 
     // Step 1: Deduplicate
@@ -60,15 +70,14 @@ Your jobs:
     });
 
     // Assign temporary IDs for the judge pass
-    const dedupedFindings: Finding[] = dedupOutput.findings
-      .map((f, i) => ({
-        id: String(i + 1),
-        severity: f.severity,
-        title: f.title,
-        description: f.description,
-        ...(f.agent ? { agent: f.agent } : {}),
-        ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
-      }));
+    const dedupedFindings: Finding[] = dedupOutput.findings.map((f, i) => ({
+      id: String(i + 1),
+      severity: f.severity,
+      title: f.title,
+      description: f.description,
+      ...(f.agent ? { agent: f.agent } : {}),
+      ...(f.fileLocation ? { fileLocation: f.fileLocation } : {})
+    }));
 
     // Step 2: Judge pass — can only de-escalate severity
     const { output: judgeOutput } = await generateText({
@@ -92,36 +101,64 @@ For each CRITICAL finding, verify ALL THREE conditions are clearly met:
 For each WARNING finding, ask: is this scenario realistically reachable with normal inputs and normal usage?
   → Does NOT qualify: requires contrived inputs, astronomically rare timing, or theoretical-only scenarios
   → If any doubt → downgrade to SUGGESTION`,
-      prompt: `Review these findings for over-escalated severity:\n\n${JSON.stringify(dedupedFindings.map(f => ({ id: f.id, severity: f.severity, title: f.title, description: f.description })), null, 2)}`
+      prompt: `Review these findings for over-escalated severity:\n\n${JSON.stringify(
+        dedupedFindings.map((f) => ({
+          id: f.id,
+          severity: f.severity,
+          title: f.title,
+          description: f.description
+        })),
+        null,
+        2
+      )}`
     });
 
     // Enforce never-escalate: apply judge severity only if it is the same or lower priority
-    const judgeBySeverityId = new Map(judgeOutput.findings.map(f => [f.id, f.severity]));
+    const judgeBySeverityId = new Map(
+      judgeOutput.findings.map((f) => [f.id, f.severity])
+    );
 
     const findings: Finding[] = dedupedFindings
       .map((f) => {
         const judgeSeverity = judgeBySeverityId.get(f.id);
-        const finalSeverity = judgeSeverity !== undefined &&
-          (severityPriority[judgeSeverity] ?? 4) >= (severityPriority[f.severity] ?? 4)
-          ? judgeSeverity
-          : f.severity;
+        const finalSeverity =
+          judgeSeverity !== undefined &&
+          (severityPriority[judgeSeverity] ?? 4) >=
+            (severityPriority[f.severity] ?? 4)
+            ? judgeSeverity
+            : f.severity;
         return { ...f, severity: finalSeverity };
       })
-      .sort((a, b) => (severityPriority[a.severity] ?? 4) - (severityPriority[b.severity] ?? 4))
+      .sort(
+        (a, b) =>
+          (severityPriority[a.severity] ?? 4) -
+          (severityPriority[b.severity] ?? 4)
+      )
       .map((f, i) => ({ ...f, id: String(i + 1) }));
 
-    const criticalCount = findings.filter((f) => f.severity === "critical").length;
-    const warningCount = findings.filter((f) => f.severity === "warning").length;
-    const suggestionCount = findings.filter((f) => f.severity === "suggestion").length;
+    const criticalCount = findings.filter(
+      (f) => f.severity === "critical"
+    ).length;
+    const warningCount = findings.filter(
+      (f) => f.severity === "warning"
+    ).length;
+    const suggestionCount = findings.filter(
+      (f) => f.severity === "suggestion"
+    ).length;
 
     const summary: ReviewSummary = {
-      score: Math.max(100 - criticalCount * CRITICALPENALTY - warningCount * WARNINGPENALTY, 0),
+      score: Math.max(
+        100 - criticalCount * CRITICALPENALTY - warningCount * WARNINGPENALTY,
+        0
+      ),
       critical: criticalCount,
       warnings: warningCount,
-      suggestions: suggestionCount,
+      suggestions: suggestionCount
     };
 
-    console.log(`SummaryAgent: ${findings.length} findings after dedup+judge, score ${summary.score}`);
+    console.log(
+      `SummaryAgent: ${findings.length} findings after dedup+judge, score ${summary.score}`
+    );
     return { findings, summary };
   }
 }

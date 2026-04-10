@@ -10,7 +10,9 @@ export function ReviewPage({ prism }: ReviewPageProps) {
   const isCompleted = prism.stage === "completed";
 
   return (
-    <div className={`flex mt-20 bg-[#fbf9f6] ${isCompleted ? "h-[calc(100vh-5rem)] overflow-hidden" : "min-h-[calc(100vh-5rem)] flex-col"}`}>
+    <div
+      className={`flex mt-20 bg-[#fbf9f6] ${isCompleted ? "h-[calc(100vh-5rem)] overflow-hidden" : "min-h-[calc(100vh-5rem)] flex-col"}`}
+    >
       <CenterPanel
         stage={prism.stage}
         input={prism.input}

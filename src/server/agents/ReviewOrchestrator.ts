@@ -8,7 +8,11 @@ import {
   type PRData
 } from "../tools/github";
 import { makeOrchestratorTools } from "../tools/orchestratorTools";
-import type { Finding, ReviewSummary, SteeringConfig } from "../../types/review";
+import type {
+  Finding,
+  ReviewSummary,
+  SteeringConfig
+} from "../../types/review";
 
 type OrchestratorState = {
   pendingContext: PRAnalysisContext | null;
@@ -45,18 +49,28 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
 
     const { owner, repo, prNumber } = parsed;
     try {
-      return await getPRAnalysisContext(owner, repo, prNumber, this.env.GITHUB_TOKEN);
+      return await getPRAnalysisContext(
+        owner,
+        repo,
+        prNumber,
+        this.env.GITHUB_TOKEN
+      );
     } catch (err) {
       console.error(`Failed to fetch PR ${owner}/${repo}#${prNumber}:`, err);
       return null;
     }
   }
 
-  private async embedCodeFiles(files: import("../tools/github").GitHubFile[], repo: string, prNumber: number, reviewId: string) {
+  private async embedCodeFiles(
+    files: import("../tools/github").GitHubFile[],
+    repo: string,
+    prNumber: number,
+    reviewId: string
+  ) {
     if (!this.env.VECTORIZE || !files.length) return;
     try {
       const filesToEmbed = files
-        .filter(f => f.patch && f.additions > 0)
+        .filter((f) => f.patch && f.additions > 0)
         .slice(0, 10);
 
       if (!filesToEmbed.length) return;
@@ -64,60 +78,112 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       const vectors = await Promise.all(
         filesToEmbed.map(async (f) => {
           const text = f.patch!.slice(0, 2000);
-          const result = await this.env.AI.run("@cf/baai/bge-base-en-v1.5", { text: [text] }) as unknown as { data: number[][] };
+          const result = (await this.env.AI.run("@cf/baai/bge-base-en-v1.5", {
+            text: [text]
+          })) as unknown as { data: number[][] };
           return {
             id: `${reviewId}-${f.filename.replace(/\//g, "-")}`,
             values: result.data[0],
-            metadata: { repo, filePath: f.filename, prNumber, reviewId, createdAt: Date.now() },
+            metadata: {
+              repo,
+              filePath: f.filename,
+              prNumber,
+              reviewId,
+              createdAt: Date.now()
+            }
           };
         })
       );
       await this.env.VECTORIZE.upsert(vectors);
-      console.log(`Vectorize: embedded ${vectors.length} code files for ${repo}`);
+      console.log(
+        `Vectorize: embedded ${vectors.length} code files for ${repo}`
+      );
     } catch (err) {
       console.error("Vectorize embedding failed:", err);
     }
   }
 
-  private async persistReview(prData: PRData, prUrl: string, summary: ReviewSummary, findings: Finding[]): Promise<string> {
+  private async persistReview(
+    prData: PRData,
+    prUrl: string,
+    summary: ReviewSummary,
+    findings: Finding[]
+  ): Promise<string> {
     const db = this.env.DB;
     const reviewId = crypto.randomUUID();
 
     // Upsert repo
-    await db.prepare(
-      `INSERT INTO repos (owner, repo) VALUES (?, ?) ON CONFLICT(owner, repo) DO NOTHING`
-    ).bind(prData.owner, prData.repo).run();
+    await db
+      .prepare(
+        `INSERT INTO repos (owner, repo) VALUES (?, ?) ON CONFLICT(owner, repo) DO NOTHING`
+      )
+      .bind(prData.owner, prData.repo)
+      .run();
 
-    const repoRow = await db.prepare(
-      `SELECT id FROM repos WHERE owner = ? AND repo = ?`
-    ).bind(prData.owner, prData.repo).first<{ id: number }>();
+    const repoRow = await db
+      .prepare(`SELECT id FROM repos WHERE owner = ? AND repo = ?`)
+      .bind(prData.owner, prData.repo)
+      .first<{ id: number }>();
 
     if (!repoRow) throw new Error("Failed to upsert repo");
 
     // Insert review
-    await db.prepare(`
+    await db
+      .prepare(`
       INSERT INTO reviews (id, repo_id, pr_number, pr_title, pr_url, score, critical, warnings, suggestions, files_changed, contributors, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(reviewId, repoRow.id, prData.prNumber, prData.title, prUrl, summary.score, summary.critical, summary.warnings, summary.suggestions, prData.files.length, JSON.stringify(prData.contributors), Date.now()).run();
+    `)
+      .bind(
+        reviewId,
+        repoRow.id,
+        prData.prNumber,
+        prData.title,
+        prUrl,
+        summary.score,
+        summary.critical,
+        summary.warnings,
+        summary.suggestions,
+        prData.files.length,
+        JSON.stringify(prData.contributors),
+        Date.now()
+      )
+      .run();
 
     // Batch insert findings
     if (findings.length > 0) {
-      await db.batch(findings.map((f) =>
-        db.prepare(`
+      await db.batch(
+        findings.map((f) =>
+          db
+            .prepare(`
           INSERT INTO findings (id, review_id, agent, severity, title, description, file_location)
           VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(f.id, reviewId, f.agent ?? null, f.severity, f.title, f.description, f.fileLocation ?? null)
-      ));
+        `)
+            .bind(
+              f.id,
+              reviewId,
+              f.agent ?? null,
+              f.severity,
+              f.title,
+              f.description,
+              f.fileLocation ?? null
+            )
+        )
+      );
     }
 
-    console.log(`Persisted review ${reviewId} to D1 (${findings.length} findings)`);
+    console.log(
+      `Persisted review ${reviewId} to D1 (${findings.length} findings)`
+    );
     return reviewId;
   }
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/internal/agent-task" && request.method === "POST") {
-      const { agent, text } = await request.json() as { agent: string; text: string };
+      const { agent, text } = (await request.json()) as {
+        agent: string;
+        text: string;
+      };
       this.broadcast(JSON.stringify({ type: "agent_task", agent, text }));
       return new Response(null, { status: 204 });
     }
@@ -139,18 +205,33 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
 
       const context = this.state?.pendingContext;
       if (!context) {
-        return new Response("No pending PR context. Please submit a PR URL first.");
+        return new Response(
+          "No pending PR context. Please submit a PR URL first."
+        );
       }
 
       const { agents, rigor, focus, model } = config;
       const agentList = agents.join(", ");
 
       for (const agentId of agents) {
-        this.broadcast(JSON.stringify({ type: "agent_update", agent: agentId, status: "queued" }));
+        this.broadcast(
+          JSON.stringify({
+            type: "agent_update",
+            agent: agentId,
+            status: "queued"
+          })
+        );
       }
 
-      this.broadcast(JSON.stringify({ type: "stage_change", stage: "processing" }));
-      this.broadcast(JSON.stringify({ type: "log_entry", message: `Deploying ${agents.length} agent${agents.length !== 1 ? "s" : ""} (${rigor} analysis)...` }));
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "processing" })
+      );
+      this.broadcast(
+        JSON.stringify({
+          type: "log_entry",
+          message: `Deploying ${agents.length} agent${agents.length !== 1 ? "s" : ""} (${rigor} analysis)...`
+        })
+      );
 
       // Query D1 for past findings on this repo to provide PatternAgent with history context
       let repoContext: string | undefined;
@@ -165,34 +246,52 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
             WHERE rp.owner = ? AND rp.repo = ?
             ORDER BY r.created_at DESC
             LIMIT 15
-          `).bind(prDataForContext.owner, prDataForContext.repo).all<{ title: string; severity: string; agent: string; file_location: string | null }>();
+          `)
+            .bind(prDataForContext.owner, prDataForContext.repo)
+            .all<{
+              title: string;
+              severity: string;
+              agent: string;
+              file_location: string | null;
+            }>();
 
           if (rows.results.length) {
-            const lines = rows.results.map(f =>
-              `- [${f.severity}] ${f.title} (${f.agent}${f.file_location ? `, ${f.file_location}` : ""})`
+            const lines = rows.results.map(
+              (f) =>
+                `- [${f.severity}] ${f.title} (${f.agent}${f.file_location ? `, ${f.file_location}` : ""})`
             );
             repoContext = `Past findings for ${prDataForContext.owner}/${prDataForContext.repo}:\n${lines.join("\n")}`;
           }
-        } catch { /* best-effort — don't block dispatch on context failure */ }
+        } catch {
+          /* best-effort — don't block dispatch on context failure */
+        }
       }
 
       try {
-        await this.runWorkflow("REVIEW_WORKFLOW", {
-          diff: context.diff,
-          agents,
-          rigor,
-          orchestratorId: this.name,
-          ...(focus ? { focus } : {}),
-          ...(repoContext ? { repoContext } : {}),
-          ...(model ? { model } : {}),
-        }, { id: crypto.randomUUID() });
+        await this.runWorkflow(
+          "REVIEW_WORKFLOW",
+          {
+            diff: context.diff,
+            agents,
+            rigor,
+            orchestratorId: this.name,
+            ...(focus ? { focus } : {}),
+            ...(repoContext ? { repoContext } : {}),
+            ...(model ? { model } : {})
+          },
+          { id: crypto.randomUUID() }
+        );
       } catch (err) {
         console.error("Failed to start workflow:", err);
-        return new Response("Failed to start the review workflow. Please check the server logs.");
+        return new Response(
+          "Failed to start the review workflow. Please check the server logs."
+        );
       }
 
       (onFinish as (() => void) | undefined)?.();
-      return new Response(`Starting review with ${agents.length} agent${agents.length !== 1 ? "s" : ""}: ${agentList}. ${focus ? `Focusing on: ${focus}.` : ""}`);
+      return new Response(
+        `Starting review with ${agents.length} agent${agents.length !== 1 ? "s" : ""}: ${agentList}. ${focus ? `Focusing on: ${focus}.` : ""}`
+      );
     }
 
     // Route: GitHub PR URL — fetch context and present steering prompt
@@ -204,7 +303,9 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
         const result = streamText({
           model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
           system: `You are Prism. Tell the user there was an error fetching the PR.`,
-          messages: [{ role: "user", content: `Failed to fetch PR from ${url}` }],
+          messages: [
+            { role: "user", content: `Failed to fetch PR from ${url}` }
+          ],
           maxOutputTokens: 512,
           abortSignal: options?.abortSignal
         });
@@ -212,36 +313,60 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       }
 
       // Store context + prData in DO state for subsequent turns
-      this.setState({ pendingContext: context, prData: context.prData, findings: [] });
+      this.setState({
+        pendingContext: context,
+        prData: context.prData,
+        findings: []
+      });
 
       const { prData } = context;
-      this.broadcast(JSON.stringify({
-        type: "pr_loaded",
-        prMetadata: {
-          title: prData.title,
-          repoName: `${prData.owner}/${prData.repo}`,
-          prNumber: prData.prNumber,
-          filesChanged: prData.files.length,
-          contributors: prData.contributors
-        }
-      }));
-      this.broadcast(JSON.stringify({ type: "log_entry", message: `PR #${prData.prNumber} loaded — ${prData.files.length} files changed` }));
-      this.broadcast(JSON.stringify({ type: "stage_change", stage: "steering" }));
+      this.broadcast(
+        JSON.stringify({
+          type: "pr_loaded",
+          prMetadata: {
+            title: prData.title,
+            repoName: `${prData.owner}/${prData.repo}`,
+            prNumber: prData.prNumber,
+            filesChanged: prData.files.length,
+            contributors: prData.contributors
+          }
+        })
+      );
+      this.broadcast(
+        JSON.stringify({
+          type: "log_entry",
+          message: `PR #${prData.prNumber} loaded — ${prData.files.length} files changed`
+        })
+      );
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "steering" })
+      );
 
       (onFinish as (() => void) | undefined)?.();
-      return new Response(`PR loaded: "${prData.title}" (#${prData.prNumber}, ${prData.files.length} files). Configure your review below.`);
+      return new Response(
+        `PR loaded: "${prData.title}" (#${prData.prNumber}, ${prData.files.length} files). Configure your review below.`
+      );
     }
 
     // Route: Quoted finding — structured payload from "Ask" button, no tool calls needed
     if (text.startsWith("PRISM_FIND:")) {
       const nl = text.indexOf("\n");
       let payload: {
-        id: string; title: string; severity: string; description: string;
-        fileLocation?: string; owner?: string; repo?: string;
+        id: string;
+        title: string;
+        severity: string;
+        description: string;
+        fileLocation?: string;
+        owner?: string;
+        repo?: string;
       } | null = null;
       try {
-        payload = JSON.parse(text.slice("PRISM_FIND:".length, nl >= 0 ? nl : text.length));
-      } catch { /* malformed, fall through to default route */ }
+        payload = JSON.parse(
+          text.slice("PRISM_FIND:".length, nl >= 0 ? nl : text.length)
+        );
+      } catch {
+        /* malformed, fall through to default route */
+      }
 
       if (payload) {
         let fileContent: string | null = null;
@@ -253,10 +378,13 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
               Accept: "application/vnd.github.v3.raw",
               "User-Agent": "cf-ai-prism"
             };
-            if (this.env.GITHUB_TOKEN) headers["Authorization"] = `Bearer ${this.env.GITHUB_TOKEN}`;
+            if (this.env.GITHUB_TOKEN)
+              headers["Authorization"] = `Bearer ${this.env.GITHUB_TOKEN}`;
             const res = await fetch(apiUrl, { headers });
             if (res.ok) fileContent = await res.text();
-          } catch { /* proceed without file content */ }
+          } catch {
+            /* proceed without file content */
+          }
         }
 
         const context = [
@@ -264,8 +392,12 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
           `Severity: ${payload.severity}`,
           payload.fileLocation ? `File: ${payload.fileLocation}` : null,
           `Description: ${payload.description}`,
-          fileContent ? `\nCurrent file content:\n\`\`\`\n${fileContent.slice(0, 4000)}\n\`\`\`` : null
-        ].filter(Boolean).join("\n");
+          fileContent
+            ? `\nCurrent file content:\n\`\`\`\n${fileContent.slice(0, 4000)}\n\`\`\``
+            : null
+        ]
+          .filter(Boolean)
+          .join("\n");
 
         const result = streamText({
           model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
@@ -293,15 +425,20 @@ Never use separate Before/After code blocks.`,
 
     // Route: Default — conversational chat with review context
     const findings = this.state?.findings ?? [];
-    const tools = makeOrchestratorTools(findings, this.env.GITHUB_TOKEN, this.state?.prData ?? null);
+    const tools = makeOrchestratorTools(
+      findings,
+      this.env.GITHUB_TOKEN,
+      this.state?.prData ?? null
+    );
 
     const result = streamText({
       model: workersai("@cf/mistralai/mistral-small-3.1-24b-instruct"),
-      system: findings.length > 0
-        ? `You are Prism, an AI code review assistant. A review is complete with ${findings.length} findings (IDs: ${findings.map((f) => f.id).join(", ")}).
+      system:
+        findings.length > 0
+          ? `You are Prism, an AI code review assistant. A review is complete with ${findings.length} findings (IDs: ${findings.map((f) => f.id).join(", ")}).
 Use getFinding to retrieve a specific finding when the user asks about it. Use suggestFix when the user asks how to fix something — it will fetch the file content and return context for you to generate a concrete diff.
 Be direct and specific. When suggesting fixes, show before/after code.`
-        : `You are Prism, an AI-powered code review system. Ask the user for a GitHub PR URL to start a review.`,
+          : `You are Prism, an AI-powered code review system. Ask the user for a GitHub PR URL to start a review.`,
       messages: pruneMessages({
         messages: await convertToModelMessages(this.messages),
         toolCalls: "before-last-2-messages"
@@ -319,13 +456,21 @@ Be direct and specific. When suggesting fixes, show before/after code.`
     progress: { agent: string; status: string }
   ) {
     console.log("Workflow progress:", progress);
-    const knownAgents = ["logic", "security", "performance", "pattern", "summary"];
+    const knownAgents = [
+      "logic",
+      "security",
+      "performance",
+      "pattern",
+      "summary"
+    ];
     if (!knownAgents.includes(progress.agent)) return;
-    this.broadcast(JSON.stringify({
-      type: "agent_update",
-      agent: progress.agent,
-      status: progress.status === "complete" ? "completed" : "analyzing"
-    }));
+    this.broadcast(
+      JSON.stringify({
+        type: "agent_update",
+        agent: progress.agent,
+        status: progress.status === "complete" ? "completed" : "analyzing"
+      })
+    );
   }
 
   async onWorkflowComplete(
@@ -342,10 +487,20 @@ Be direct and specific. When suggesting fixes, show before/after code.`
       if (prData) {
         const prUrl = `https://github.com/${prData.owner}/${prData.repo}/pull/${prData.prNumber}`;
         try {
-          const reviewId = await this.persistReview(prData, prUrl, result.summary, result.findings);
+          const reviewId = await this.persistReview(
+            prData,
+            prUrl,
+            result.summary,
+            result.findings
+          );
           // Best-effort Vectorize embedding of changed code files for cross-PR pattern search
           if (prData.files?.length) {
-            this.embedCodeFiles(prData.files, `${prData.owner}/${prData.repo}`, prData.prNumber, reviewId).catch(() => {});
+            this.embedCodeFiles(
+              prData.files,
+              `${prData.owner}/${prData.repo}`,
+              prData.prNumber,
+              reviewId
+            ).catch(() => {});
           }
         } catch (err) {
           console.error("Failed to persist review to D1:", err);
@@ -353,16 +508,26 @@ Be direct and specific. When suggesting fixes, show before/after code.`
       }
 
       // Update DO state: clear pending context + diff, keep prData for contentsUrl lookup
-      this.setState({ pendingContext: null, prData: this.state?.prData ?? null, findings: result.findings });
+      this.setState({
+        pendingContext: null,
+        prData: this.state?.prData ?? null,
+        findings: result.findings
+      });
 
-      this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
-      this.broadcast(JSON.stringify({
-        type: "review_complete",
-        findings: result.findings,
-        summary: result.summary
-      }));
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "completed" })
+      );
+      this.broadcast(
+        JSON.stringify({
+          type: "review_complete",
+          findings: result.findings,
+          summary: result.summary
+        })
+      );
     } else {
-      this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
+      this.broadcast(
+        JSON.stringify({ type: "stage_change", stage: "completed" })
+      );
     }
   }
 
@@ -372,7 +537,14 @@ Be direct and specific. When suggesting fixes, show before/after code.`
     error: string
   ) {
     console.error("Workflow error:", instanceId, error);
-    this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
-    this.broadcast(JSON.stringify({ type: "api_error", message: "Model out of credits — please choose another model" }));
+    this.broadcast(
+      JSON.stringify({ type: "stage_change", stage: "completed" })
+    );
+    this.broadcast(
+      JSON.stringify({
+        type: "api_error",
+        message: "Model out of credits — please choose another model"
+      })
+    );
   }
 }

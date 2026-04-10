@@ -9,7 +9,7 @@ interface NavProps {
 const TAB_LABEL: Record<AppTab, string> = {
   dashboard: "Dashboard",
   history: "Review History",
-  review: "Active Analysis",
+  review: "Active Analysis"
 };
 
 export function Nav({ activeTab, onTabChange, onNewReview }: NavProps) {
@@ -46,8 +46,12 @@ export function Nav({ activeTab, onTabChange, onNewReview }: NavProps) {
           New Review
         </button>
         <div className="flex items-center gap-3 text-[#464554]">
-          <span className="material-symbols-outlined cursor-pointer hover:text-[#2a14b4] transition-colors text-xl">notifications</span>
-          <span className="material-symbols-outlined cursor-pointer hover:text-[#2a14b4] transition-colors text-xl">account_circle</span>
+          <span className="material-symbols-outlined cursor-pointer hover:text-[#2a14b4] transition-colors text-xl">
+            notifications
+          </span>
+          <span className="material-symbols-outlined cursor-pointer hover:text-[#2a14b4] transition-colors text-xl">
+            account_circle
+          </span>
         </div>
       </div>
     </header>

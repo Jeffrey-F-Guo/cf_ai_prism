@@ -9,9 +9,9 @@ export const agentFindingSchema = z.object({
       severity: severityEnum,
       title: z.string(),
       description: z.string(),
-      fileLocation: z.string().optional(),
+      fileLocation: z.string().optional()
     })
-  ),
+  )
 });
 
 // Schema for SummaryAgent's deduplicated output
@@ -24,7 +24,7 @@ export const summarySchema = z.object({
       description: z.string(),
       agent: z.string().optional(),
       fileLocation: z.string().optional(),
-      reasoning: z.string().optional(),
+      reasoning: z.string().optional()
     })
-  ),
+  )
 });

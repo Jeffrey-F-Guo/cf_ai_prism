@@ -5,7 +5,12 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ summary }: SummaryCardProps) {
-  const scoreColor = summary.score >= 80 ? "#bd9dff" : summary.score >= 60 ? "#ffb800" : "#ff6e84";
+  const scoreColor =
+    summary.score >= 80
+      ? "#bd9dff"
+      : summary.score >= 60
+        ? "#ffb800"
+        : "#ff6e84";
   const glowColor =
     summary.score >= 80
       ? "rgba(189,157,255,0.4)"
@@ -26,14 +31,16 @@ export function SummaryCard({ summary }: SummaryCardProps) {
         <div className="relative flex items-center justify-center mb-4 w-28 h-28">
           <svg viewBox="0 0 112 112" className="w-28 h-28 -rotate-90">
             <circle
-              cx="56" cy="56"
+              cx="56"
+              cy="56"
               fill="transparent"
               r="48"
               stroke="#262626"
               strokeWidth="6"
             />
             <circle
-              cx="56" cy="56"
+              cx="56"
+              cy="56"
               fill="transparent"
               r="48"
               stroke={scoreColor}
@@ -52,16 +59,28 @@ export function SummaryCard({ summary }: SummaryCardProps) {
         </div>
         <div className="w-full space-y-1.5 pt-2 border-t border-white/5">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Critical</span>
-            <span className="text-[#ff6e84] font-black text-sm tabular-nums leading-none">{summary.critical}</span>
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">
+              Critical
+            </span>
+            <span className="text-[#ff6e84] font-black text-sm tabular-nums leading-none">
+              {summary.critical}
+            </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Warnings</span>
-            <span className="text-[#ffb800] font-black text-sm tabular-nums leading-none">{summary.warnings}</span>
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">
+              Warnings
+            </span>
+            <span className="text-[#ffb800] font-black text-sm tabular-nums leading-none">
+              {summary.warnings}
+            </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">Suggestions</span>
-            <span className="text-[#bd9dff] font-black text-sm tabular-nums leading-none">{summary.suggestions}</span>
+            <span className="text-[9px] uppercase text-[#777575] font-bold tracking-wider">
+              Suggestions
+            </span>
+            <span className="text-[#bd9dff] font-black text-sm tabular-nums leading-none">
+              {summary.suggestions}
+            </span>
           </div>
         </div>
       </div>

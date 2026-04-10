@@ -3,30 +3,62 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText, Output, stepCountIs } from "ai";
 import { makeFetchFileContentTool } from "../tools/github";
-import { smartLogicEval, makeTraceDataFlowTool, makeDetectRaceConditionsTool } from "../tools/LogicTools";
+import {
+  smartLogicEval,
+  makeTraceDataFlowTool,
+  makeDetectRaceConditionsTool
+} from "../tools/LogicTools";
 import { agentFindingSchema } from "../tools/schemas";
-import { LOGIC_SEVERITY_RUBRIC, LOGIC_EXTRACTION_REMINDER } from "../tools/prompts";
+import {
+  LOGIC_SEVERITY_RUBRIC,
+  LOGIC_EXTRACTION_REMINDER
+} from "../tools/prompts";
 import type { Finding } from "../../types/review";
 
 export class LogicAgent extends Agent<Env> {
-  async analyzeCode(diff: string, focus?: string, orchestratorId?: string, rigor?: "quick" | "standard" | "deep", model?: "claude" | "deepseek"): Promise<Finding[]> {
+  async analyzeCode(
+    diff: string,
+    focus?: string,
+    orchestratorId?: string,
+    rigor?: "quick" | "standard" | "deep",
+    model?: "claude" | "deepseek"
+  ): Promise<Finding[]> {
     const modelPref = model ?? "claude";
-    const llm = modelPref === "claude"
-      ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })("claude-sonnet-4-6")
-      : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })("deepseek-chat");
-    const extractLlm = modelPref === "claude"
-      ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })("claude-haiku-4-5-20251001")
-      : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })("deepseek-chat");
+    const llm =
+      modelPref === "claude"
+        ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })(
+            "claude-sonnet-4-6"
+          )
+        : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })(
+            "deepseek-chat"
+          );
+    const extractLlm =
+      modelPref === "claude"
+        ? createAnthropic({ apiKey: this.env.CLAUDE_API_KEY })(
+            "claude-haiku-4-5-20251001"
+          )
+        : createDeepSeek({ apiKey: this.env.DEEPSEEK_API_KEY })(
+            "deepseek-chat"
+          );
 
-    const traceDataFlow = makeTraceDataFlowTool(this.env.DEEPSEEK_API_KEY, this.env.CLAUDE_API_KEY, modelPref);
-    const detectRaceConditions = makeDetectRaceConditionsTool(this.env.DEEPSEEK_API_KEY, this.env.CLAUDE_API_KEY, modelPref);
+    const traceDataFlow = makeTraceDataFlowTool(
+      this.env.DEEPSEEK_API_KEY,
+      this.env.CLAUDE_API_KEY,
+      modelPref
+    );
+    const detectRaceConditions = makeDetectRaceConditionsTool(
+      this.env.DEEPSEEK_API_KEY,
+      this.env.CLAUDE_API_KEY,
+      modelPref
+    );
 
     const steps = rigor === "quick" ? 2 : rigor === "deep" ? 5 : 3;
-    const rigorClause = rigor === "quick"
-      ? "\n\nRigor: QUICK — call only smartLogicEval, then generate immediately. Do not call traceDataFlow or detectRaceConditions."
-      : rigor === "deep"
-      ? "\n\nRigor: DEEP — call smartLogicEval first, then call traceDataFlow on any flagged variable. Only call detectRaceConditions if the diff shows shared mutable state being read AND written across multiple separate async operations or request handlers — not for plain increments or synchronous sequences."
-      : "";
+    const rigorClause =
+      rigor === "quick"
+        ? "\n\nRigor: QUICK — call only smartLogicEval, then generate immediately. Do not call traceDataFlow or detectRaceConditions."
+        : rigor === "deep"
+          ? "\n\nRigor: DEEP — call smartLogicEval first, then call traceDataFlow on any flagged variable. Only call detectRaceConditions if the diff shows shared mutable state being read AND written across multiple separate async operations or request handlers — not for plain increments or synchronous sequences."
+          : "";
     const focusClause = focus
       ? `\n\nThe user specifically wants to focus on: ${focus}. Prioritize findings related to this area.`
       : "";
@@ -35,11 +67,13 @@ export class LogicAgent extends Agent<Env> {
       if (!orchestratorId) return;
       this.env.ReviewOrchestrator.get(
         this.env.ReviewOrchestrator.idFromName(orchestratorId)
-      ).fetch("http://do/internal/agent-task", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: "logic", text })
-      }).catch(() => {});
+      )
+        .fetch("http://do/internal/agent-task", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent: "logic", text })
+        })
+        .catch(() => {});
     };
 
     // Step 1: Analyze with tools
@@ -59,7 +93,12 @@ Rules for reporting findings:
 
       ${LOGIC_SEVERITY_RUBRIC}${focusClause}`,
       prompt: `Analyze this code diff for logic errors:\n\n${diff}`,
-      tools: { fetchFileContent: makeFetchFileContentTool(this.env.GITHUB_TOKEN), smartLogicEval, traceDataFlow, detectRaceConditions },
+      tools: {
+        fetchFileContent: makeFetchFileContentTool(this.env.GITHUB_TOKEN),
+        smartLogicEval,
+        traceDataFlow,
+        detectRaceConditions
+      },
       stopWhen: stepCountIs(steps),
       onStepFinish: ({ toolCalls }) => {
         const tool = toolCalls?.[0];
