@@ -373,6 +373,6 @@ Be direct and specific. When suggesting fixes, show before/after code.`
   ) {
     console.error("Workflow error:", instanceId, error);
     this.broadcast(JSON.stringify({ type: "stage_change", stage: "completed" }));
-    this.broadcast(JSON.stringify({ type: "review_error", error }));
+    this.broadcast(JSON.stringify({ type: "api_error", message: "Model out of credits — please choose another model" }));
   }
 }

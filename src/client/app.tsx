@@ -138,6 +138,13 @@ export default function App() {
           onCancel={() => setConfirmModal(null)}
         />
       )}
+      {prism.notification && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-[#1b1c1a] text-white text-sm px-5 py-3 rounded-2xl shadow-xl">
+          <span className="material-symbols-outlined text-amber-400 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+          <span>{prism.notification}</span>
+          <button onClick={prism.clearNotification} className="text-white/50 hover:text-white ml-1 leading-none">✕</button>
+        </div>
+      )}
     </>
   );
 }

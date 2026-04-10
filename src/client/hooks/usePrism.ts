@@ -73,6 +73,10 @@ export interface PrismState {
   logs: LogEntry[];
   loadHistoryReview: (id: string) => void;
   deleteReview: (id: string) => void;
+
+  // Notifications
+  notification: string | null;
+  clearNotification: () => void;
 }
 
 export function usePrism(): PrismState {
@@ -91,6 +95,7 @@ export function usePrism(): PrismState {
   const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [quotedFinding, setQuotedFinding] = useState<Finding | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
 
   const fetchHistory = useCallback(() => {
     fetch("/api/reviews?limit=20")
@@ -198,6 +203,8 @@ export function usePrism(): PrismState {
           setReviewSummary(data.summary || null);
           // Refresh history list after a short delay to let D1 write settle
           setTimeout(fetchHistory, 500);
+        } else if (data.type === "api_error") {
+          setNotification(data.message ?? "Review failed — check your API configuration");
         }
       } catch {
         // Not JSON, ignore
@@ -373,6 +380,8 @@ export function usePrism(): PrismState {
     findings,
     reviewHistory,
     reviewSummary,
-    logs
+    logs,
+    notification,
+    clearNotification: () => setNotification(null),
   };
 }
