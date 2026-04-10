@@ -81,14 +81,17 @@ Rules:
 - If a finding is already "suggestion", leave it as-is
 - Return ALL findings (even unchanged ones) with their id and severity
 
-For each CRITICAL finding, ask: will this directly break the project in production under realistic, normal usage?
-  → Qualifies as critical: data corruption, security breach, crash, silent data loss for normal inputs
-  → Does NOT qualify: "possibly", "under edge conditions", soft invariant violations, bounded collections, single-threaded environments
-  → If any doubt → lower to WARNING
+For each CRITICAL finding, verify ALL THREE conditions are clearly met:
+  1. Triggers under normal inputs with no unusual caller behaviour or rare timing required
+  2. Consequence is data corruption, security breach, exploitable auth bypass, crash, or silent data loss
+  3. No opt-in, configuration, or additional precondition needed to hit it
+  → If any condition is not clearly and unambiguously true → downgrade to WARNING
+  → Boundary conditions requiring exact value matches (e.g. exact millisecond, exact integer overflow) do NOT meet condition 1
+  → Bugs that require the caller to pass a non-default optional argument do NOT meet condition 3
 
-For each WARNING finding, ask: is this scenario realistically reachable with normal inputs and normal usage patterns?
-  → Does NOT qualify: requires contrived inputs, unlikely concurrent conditions, or theoretical-only scenarios
-  → If any doubt → lower to SUGGESTION`,
+For each WARNING finding, ask: is this scenario realistically reachable with normal inputs and normal usage?
+  → Does NOT qualify: requires contrived inputs, astronomically rare timing, or theoretical-only scenarios
+  → If any doubt → downgrade to SUGGESTION`,
       prompt: `Review these findings for over-escalated severity:\n\n${JSON.stringify(dedupedFindings.map(f => ({ id: f.id, severity: f.severity, title: f.title, description: f.description })), null, 2)}`
     });
 
