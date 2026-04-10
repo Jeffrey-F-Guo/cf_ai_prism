@@ -31,6 +31,8 @@ type HistoryRow = {
   pr_title: string;
   score: number;
   created_at: number;
+  owner: string;
+  repo: string;
 };
 
 // State interface
@@ -100,7 +102,9 @@ export function usePrism(): PrismState {
           prNumber: row.pr_number,
           prTitle: row.pr_title,
           score: row.score,
-          timeAgo: formatTimeAgo(row.created_at)
+          timeAgo: formatTimeAgo(row.created_at),
+          owner: row.owner,
+          repo: row.repo,
         })));
       })
       .catch(() => {});

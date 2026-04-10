@@ -107,26 +107,34 @@ export function CenterPanel({
                 </button>
               </div>
             </div>
-            <p className="mt-6 text-[#464554] text-sm">Enter any GitHub Pull Request URL to initiate a deep logic scan.</p>
+            <p className="mt-6 text-[#464554] text-sm">Enter any GitHub Pull Request URL to start an AI-powered code review.</p>
           </div>
         </div>
 
         {/* Bento feature grid */}
         <div className="max-w-7xl mx-auto px-12 pb-24 grid grid-cols-1 md:grid-cols-12 gap-8">
           <div className="md:col-span-8 bg-[#f5f3f0] rounded-[2.5rem] p-12 relative overflow-hidden">
-            <span className="font-body font-bold text-[#2a14b4] tracking-widest uppercase text-[10px] mb-4 block">Engine 01</span>
-            <h2 className="text-4xl font-headline font-bold text-[#1b1c1a] mb-6 max-w-md">Cognitive Structural Analysis</h2>
+            <span className="font-body font-bold text-[#2a14b4] tracking-widest uppercase text-[10px] mb-4 block">What is Prism</span>
+            <h2 className="text-4xl font-headline font-bold text-[#1b1c1a] mb-6 max-w-md">A last line of defense before merge</h2>
             <p className="text-[#464554] text-lg leading-relaxed max-w-lg mb-8">
-              Prism maps the neural pathways of your changes, identifying architectural shifts and logic drift before they enter your main branch.
+              Paste a GitHub PR URL and Prism reviews it before it hits main. Four specialized agents run in parallel — each focused on a different class of problem — so nothing slips through. Use it to catch real issues, or as an interactive tool to understand and improve your own code.
             </p>
             <div className="flex gap-4 flex-wrap">
               <div className="bg-white px-4 py-3 rounded-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#2a14b4]">shield</span>
-                <span className="text-sm font-semibold text-[#1b1c1a]">Risk Mapping</span>
+                <span className="text-sm font-semibold text-[#1b1c1a]">Security</span>
+              </div>
+              <div className="bg-white px-4 py-3 rounded-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center gap-3">
+                <span className="material-symbols-outlined text-[#2a14b4]">psychology</span>
+                <span className="text-sm font-semibold text-[#1b1c1a]">Logic</span>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#2a14b4]">speed</span>
-                <span className="text-sm font-semibold text-[#1b1c1a]">Latency Prediction</span>
+                <span className="text-sm font-semibold text-[#1b1c1a]">Performance</span>
+              </div>
+              <div className="bg-white px-4 py-3 rounded-xl shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)] flex items-center gap-3">
+                <span className="material-symbols-outlined text-[#2a14b4]">grid_view</span>
+                <span className="text-sm font-semibold text-[#1b1c1a]">Pattern</span>
               </div>
             </div>
           </div>
@@ -134,27 +142,27 @@ export function CenterPanel({
           <div className="md:col-span-4 bg-gradient-to-br from-[#2a14b4] to-[#4338ca] p-8 rounded-[2.5rem] text-white flex flex-col justify-between">
             <div>
               <span className="material-symbols-outlined text-4xl mb-6 block">bolt</span>
-              <h3 className="text-2xl font-headline font-bold mb-4">Instant Refactoring Proposals</h3>
+              <h3 className="text-2xl font-headline font-bold mb-4">Follow-up Chat</h3>
               <p className="text-white/80 text-sm leading-relaxed">
-                Receive autonomous code suggestions aligned with your project's design patterns.
+                Ask the Prism Assistant about any finding to get an explanation or a suggested fix, with full file context injected automatically.
               </p>
             </div>
           </div>
 
           <div className="md:col-span-4 bg-[#eae8e5] rounded-[2.5rem] p-10">
             <span className="material-symbols-outlined text-[#2a14b4] mb-4 block">grid_view</span>
-            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">Pattern Matching</h4>
-            <p className="text-[#464554] text-sm leading-relaxed">Automatically detects deviations from established repository patterns.</p>
+            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">SOLID & Anti-patterns</h4>
+            <p className="text-[#464554] text-sm leading-relaxed">Flags SOLID violations, high cyclomatic complexity, long functions, and naming inconsistencies.</p>
           </div>
           <div className="md:col-span-4 bg-white border border-[#c7c4d7]/15 rounded-[2.5rem] p-10 shadow-[0_16px_32px_-4px_rgba(27,28,26,0.04)]">
             <span className="material-symbols-outlined text-[#2a14b4] mb-4 block">psychology</span>
-            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">Intent Verification</h4>
-            <p className="text-[#464554] text-sm leading-relaxed">Compares code changes against PR descriptions to verify intent.</p>
+            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">Security Scanning</h4>
+            <p className="text-[#464554] text-sm leading-relaxed">Scans for injection vulnerabilities, exposed secrets, insecure auth flows, and OWASP-class issues.</p>
           </div>
           <div className="md:col-span-4 bg-[#f5f3f0] rounded-[2.5rem] p-10">
             <span className="material-symbols-outlined text-[#2a14b4] mb-4 block">history</span>
-            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">Regression DNA</h4>
-            <p className="text-[#464554] text-sm leading-relaxed">Traces logic changes to prevent re-introduction of previously fixed bugs.</p>
+            <h4 className="text-xl font-headline font-bold mb-3 text-[#1b1c1a]">Review History</h4>
+            <p className="text-[#464554] text-sm leading-relaxed">Every review is stored in D1. The dashboard tracks scores, finding trends, and top recurring issues across all your PRs.</p>
           </div>
         </div>
       </section>
@@ -183,7 +191,7 @@ export function CenterPanel({
               <span className="text-[12px] uppercase tracking-[0.3em] text-[#2a14b4] font-bold mb-4 block">System Diagnostic</span>
               <h2 className="text-5xl font-headline text-[#1b1c1a] leading-[1.1] mb-6">System Analysis in Progress</h2>
               <p className="text-[#464554] text-lg leading-relaxed font-light">
-                Prism is cross-referencing heuristic patterns with neural baseline signatures. High-fidelity results incoming.
+                The enabled agents are running in parallel against your diff. Results will appear as each agent completes.
               </p>
             </div>
             {/* Circular progress */}
@@ -274,11 +282,24 @@ export function CenterPanel({
         {/* Findings */}
         <section className="space-y-6">
           <h2 className="font-headline text-2xl font-semibold border-b border-[#e4e2df] pb-4 text-[#1b1c1a]">Detected Findings</h2>
-          <div className="space-y-6">
-            {findings.map((finding) => (
-              <FindingCard key={finding.id} finding={finding} onReply={() => onReplyToFinding(finding)} />
-            ))}
-          </div>
+          {findings.length === 0 ? (
+            <div className="flex items-center gap-5 bg-emerald-50 border border-emerald-200 rounded-2xl px-8 py-6">
+              <span className="material-symbols-outlined text-emerald-500 text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+              <div>
+                <p className="font-semibold text-emerald-800 text-lg">No errors found</p>
+                <p className="text-emerald-700 text-sm mt-0.5">Looks great!</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {[...findings].sort((a, b) => {
+                const priority: Record<string, number> = { critical: 0, warning: 1, suggestion: 2, success: 3 };
+                return (priority[a.severity] ?? 4) - (priority[b.severity] ?? 4);
+              }).map((finding) => (
+                <FindingCard key={finding.id} finding={finding} onReply={() => onReplyToFinding(finding)} />
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </section>

@@ -4,6 +4,7 @@ export interface SteeringConfig {
   agents: Array<"logic" | "security" | "performance" | "pattern">;
   rigor: "quick" | "standard" | "deep";
   focus?: string;
+  model?: "claude" | "deepseek";
 }
 
 export type AgentStatus = "analyzing" | "queued" | "completed";
@@ -69,6 +70,8 @@ export interface ReviewHistoryItem {
   prTitle: string;
   score: number;
   timeAgo: string;
+  owner: string;
+  repo: string;
 }
 
 export interface LogEntry {
