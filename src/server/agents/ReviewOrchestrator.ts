@@ -52,7 +52,34 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
     }
   }
 
-  private async persistReview(prData: PRData, prUrl: string, summary: ReviewSummary, findings: Finding[]) {
+  private async embedCodeFiles(files: import("../tools/github").GitHubFile[], repo: string, prNumber: number, reviewId: string) {
+    if (!this.env.VECTORIZE || !files.length) return;
+    try {
+      const filesToEmbed = files
+        .filter(f => f.patch && f.additions > 0)
+        .slice(0, 10);
+
+      if (!filesToEmbed.length) return;
+
+      const vectors = await Promise.all(
+        filesToEmbed.map(async (f) => {
+          const text = f.patch!.slice(0, 2000);
+          const result = await this.env.AI.run("@cf/baai/bge-base-en-v1.5", { text: [text] }) as unknown as { data: number[][] };
+          return {
+            id: `${reviewId}-${f.filename.replace(/\//g, "-")}`,
+            values: result.data[0],
+            metadata: { repo, filePath: f.filename, prNumber, reviewId, createdAt: Date.now() },
+          };
+        })
+      );
+      await this.env.VECTORIZE.upsert(vectors);
+      console.log(`Vectorize: embedded ${vectors.length} code files for ${repo}`);
+    } catch (err) {
+      console.error("Vectorize embedding failed:", err);
+    }
+  }
+
+  private async persistReview(prData: PRData, prUrl: string, summary: ReviewSummary, findings: Finding[]): Promise<string> {
     const db = this.env.DB;
     const reviewId = crypto.randomUUID();
 
@@ -84,6 +111,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
     }
 
     console.log(`Persisted review ${reviewId} to D1 (${findings.length} findings)`);
+    return reviewId;
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -114,7 +142,7 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
         return new Response("No pending PR context. Please submit a PR URL first.");
       }
 
-      const { agents, rigor, focus } = config;
+      const { agents, rigor, focus, model } = config;
       const agentList = agents.join(", ");
 
       for (const agentId of agents) {
@@ -124,13 +152,39 @@ export class ReviewOrchestrator extends AIChatAgent<Env, OrchestratorState> {
       this.broadcast(JSON.stringify({ type: "stage_change", stage: "processing" }));
       this.broadcast(JSON.stringify({ type: "log_entry", message: `Deploying ${agents.length} agent${agents.length !== 1 ? "s" : ""} (${rigor} analysis)...` }));
 
+      // Query D1 for past findings on this repo to provide PatternAgent with history context
+      let repoContext: string | undefined;
+      const prDataForContext = this.state?.prData;
+      if (prDataForContext) {
+        try {
+          const rows = await this.env.DB.prepare(`
+            SELECT f.title, f.severity, f.agent, f.file_location
+            FROM findings f
+            JOIN reviews r ON f.review_id = r.id
+            JOIN repos rp ON r.repo_id = rp.id
+            WHERE rp.owner = ? AND rp.repo = ?
+            ORDER BY r.created_at DESC
+            LIMIT 15
+          `).bind(prDataForContext.owner, prDataForContext.repo).all<{ title: string; severity: string; agent: string; file_location: string | null }>();
+
+          if (rows.results.length) {
+            const lines = rows.results.map(f =>
+              `- [${f.severity}] ${f.title} (${f.agent}${f.file_location ? `, ${f.file_location}` : ""})`
+            );
+            repoContext = `Past findings for ${prDataForContext.owner}/${prDataForContext.repo}:\n${lines.join("\n")}`;
+          }
+        } catch { /* best-effort — don't block dispatch on context failure */ }
+      }
+
       try {
         await this.runWorkflow("REVIEW_WORKFLOW", {
           diff: context.diff,
           agents,
           rigor,
           orchestratorId: this.name,
-          ...(focus ? { focus } : {})
+          ...(focus ? { focus } : {}),
+          ...(repoContext ? { repoContext } : {}),
+          ...(model ? { model } : {}),
         }, { id: crypto.randomUUID() });
       } catch (err) {
         console.error("Failed to start workflow:", err);
@@ -288,7 +342,11 @@ Be direct and specific. When suggesting fixes, show before/after code.`
       if (prData) {
         const prUrl = `https://github.com/${prData.owner}/${prData.repo}/pull/${prData.prNumber}`;
         try {
-          await this.persistReview(prData, prUrl, result.summary, result.findings);
+          const reviewId = await this.persistReview(prData, prUrl, result.summary, result.findings);
+          // Best-effort Vectorize embedding of changed code files for cross-PR pattern search
+          if (prData.files?.length) {
+            this.embedCodeFiles(prData.files, `${prData.owner}/${prData.repo}`, prData.prNumber, reviewId).catch(() => {});
+          }
         } catch (err) {
           console.error("Failed to persist review to D1:", err);
         }
