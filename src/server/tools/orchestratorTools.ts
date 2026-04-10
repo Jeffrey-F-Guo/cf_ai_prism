@@ -1,8 +1,9 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { Finding } from "../../types/review";
+import type { PRData } from "./github";
 
-export function makeOrchestratorTools(findings: Finding[]) {
+export function makeOrchestratorTools(findings: Finding[], token?: string, prData?: PRData | null) {
   const getFinding = tool({
     description: "Retrieve a specific finding by ID from the completed review",
     inputSchema: z.object({
@@ -29,18 +30,25 @@ export function makeOrchestratorTools(findings: Finding[]) {
         return { error: `Finding #${findingId} not found.` };
       }
 
+      // Auto-resolve contentsUrl from prData if not provided by the LLM
+      let resolvedUrl = contentsUrl;
+      if (!resolvedUrl && prData && finding.fileLocation) {
+        const filePath = finding.fileLocation.split(":")[0];
+        const match = prData.files.find((f) => f.filename === filePath);
+        if (match) resolvedUrl = match.contents_url;
+      }
+
       let fileContent: string | null = null;
-      if (contentsUrl) {
+      if (resolvedUrl) {
         try {
-          const res = await fetch(contentsUrl, {
-            headers: {
-              Accept: "application/vnd.github+json",
-              "User-Agent": "cf-ai-prism"
-            }
-          });
-          const data = await res.json() as { content?: string };
-          if (data.content) {
-            fileContent = Buffer.from(data.content, "base64").toString("utf-8");
+          const headers: Record<string, string> = {
+            Accept: "application/vnd.github.v3.raw",
+            "User-Agent": "cf-ai-prism"
+          };
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+          const res = await fetch(resolvedUrl, { headers });
+          if (res.ok) {
+            fileContent = await res.text();
           }
         } catch {
           // File fetch failed — proceed without it
