@@ -86,6 +86,12 @@
 			"database_id": "d2d96525-28bc-47c8-b4df-fda1556f1c81"
 		}
 	],
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "prism-patterns"
+		}
+	],
 	"upload_source_maps": true
 	/**
    * Smart Placement

@@ -8,7 +8,9 @@ declare namespace Cloudflare {
 	interface Env {
 		AI: Ai;
 		DB: D1Database;
+		VECTORIZE?: VectorizeIndex;
 		DEEPSEEK_API_KEY: string;
+		CLAUDE_API_KEY: string;
 		GITHUB_TOKEN: string;
 		ReviewOrchestrator: DurableObjectNamespace<import("./src/server/index").ReviewOrchestrator>;
 		SecurityAgent: DurableObjectNamespace<import("./src/server/index").SecurityAgent>;
