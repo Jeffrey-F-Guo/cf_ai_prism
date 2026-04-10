@@ -114,11 +114,13 @@ export default function App() {
         <ReviewHistoryPage
           reviewHistory={prism.reviewHistory}
           onSelectReview={handleSelectReview}
+          onDeleteReview={prism.deleteReview}
         />
       ) : activeTab === "dashboard" ? (
         <Dashboard
           reviewHistory={prism.reviewHistory}
           onSelectReview={handleSelectReview}
+          onDeleteReview={prism.deleteReview}
           onViewAllReviews={() => setActiveTab("history")}
         />
       ) : (
