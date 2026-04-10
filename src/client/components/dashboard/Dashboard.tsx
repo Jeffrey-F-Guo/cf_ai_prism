@@ -61,6 +61,7 @@ const AGENT_META: Record<string, { label: string; pct: number }> = {
 interface DashboardProps {
   reviewHistory: ReviewHistoryItem[];
   onSelectReview: (id: string) => void;
+  onDeleteReview: (id: string) => void;
   onViewAllReviews: () => void;
 }
 
@@ -77,8 +78,11 @@ function scoreDotColor(score: number): string {
 }
 
 
-export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: DashboardProps) {
+export function Dashboard({ reviewHistory, onSelectReview, onDeleteReview, onViewAllReviews }: DashboardProps) {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [repoFilter, setRepoFilter] = useState<string | null>(null);
+
+  const repos = [...new Set(reviewHistory.map(r => `${r.owner}/${r.repo}`))];
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -236,23 +240,35 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
             </div>
           </div>
 
-          {/* Agent performance */}
+          {/* Agent contribution */}
           <div className="col-span-12 lg:col-span-5 bg-[#f5f3f0] p-8 rounded-2xl">
-            <h2 className="font-headline text-2xl text-[#1b1c1a] mb-8">Agent Performance</h2>
-            <div className="space-y-8">
+            <h2 className="font-headline text-2xl text-[#1b1c1a] mb-6">Agent Contribution</h2>
+            {/* Column headers */}
+            <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 text-[10px] uppercase tracking-widest text-[#777586] pb-3 border-b border-[#c7c4d7]/30 mb-1">
+              <span>Agent</span>
+              <span className="text-right leading-tight"># of<br/>findings</span>
+              <span className="text-right w-16 leading-tight">% of all<br/>findings</span>
+            </div>
+            <div>
               {Object.entries(AGENT_META).map(([key, meta]) => {
                 const agentData = data?.findingsByAgent.find((f) => f.agent === key);
                 const total = data?.findingsByAgent.reduce((s, r) => s + r.count, 0) ?? 0;
-                const pct = total > 0 && agentData ? Math.round((agentData.count / total) * 100) : meta.pct;
+                const count = agentData?.count ?? 0;
+                const pct = total > 0 && agentData ? Math.round((count / total) * 100) : meta.pct;
                 return (
-                  <div key={key}>
-                    <div className="flex justify-between text-sm mb-2 font-medium text-[#1b1c1a]">
-                      <span>{meta.label}</span>
-                      <span>{pct}%</span>
+                  <div key={key} className="grid grid-cols-[1fr_auto_auto] gap-x-6 items-center py-4 border-b border-[#c7c4d7]/20 last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-[#1b1c1a] mb-1.5">{meta.label}</p>
+                      <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#2a14b4] rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div className="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#2a14b4] rounded-full" style={{ width: `${pct}%` }} />
-                    </div>
+                    <span className="text-sm font-semibold text-[#1b1c1a] tabular-nums text-right">
+                      {total > 0 ? count : "—"}
+                    </span>
+                    <span className="text-sm font-semibold text-[#2a14b4] tabular-nums text-right w-16">
+                      {pct}%
+                    </span>
                   </div>
                 );
               })}
@@ -303,15 +319,27 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
               <h2 className="font-headline text-3xl text-[#1b1c1a]">Recent Review History</h2>
               <p className="text-[#777586] text-sm mt-1">Click any row to load the full review.</p>
             </div>
-            {reviewHistory.length > 5 && (
-              <button
-                onClick={onViewAllReviews}
-                className="flex items-center gap-1.5 text-[#2a14b4] font-semibold text-sm group"
-              >
-                <span className="hover:underline">View all reviews</span>
-                <span className="material-symbols-outlined text-base no-underline">arrow_forward</span>
-              </button>
-            )}
+            <div className="flex items-center gap-4">
+              {repos.length > 1 && (
+                <select
+                  value={repoFilter ?? ""}
+                  onChange={(e) => setRepoFilter(e.target.value || null)}
+                  className="text-xs font-mono bg-[#f5f3f0] border border-[#c7c4d7]/30 rounded-xl px-3 py-2 text-[#464554] focus:outline-none focus:ring-2 focus:ring-[#2a14b4]/20 cursor-pointer"
+                >
+                  <option value="">All repos</option>
+                  {repos.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              )}
+              {reviewHistory.length > 5 && (
+                <button
+                  onClick={onViewAllReviews}
+                  className="flex items-center gap-1.5 text-[#2a14b4] font-semibold text-sm group"
+                >
+                  <span className="hover:underline">View all reviews</span>
+                  <span className="material-symbols-outlined text-base no-underline">arrow_forward</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {reviewHistory.length === 0 ? (
@@ -330,10 +358,11 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
                     <th className="px-6 pb-2">Score</th>
                     <th className="px-6 pb-2">Date</th>
                     <th className="px-6 pb-2">Status</th>
+                    <th className="px-6 pb-2"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {reviewHistory.slice(0, 5).map((item) => {
+                  {(repoFilter ? reviewHistory.filter(r => `${r.owner}/${r.repo}` === repoFilter) : reviewHistory).slice(0, 5).map((item) => {
                     const score = item.score ?? 0;
                     return (
                       <tr
@@ -344,7 +373,7 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
                         <td className="px-6 py-5 rounded-l-2xl font-medium text-[#1b1c1a] max-w-[280px] truncate">
                           {item.prTitle}
                         </td>
-                        <td className="px-6 py-5 text-[#464554] font-mono text-sm">PR #{item.prNumber}</td>
+                        <td className="px-6 py-5 text-[#464554] font-mono text-sm">{item.owner}/{item.repo}</td>
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${scoreDotColor(score)}`} />
@@ -352,7 +381,7 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
                           </div>
                         </td>
                         <td className="px-6 py-5 text-[#464554] text-sm">{item.timeAgo}</td>
-                        <td className="px-6 py-5 rounded-r-2xl">
+                        <td className="px-6 py-5">
                           {score >= 80 ? (
                             <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase">Passed</span>
                           ) : score >= 60 ? (
@@ -360,6 +389,15 @@ export function Dashboard({ reviewHistory, onSelectReview, onViewAllReviews }: D
                           ) : (
                             <span className="bg-[#ffdad6] text-[#93000a] px-3 py-1 rounded-full text-[10px] font-bold uppercase">Failed</span>
                           )}
+                        </td>
+                        <td className="px-4 py-5 rounded-r-2xl">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDeleteReview(item.id); }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[#ffdad6] text-[#777586] hover:text-[#ba1a1a]"
+                            title="Delete review"
+                          >
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
                         </td>
                       </tr>
                     );
