@@ -118,7 +118,6 @@ export const securityScan = tool({
       fmt("DANGEROUS FUNCTIONS", dangerousFindings),
       fmt("AUTH MISUSE", authMisuseFindings),
       fmt("SQL INJECTION INDICATORS", sqlFindings),
-      "NOTES: Scan covers +lines (added code) only. Verify false positives before reporting.",
     ].join("\n\n");
   },
 });

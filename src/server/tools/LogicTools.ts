@@ -53,6 +53,13 @@ export const smartLogicEval = tool({
       }
     }
 
+    // Explicit type assertion (as T) — may be silencing a null/undefined return type
+    for (const { lineNum, content } of addedLines) {
+      if (/\b\w+\s+as\s+[A-Z]\w+\b/.test(content) && !/\/\//.test(content.slice(0, content.search(/\b\w+\s+as\s+/)))) {
+        nullRisks.push(`  - Line +${lineNum}: explicit type assertion (as T) — verify source value satisfies T including null/undefined safety`);
+      }
+    }
+
     // Result of Map.get / array.find / array[index] accessed without null check
     for (const { lineNum, content } of addedLines) {
       const m = content.match(/\.(get|find|at)\s*\([^)]*\)\s*\./);
@@ -141,7 +148,6 @@ export const smartLogicEval = tool({
       fmt("UNREACHABLE CONDITIONS", unreachable),
     ];
     if (edgeCases.length) sections.push(`EDGE CASE CHECKLIST:\n${edgeCases.join("\n")}`);
-    sections.push("NOTES: Potential risks only. Verify whether null states are actually reachable before reporting.");
 
     return sections.join("\n\n");
   },

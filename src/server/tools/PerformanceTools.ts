@@ -137,16 +137,6 @@ export const performanceAnalyze = tool({
       fmt("N+1 INDICATORS", n1Indicators),
     ];
 
-    if (coldFunctions.length && bounds.length && loops.length) {
-      sections.push(
-        "SUMMARY: Cold-path functions operate over bounded collections. O(n) in a cold/maintenance path is not a performance issue."
-      );
-    } else if (hotFunctions.length && loops.length && !bounds.length) {
-      sections.push(
-        "SUMMARY: Hot-path functions contain loops with no explicit size bound — verify input constraints before classifying severity."
-      );
-    }
-
     return sections.join("\n\n");
   },
 });

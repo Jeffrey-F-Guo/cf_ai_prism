@@ -66,7 +66,7 @@ export const patternAnalyze = tool({
       const body = fn.lines.join("\n");
       const score = 1 + [...body.matchAll(COMPLEXITY_RE)].length;
       if (score > 10) {
-        complexFindings.push(`  - ${fn.name}(): complexity ${score} (threshold: 10) — HIGH`);
+        complexFindings.push(`  - ${fn.name}(): complexity ${score} (threshold: 10)`);
       } else if (functions.length <= 5) {
         complexFindings.push(`  - ${fn.name}(): complexity ${score} — OK`);
       }
@@ -79,7 +79,7 @@ export const patternAnalyze = tool({
     const lengthFindings: string[] = [];
     for (const fn of functions) {
       if (fn.lines.length > 40) {
-        lengthFindings.push(`  - ${fn.name}(): ${fn.lines.length} added lines (threshold: 40) — LONG`);
+        lengthFindings.push(`  - ${fn.name}(): ${fn.lines.length} added lines (threshold: 40)`);
       }
     }
 
@@ -116,12 +116,12 @@ export const patternAnalyze = tool({
       if (/\bvalidat\b|\bassert\b|\bthrow\s/i.test(body)) ops.push("validate");
       if (/\bsave\b|\binsert\b|\bupdate\b|\bpersist\b|\bdb\./i.test(body)) ops.push("persist");
       if (ops.length >= 3) {
-        solidFindings.push(`  - ${fn.name}(): performs ${ops.join(" + ")} — may violate SRP`);
+        solidFindings.push(`  - ${fn.name}(): performs ${ops.join(" + ")}`);
       }
     }
     for (const { lineNum, content } of addedLines) {
       if (/\bswitch\s*\(\s*\w+\.(?:type|kind|action|event)\s*\)/.test(content)) {
-        solidFindings.push(`  - Line +${lineNum}: switch on .type/.kind/.action field — consider polymorphism (OCP violation)`);
+        solidFindings.push(`  - Line +${lineNum}: switch on .type/.kind/.action field`);
       }
     }
 
